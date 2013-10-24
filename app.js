@@ -15,6 +15,11 @@ module.exports = function(hash) {
 	callAppFunc(state, 'init', []);
 	_(undefined, state);
     };
+    this.apply = function(state, patch, _) {
+	callAppFunc(state, 'do_' + patch.type, [patch, undefined, util.protect(_, function(err, result, sf) {
+	    _(err, result, sf);
+	})]);
+    };
     this.query = function(state, query, _) {
 	callAppFunc(state, 'do_' + query.type, [query, undefined, util.protect(_, function(err, result, sf) {
 	    _(err, result, sf);

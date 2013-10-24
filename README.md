@@ -34,6 +34,18 @@ util.seq([
 ], done)();
 ```
 
+<a name="application-apply"></a>
+## apply
+should apply the patch to the state.
+
+```js
+util.seq([
+		function(_) { app.apply(state, {type: 'add', amount:2}, _); },
+		function(_) { app.query(state, {type: 'get'}, _.to('val')); },
+		function(_) { assert.equal(this.val, 2); _(); },
+], done)();
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-get"></a>

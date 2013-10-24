@@ -69,14 +69,22 @@ describe('application', function(){
 
     describe('apply', function(){
 	var app;
+	var state;
 	beforeEach(function(done) {
 	    app = new App(hash);
-	    var s0;
 	    util.seq([
 		function(_) { app.initialState(appHash, _.to('s0')); },
-		function(_) { s0 = this.s0; _(); },
+		function(_) { state = this.s0; _(); },
 	    ], done)();
 	});
+	it('should apply the patch to the state', function(done){
+	    util.seq([
+		function(_) { app.apply(state, {type: 'add', amount:2}, _); },
+		function(_) { app.query(state, {type: 'get'}, _.to('val')); },
+		function(_) { assert.equal(this.val, 2); _(); },
+	    ], done)();
+	});
+
     });
 
 
