@@ -1,10 +1,23 @@
 # TOC
+   - [application](#application)
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
    - [hash](#hash)
 <a name=""></a>
  
+<a name="application"></a>
+# application
+should properly create an initial state.
+
+```js
+var app = new App(hash);
+util.seq([
+    function(_) { app.initialState(appHash, _.to('s0')); },
+    function(_) { assert.equal(this.s0.val, 0); _(); },
+], done)();
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-get"></a>
