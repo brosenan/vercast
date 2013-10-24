@@ -1,5 +1,6 @@
 
     hash should give any two different JSONable objects a different hash code: [2K[0G  ․ hash should give any two different JSONable objects a different hash code
+    hash should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ hash should reconstruct an object from the hash that is identical to the origianl object
 
-  1 passing (7 ms)
+  2 passing (28 ms)
 
