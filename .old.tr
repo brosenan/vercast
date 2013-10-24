@@ -1,6 +1,9 @@
 
+    counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
+    counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
+    counter add should be reversible: [2K[0G  ․ counter add should be reversible
     hash should give any two different JSONable objects a different hash code: [2K[0G  ․ hash should give any two different JSONable objects a different hash code
     hash should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ hash should reconstruct an object from the hash that is identical to the origianl object
 
-  2 passing (28 ms)
+  5 passing (14 ms)
 

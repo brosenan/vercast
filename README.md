@@ -1,7 +1,64 @@
 # TOC
+   - [counter](#counter)
+     - [get](#counter-get)
+     - [add](#counter-add)
    - [hash](#hash)
 <a name=""></a>
  
+<a name="counter"></a>
+# counter
+<a name="counter-get"></a>
+## get
+should initially return 0.
+
+```js
+var counter = new Counter();
+var s0 = counter.getInitialState();
+util.seq([
+		function(_) { counter.apply(s0, {type: 'get'}, _.to('s1', 'val', 'sf')); },
+		function(_) {
+		    assert.deepEqual(this.s1, s0, 'get should not change the state');
+		    assert.equal(this.val, 0);
+		    assert.equal(this.sf, true);
+		    _();
+		},
+], done)();
+```
+
+<a name="counter-add"></a>
+## add
+should increase the counter value by the given amount.
+
+```js
+var counter = new Counter();
+var s0 = counter.getInitialState();
+util.seq([
+		function(_) { counter.apply(s0, {type: 'add', amount: 2}, _.to('s1')); },
+		function(_) { counter.apply(this.s1, {type: 'get'}, _.to('s2', 'val')); },
+		function(_) {
+		    assert.equal(this.val, 2);
+		    _();
+		},
+], done)();
+```
+
+should be reversible.
+
+```js
+var counter = new Counter();
+var s0 = counter.getInitialState();
+var s0Copy = JSON.parse(JSON.stringify(s0));
+var patch = {type: 'add', amount: 2};
+util.seq([
+		function(_) { counter.apply(s0, patch, _.to('s1')); },
+		function(_) { counter.apply(this.s1, counter.inv(patch), _.to('s0')); },
+		function(_) {
+		    assert.deepEqual(this.s0, s0Copy);
+		    _();
+		},
+], done)();
+```
+
 <a name="hash"></a>
 # hash
 should give any two different JSONable objects a different hash code.
