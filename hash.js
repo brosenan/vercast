@@ -8,12 +8,12 @@ module.exports = function() {
 	var sha1 = crypto.createHash('sha1');
 	sha1.update(JSON.stringify(obj));
 	var hash = sha1.digest('base64')
-	hashMap[hash] = obj;
+	hashMap[hash] = JSON.stringify(obj);
 	_(undefined, {$hash$:hash});
     };
 
     this.unhash = function(hash, _) {
-	_(undefined, hashMap[hash.$hash$]);
+	_(undefined, JSON.parse(hashMap[hash.$hash$]));
     };
 
 }

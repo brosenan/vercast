@@ -27,5 +27,16 @@ describe('hash', function(){
 	    function(_) { assert.deepEqual(this.obj, obj); _(); },
 	], done)();
     });
+    it('should store its own copy of the object', function(done){
+	var hash = new Hash();
+	var obj = {foo: 'bar', count: [1, 2, 3]};
+	util.seq([
+	    function(_) { hash.hash(obj, _.to('h')); },
+	    function(_) { obj.foo = 'baz'; _(); },
+	    function(_) { hash.unhash(this.h, _.to('obj')); },
+	    function(_) { assert.equal(this.obj.foo, 'bar'); _(); },
+	], done)();
+    });
+
 
 });

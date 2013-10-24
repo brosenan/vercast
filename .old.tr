@@ -4,6 +4,7 @@
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
     hash should give any two different JSONable objects a different hash code: [2K[0G  ․ hash should give any two different JSONable objects a different hash code
     hash should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ hash should reconstruct an object from the hash that is identical to the origianl object
+    hash should store its own copy of the object: [2K[0G  ․ hash should store its own copy of the object
 
-  5 passing (14 ms)
+  6 passing (15 ms)
 
