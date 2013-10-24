@@ -1,5 +1,8 @@
 # TOC
    - [application](#application)
+     - [initialState](#application-initialstate)
+     - [query](#application-query)
+     - [apply](#application-apply)
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
@@ -8,13 +11,26 @@
  
 <a name="application"></a>
 # application
+<a name="application-initialstate"></a>
+## initialState
 should properly create an initial state.
 
 ```js
 var app = new App(hash);
 util.seq([
-    function(_) { app.initialState(appHash, _.to('s0')); },
-    function(_) { assert.equal(this.s0.val, 0); _(); },
+		function(_) { app.initialState(appHash, _.to('s0')); },
+		function(_) { assert.equal(this.s0.val, 0); _(); },
+], done)();
+```
+
+<a name="application-query"></a>
+## query
+should return the query result based on the state.
+
+```js
+util.seq([
+		function(_) { app.query(s0, {type: 'get'}, _.to('val', 'sf')); },
+		function(_) { assert.equal(this.val, 0); _(); },
 ], done)();
 ```
 
