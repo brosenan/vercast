@@ -10,4 +10,13 @@ module.exports = function(app, hash) {
 	], cb)();
 	
     }
+
+    this.apply = function(h1, patch, cb) {
+	util.seq([
+	    function(_) { hash.unhash(h1, _.to('state')); },
+	    function(_) { app.apply(this.state, patch, _.to('result', 'sf')); },
+	    function(_) { hash.hash(this.state, _.to('h2')); },
+	    function(_) { cb(undefined, this.h2, this.result, this.sf); },
+	], cb)();
+    };
 };
