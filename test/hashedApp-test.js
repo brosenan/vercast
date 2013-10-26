@@ -29,7 +29,7 @@ describe('HashedApp', function(){
     });
     describe('apply', function(){
 	var h0;
-	var app = new HashedApp(new App(hash), hash);
+	var app = new HashedApp(new App(hash), hash, new DummyKVS());
 	beforeEach(function(done) {
 	    util.seq([
 		function(_) { app.initialState(appHash, _.to('h0')); },
@@ -56,6 +56,16 @@ describe('HashedApp', function(){
 		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
 		function(_) { assert.equal(this.r2, -2); _(); },
 	    ], done)();
+	});
+	it('should handle _comp patches', function(done){
+	    util.seq([
+		function(_) { app.apply(h0, {type: '_comp', patches: [{type: 'add', amount: 1}, 
+								      {type: 'add', amount: 2}, 
+								      {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { assert.equal(this.r2, 6); _(); },
+	    ], done)();	    
 	});
 
     });
