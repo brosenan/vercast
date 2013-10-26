@@ -9,6 +9,7 @@
    - [HashedApp](#hashedapp)
      - [initialState](#hashedapp-initialstate)
      - [apply](#hashedapp-apply)
+     - [trans](#hashedapp-trans)
 <a name=""></a>
  
 <a name="application"></a>
@@ -176,6 +177,20 @@ util.seq([
 			      _();},
 		function(_) { app.apply(this.h2, {type: 'add', amount: -2}, _.to('h3', 'r3', 'sf3')); },
 		function(_) { assert.equal(this.h3.$hash$, h0.$hash$); _(); },
+], done)();
+```
+
+<a name="hashedapp-trans"></a>
+## trans
+should return the hash of the target state when given a source state and a patch.
+
+```js
+util.seq([
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1')); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h1', 'r1')); },
+		function(_) { assert.equal(this.r1, 3); _(); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
+		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
 ], done)();
 ```
 

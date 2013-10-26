@@ -19,4 +19,6 @@ module.exports = function(app, hash) {
 	    function(_) { cb(undefined, this.h2, this.result, this.sf); },
 	], cb)();
     };
+    
+    this.trans = this.apply;
 };

@@ -48,8 +48,28 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.h3.$hash$, h0.$hash$); _(); },
 	    ], done)();
 	});
+    });
+    describe('trans', function(){
+	var h0;
+	var app = new HashedApp(new App(hash), hash);
+	beforeEach(function(done) {
+	    util.seq([
+		function(_) { app.initialState(appHash, _.to('h0')); },
+		function(_) { h0 = this.h0; _(); }
+	    ], done)();
+	});
+	it('should return the hash of the target state when given a source state and a patch', function(done){
+	    util.seq([
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1')); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h1', 'r1')); },
+		function(_) { assert.equal(this.r1, 3); _(); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
+		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
+	    ], done)();
+	});
 
     });
+
 
 
 });
