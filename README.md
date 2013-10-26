@@ -2,6 +2,7 @@
    - [application](#application)
      - [initialState](#application-initialstate)
      - [apply](#application-apply)
+     - [inv](#application-inv)
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
@@ -44,6 +45,20 @@ util.seq([
 		function(_) { app.apply(state, {type: 'add', amount:2}, _); },
 		function(_) { app.apply(state, {type: 'get'}, _.to('val')); },
 		function(_) { assert.equal(this.val, 2); _(); },
+], done)();
+```
+
+<a name="application-inv"></a>
+## inv
+should invert patches.
+
+```js
+var app = new App(hash);
+util.seq([
+		function(_) { app.inv(appHash, {type: 'add', amount: 2}, _.to('inv')); },
+		function(_) { assert.equal(this.inv.type, 'add');
+			      assert.equal(this.inv.amount, -2); 
+			      _();},
 ], done)();
 ```
 
@@ -177,6 +192,17 @@ util.seq([
 			      _();},
 		function(_) { app.apply(this.h2, {type: 'add', amount: -2}, _.to('h3', 'r3', 'sf3')); },
 		function(_) { assert.equal(this.h3.$hash$, h0.$hash$); _(); },
+], done)();
+```
+
+should handle _inv patches.
+
+```js
+util.seq([
+		function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { assert.equal(this.r2, -2); _(); },
 ], done)();
 ```
 

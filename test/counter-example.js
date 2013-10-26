@@ -13,8 +13,9 @@ exports.counter_app = convertApp({
 	patch.amount *= -1;
 	return patch;
     },
-    init: function() {
+    init: function(_) {
 	this.val = 0;
+	_();
     }
 });
 

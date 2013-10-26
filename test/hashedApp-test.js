@@ -49,6 +49,15 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.h3.$hash$, h0.$hash$); _(); },
 	    ], done)();
 	});
+	it('should handle _inv patches', function(done){
+	    util.seq([
+		function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { assert.equal(this.r2, -2); _(); },
+	    ], done)();
+	});
+
     });
     describe('trans', function(){
 	var h0;

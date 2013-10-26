@@ -2,6 +2,7 @@
     application initialState should properly create an initial state: [2K[0G  ․ application initialState should properly create an initial state
     application apply should return the query result based on the state: [2K[0G  ․ application apply should return the query result based on the state
     application apply should apply the patch to the state: [2K[0G  ․ application apply should apply the patch to the state
+    application inv should invert patches: [2K[0G  ․ application inv should invert patches
     counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
@@ -10,8 +11,9 @@
     hash should store its own copy of the object: [2K[0G  ․ hash should store its own copy of the object
     HashedApp initialState should return the initial state's hash: [2K[0G  ․ HashedApp initialState should return the initial state's hash
     HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch: [2K[0G  ․ HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch
+    HashedApp apply should handle _inv patches: [2K[0G  ․ HashedApp apply should handle _inv patches
     HashedApp trans should return the hash of the target state when given a source state and a patch: [2K[0G  ․ HashedApp trans should return the hash of the target state when given a source state and a patch
     HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered: [2K[0G  ․ HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
 
-  13 passing (19 ms)
+  15 passing (22 ms)
 

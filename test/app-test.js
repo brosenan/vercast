@@ -47,8 +47,21 @@ describe('application', function(){
 		function(_) { assert.equal(this.val, 2); _(); },
 	    ], done)();
 	});
+    });
+
+    describe('inv', function(){
+	it('should invert patches', function(done){
+	    var app = new App(hash);
+	    util.seq([
+		function(_) { app.inv(appHash, {type: 'add', amount: 2}, _.to('inv')); },
+		function(_) { assert.equal(this.inv.type, 'add');
+			      assert.equal(this.inv.amount, -2); 
+			      _();},
+	    ], done)();
+	});
 
     });
+
 
 
 });
