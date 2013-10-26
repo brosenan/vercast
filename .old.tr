@@ -16,6 +16,7 @@
     HashedApp apply should handle _hashed patches: [2K[0G  ․ HashedApp apply should handle _hashed patches
     HashedApp trans should return the hash of the target state when given a source state and a patch: [2K[0G  ․ HashedApp trans should return the hash of the target state when given a source state and a patch
     HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered: [2K[0G  ․ HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
+    HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead: [2K[0G  ․ HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead
 
-  17 passing (24 ms)
+  18 passing (24 ms)
 

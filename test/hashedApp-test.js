@@ -80,9 +80,11 @@ describe('HashedApp', function(){
     describe('trans', function(){
 	var h0;
 	var app;
+	var kvs;
 	beforeEach(function(done) {
 	    var hash = new Hash(new DummyKVS());
-	    app  = new HashedApp(new App(hash), hash, new DummyKVS());
+	    kvs = new DummyKVS();
+	    app  = new HashedApp(new App(hash), hash, kvs);
 	    util.seq([
 		function(_) { hash.hash(counter_app, _.to('appHash')); },
 		function(_) { app.initialState(this.appHash, _.to('h0')); },
@@ -110,6 +112,18 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(process._counter, 2); _(); }, // We expect only two invocations. The rest should be cached.
 	    ], done)();
 	});
+	it('should avoid hashing _hashed patches, and should used the undelying hash instead', function(done){
+	    var newHash = new Hash(new DummyKVS());
+	    var patch = {type: 'add', amount: 2};
+	    util.seq([
+		function(_) { hash.hash(patch, _.to('patchHash')); },
+		function(_) { app.trans(h0, patch, _.to('h1')); },
+		function(_) { this.newApp = new HashedApp(new App(newHash), newHash, kvs); _(); },
+		function(_) { this.newApp.trans(h0, {type: '_hashed', hash: this.patchHash}, _.to('alt_h1')); },
+		function(_) { assert.equal(this.h1.$hash$, this.alt_h1.$hash$); _(); },
+	    ], done)();
+	});
+
     });
 
 

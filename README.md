@@ -259,3 +259,17 @@ util.seq([
 ], done)();
 ```
 
+should avoid hashing _hashed patches, and should used the undelying hash instead.
+
+```js
+var newHash = new Hash(new DummyKVS());
+var patch = {type: 'add', amount: 2};
+util.seq([
+		function(_) { hash.hash(patch, _.to('patchHash')); },
+		function(_) { app.trans(h0, patch, _.to('h1')); },
+		function(_) { this.newApp = new HashedApp(new App(newHash), newHash, kvs); _(); },
+		function(_) { this.newApp.trans(h0, {type: '_hashed', hash: this.patchHash}, _.to('alt_h1')); },
+		function(_) { assert.equal(this.h1.$hash$, this.alt_h1.$hash$); _(); },
+], done)();
+```
+

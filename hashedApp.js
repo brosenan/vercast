@@ -27,7 +27,13 @@ module.exports = function(app, hash, kvs) {
     
     this.trans = function(h1, patch, cb) {
 	util.seq([
-	    function(_) { hash.hash(patch, _.to('hp')); },
+	    function(_) { 
+		if(patch.type == '_hashed') {
+		    this.hp = patch.hash; _();
+		} else {
+		    hash.hash(patch, _.to('hp')); 
+		}
+	    },
 	    function(_) { kvs.check(h1.$hash$ + ':' + this.hp.$hash$, _.to('cached')); },
 	    function(_) { if(this.cached) {cb(undefined, {$hash$: this.cached});} else _(); },
 	    function(_) { self.apply(h1, patch, _.to('h2', 'result', 'sf')); },
