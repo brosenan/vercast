@@ -3,8 +3,9 @@ var util = require('../util.js');
 var assert = require('assert');
 var Hash = require('../hash.js');
 var counter_app = require('./counter-example.js').counter_app;
+var DummyKVS = require('../keyvalue.js');
 
-var hash = new Hash();
+var hash = new Hash(new DummyKVS());
 var appHash;
 
 describe('application', function(){

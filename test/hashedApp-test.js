@@ -4,8 +4,9 @@ var util = require('../util.js');
 var assert = require('assert');
 var Hash = require('../hash.js');
 var counter_app = require('./counter-example.js').counter_app;
+var DummyKVS = require('../keyvalue.js');
 
-var hash = new Hash();
+var hash = new Hash(new DummyKVS());
 var appHash;
 
 describe('HashedApp', function(){
@@ -51,10 +52,13 @@ describe('HashedApp', function(){
     });
     describe('trans', function(){
 	var h0;
-	var app = new HashedApp(new App(hash), hash);
+	var app;
 	beforeEach(function(done) {
+	    var hash = new Hash(new DummyKVS());
+	    app  = new HashedApp(new App(hash), hash, new DummyKVS());
 	    util.seq([
-		function(_) { app.initialState(appHash, _.to('h0')); },
+		function(_) { hash.hash(counter_app, _.to('appHash')); },
+		function(_) { app.initialState(this.appHash, _.to('h0')); },
 		function(_) { h0 = this.h0; _(); }
 	    ], done)();
 	});
@@ -67,7 +71,18 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
 	    ], done)();
 	});
-
+	it('should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered', function(done){
+	    process._counter = 0; // The counter's 'add' method increments this counter as a side effect.
+	    util.seq([
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1')); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
+		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3')); },
+		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4')); },
+		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5')); },
+		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6')); },
+		function(_) { assert.equal(process._counter, 2); _(); }, // We expect only two invocations. The rest should be cached.
+	    ], done)();
+	});
     });
 
 

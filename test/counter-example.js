@@ -4,6 +4,8 @@ exports.counter_app = convertApp({
 	_(undefined, this.val, true);
     },
     do_add: function(patch, ctx, _) {
+	// Side effect: count calls in the process
+	if('_counter' in process) process._counter++;
 	this.val += patch.amount;
 	_(undefined, undefined, true);
     },

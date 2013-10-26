@@ -106,7 +106,7 @@ util.seq([
 should give any two different JSONable objects a different hash code.
 
 ```js
-var hash = new Hash();
+var hash = new Hash(new DummyKVS());
 var obj1 = {foo: 'bar', count: [1, 2, 3]};
 var obj2 = {foo: 'bar', count: [1, 2, 4]};
 util.seq([
@@ -124,7 +124,7 @@ util.seq([
 should reconstruct an object from the hash that is identical to the origianl object.
 
 ```js
-var hash = new Hash();
+var hash = new Hash(new DummyKVS());
 var obj = {foo: 'bar', count: [1, 2, 3]};
 util.seq([
     function(_) { hash.hash(obj, _.to('h')); },
@@ -136,7 +136,7 @@ util.seq([
 should store its own copy of the object.
 
 ```js
-var hash = new Hash();
+var hash = new Hash(new DummyKVS());
 var obj = {foo: 'bar', count: [1, 2, 3]};
 util.seq([
     function(_) { hash.hash(obj, _.to('h')); },
@@ -191,6 +191,21 @@ util.seq([
 		function(_) { assert.equal(this.r1, 3); _(); },
 		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
 		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
+], done)();
+```
+
+should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered.
+
+```js
+process._counter = 0; // The counter's 'add' method increments this counter as a side effect.
+util.seq([
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1')); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
+		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3')); },
+		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4')); },
+		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5')); },
+		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6')); },
+		function(_) { assert.equal(process._counter, 2); _(); }, // We expect only two invocations. The rest should be cached.
 ], done)();
 ```
 

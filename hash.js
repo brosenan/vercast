@@ -1,19 +1,24 @@
 var crypto = require('crypto');
+var util = require('./util.js');
 
-module.exports = function() {
+module.exports = function(kvs) {
 
-    var hashMap = {};
-
-    this.hash = function(obj, _) {
+    this.hash = function(obj, cb) {
 	var sha1 = crypto.createHash('sha1');
 	sha1.update(JSON.stringify(obj));
 	var hash = sha1.digest('base64');
-	hashMap[hash] = JSON.stringify(obj);
-	_(undefined, {$hash$:hash});
+	util.seq([
+	    function(_) { kvs.store(hash, JSON.stringify(obj), _); },
+	    function(_) { cb(undefined, {$hash$:hash}); },
+	], cb)();
     };
 
-    this.unhash = function(hash, _) {
-	_(undefined, JSON.parse(hashMap[hash.$hash$]));
+    this.unhash = function(hash, cb) {
+	util.seq([
+	    function(_) { kvs.retrieve(hash.$hash$, _.to('json')); },
+	    function(_) { cb(undefined, JSON.parse(this.json)); },
+	], cb)();
+	
     };
 
 }
