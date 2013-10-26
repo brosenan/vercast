@@ -67,6 +67,14 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.r2, 6); _(); },
 	    ], done)();	    
 	});
+	it('should handle _hashed patches', function(done){
+	    util.seq([
+		function(_) { hash.hash({type: 'add', amount: 3}, _.to('ph')); },
+		function(_) { app.apply(h0, {type: '_hashed', hash: this.ph}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { assert.equal(this.r2, 3); _(); },
+	    ], done)();
+	});
 
     });
     describe('trans', function(){

@@ -13,8 +13,9 @@
     HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch: [2K[0G  ․ HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch
     HashedApp apply should handle _inv patches: [2K[0G  ․ HashedApp apply should handle _inv patches
     HashedApp apply should handle _comp patches: [2K[0G  ․ HashedApp apply should handle _comp patches
+    HashedApp apply should handle _hashed patches: [2K[0G  ․ HashedApp apply should handle _hashed patches
     HashedApp trans should return the hash of the target state when given a source state and a patch: [2K[0G  ․ HashedApp trans should return the hash of the target state when given a source state and a patch
     HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered: [2K[0G  ․ HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
 
-  16 passing (23 ms)
+  17 passing (24 ms)
 

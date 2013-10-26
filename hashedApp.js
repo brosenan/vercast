@@ -55,4 +55,10 @@ module.exports = function(app, hash, kvs) {
 	    function(_) { cb(undefined, this.h3, undefined, this.sf1 && this.sf2); },
 	], cb)();
     };
+    this.do__hashed = function(h1, patch, cb) {
+	util.seq([
+	    function(_) { hash.unhash(patch.hash, _.to('patch')); },
+	    function(_) { self.apply(h1, this.patch, cb); },
+	], cb)();
+    };
 };
