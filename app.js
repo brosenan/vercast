@@ -20,9 +20,4 @@ module.exports = function(hash) {
 	    _(err, result, sf);
 	})]);
     };
-    this.query = function(state, query, _) {
-	callAppFunc(state, 'do_' + query.type, [query, undefined, util.protect(_, function(err, result, sf) {
-	    _(err, result, sf);
-	})]);
-    };
 };

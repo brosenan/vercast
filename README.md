@@ -1,12 +1,13 @@
 # TOC
    - [application](#application)
      - [initialState](#application-initialstate)
-     - [query](#application-query)
      - [apply](#application-apply)
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
    - [hash](#hash)
+   - [HashedApp](#hashedapp)
+     - [initialState](#hashedapp-initialstate)
 <a name=""></a>
  
 <a name="application"></a>
@@ -23,25 +24,23 @@ util.seq([
 ], done)();
 ```
 
-<a name="application-query"></a>
-## query
+<a name="application-apply"></a>
+## apply
 should return the query result based on the state.
 
 ```js
 util.seq([
-		function(_) { app.query(s0, {type: 'get'}, _.to('val', 'sf')); },
+		function(_) { app.apply(state, {type: 'get'}, _.to('val', 'sf')); },
 		function(_) { assert.equal(this.val, 0); _(); },
 ], done)();
 ```
 
-<a name="application-apply"></a>
-## apply
 should apply the patch to the state.
 
 ```js
 util.seq([
 		function(_) { app.apply(state, {type: 'add', amount:2}, _); },
-		function(_) { app.query(state, {type: 'get'}, _.to('val')); },
+		function(_) { app.apply(state, {type: 'get'}, _.to('val')); },
 		function(_) { assert.equal(this.val, 2); _(); },
 ], done)();
 ```
@@ -142,6 +141,22 @@ util.seq([
     function(_) { obj.foo = 'baz'; _(); },
     function(_) { hash.unhash(this.h, _.to('obj')); },
     function(_) { assert.equal(this.obj.foo, 'bar'); _(); },
+], done)();
+```
+
+<a name="hashedapp"></a>
+# HashedApp
+<a name="hashedapp-initialstate"></a>
+## initialState
+should return the initial state's hash.
+
+```js
+var app = new HashedApp(new App(hash), hash);
+util.seq([
+		function(_) { app.initialState(appHash, _.to('h0')); },
+		function(_) { assert.equal(typeof this.h0.$hash$, 'string'); _(); },
+		function(_) { hash.unhash(this.h0, _.to('s0')); },
+		function(_) { assert.equal(this.s0.val, 0); _(); },
 ], done)();
 ```
 
