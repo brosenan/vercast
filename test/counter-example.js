@@ -9,6 +9,11 @@ exports.counter_app = convertApp({
 	this.val += patch.amount;
 	_(undefined, undefined, true);
     },
+    do_set : function(patch, ctx, _) {
+	var sf = (this.val == patch.from);
+	this.val = patch.to;
+	_(undefined, undefined, sf);
+    },
     inv_add: function(patch) {
 	patch.amount *= -1;
 	return patch;

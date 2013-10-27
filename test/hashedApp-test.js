@@ -110,7 +110,6 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.r2, -5); _(); },
 	    ], done)();
 	});
-
     });
     describe('trans', function(){
 	var h0;
