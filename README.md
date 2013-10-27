@@ -245,6 +245,35 @@ util.seq([
 ], done)();
 ```
 
+should support _inv of _inv patches.
+
+```js
+util.seq([
+		function(_) { app.apply(h0, {type: '_inv', patch: 
+					     {type: '_inv', patch: 
+					      {type: 'add', amount: 2}}}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { 
+		    assert(this.sf1, 'sf1');
+		    assert(this.sf2, 'sf2');
+		    assert.equal(this.r2, 2); 
+		    _(); 
+		},
+], done)();
+```
+
+should support _inv of _hashed.
+
+```js
+var patch = {type: 'add', amount: 5};
+util.seq([
+		function(_) { hash.hash(patch, _.to('hp')); },
+		function(_) { app.apply(h0, {type: '_inv', patch: {type: '_hashed', hash: this.hp}}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { assert.equal(this.r2, -5); _(); },
+], done)();
+```
+
 <a name="hashedapp-trans"></a>
 ## trans
 should return the hash of the target state when given a source state and a patch.

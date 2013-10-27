@@ -80,5 +80,14 @@ module.exports = function(app, hash, kvs) {
 	}
 	patch.patches = newPatches;
 	this.apply(h1, patch, cb);
-    }
+    };
+    this.inv__inv = function(h1, patch, cb) {
+	self.apply(h1, patch.patch, cb);
+    };
+    this.inv__hashed = function(h1, patch, cb) {
+	util.seq([
+	    function(_) { hash.unhash(patch.hash, _.to('patch')); },
+	    function(_) { self.apply(h1, {type: '_inv', patch: this.patch}, cb); },
+	], cb)();
+    };
 };
