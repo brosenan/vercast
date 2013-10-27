@@ -35,7 +35,7 @@ module.exports = function(app, hash, kvs) {
 		}
 	    },
 	    function(_) { kvs.check(h1.$hash$ + ':' + this.hp.$hash$, _.to('cached')); },
-	    function(_) { if(this.cached) {cb(undefined, {$hash$: this.cached});} else _(); },
+	    function(_) { if(this.cached) {cb(undefined, {$hash$: this.cached}, true);} else _(); },
 	    function(_) { self.apply(h1, patch, _.to('h2', 'result', 'sf')); },
 	    function(_) { if(!this.sf) {cb(undefined, this.h2, this.sf);} else _(); },
 	    function(_) { kvs.store(h1.$hash$ + ':' + this.hp.$hash$, this.h2.$hash$, _); },
@@ -44,6 +44,10 @@ module.exports = function(app, hash, kvs) {
     };
 
     this.do__inv = function(h1, patch, cb) {
+	var methodName = 'inv_' + patch.patch.type;
+	if(this[methodName]) {
+	    return this[methodName](h1, patch.patch, cb);
+	}
 	util.seq([
 	    function(_) { hash.unhash(h1, _.to('s1')); },
 	    function(_) { app.inv(this.s1._app, patch.patch, _.to('unpatch')); },
@@ -67,4 +71,14 @@ module.exports = function(app, hash, kvs) {
 	    function(_) { self.apply(h1, this.patch, cb); },
 	], cb)();
     };
+
+    this.inv__comp = function(h1, patch, cb) {
+	var patches = patch.patches;
+	var newPatches = [];
+	for(var i = patches.length - 1; i >=0; i--) {
+	    newPatches.push({type: '_inv', patch: patches[i]});
+	}
+	patch.patches = newPatches;
+	this.apply(h1, patch, cb);
+    }
 };

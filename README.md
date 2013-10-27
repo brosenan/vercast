@@ -230,16 +230,32 @@ util.seq([
 ], done)();
 ```
 
+should support _inv of _comp patches.
+
+```js
+util.seq([
+		function(_) { app.apply(h0, {type: '_inv', patch: 
+					     {type: '_comp', patches: [
+						 {type: 'add', amount: 1}, 
+						 {type: 'add', amount: 2}, 
+						 {type: 'add', amount: 3}]}}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { assert.equal(this.r2, -6); _(); },
+], done)();
+```
+
 <a name="hashedapp-trans"></a>
 ## trans
 should return the hash of the target state when given a source state and a patch.
 
 ```js
 util.seq([
-		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1')); },
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'sf1')); },
+		function(_) { assert(this.sf1, 'add operation should be safe'); _(); },
 		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h1', 'r1')); },
 		function(_) { assert.equal(this.r1, 3); _(); },
-		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'sf2')); },
 		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
 ], done)();
 ```
@@ -249,12 +265,13 @@ should cache previous calls and only invoke the actual method if the combination
 ```js
 process._counter = 0; // The counter's 'add' method increments this counter as a side effect.
 util.seq([
-		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1')); },
-		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2')); },
-		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3')); },
-		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4')); },
-		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5')); },
-		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6')); },
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'sf1')); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'sf2')); },
+		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3', 'sf3')); },
+		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4', 'sf4')); },
+		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5', 'sf5')); },
+		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6', 'sf6')); },
+		function(_) { assert(this.sf6, 'all operations should be safe'); _(); },
 		function(_) { assert.equal(process._counter, 2); _(); }, // We expect only two invocations. The rest should be cached.
 ], done)();
 ```
