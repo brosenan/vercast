@@ -11,6 +11,7 @@
      - [initialState](#hashedapp-initialstate)
      - [apply](#hashedapp-apply)
      - [trans](#hashedapp-trans)
+     - [query](#hashedapp-query)
 <a name=""></a>
  
 <a name="application"></a>
@@ -317,5 +318,30 @@ util.seq([
 		function(_) { this.newApp.trans(h0, {type: '_hashed', hash: this.patchHash}, _.to('alt_h1')); },
 		function(_) { assert.equal(this.h1.$hash$, this.alt_h1.$hash$); _(); },
 ], done)();
+```
+
+<a name="hashedapp-query"></a>
+## query
+should return the result of applying a patch.
+
+```js
+util.seq([
+		function(_) { app.query(h0, {type: 'get'}, _.to('result')); },
+		function(_) { assert.equal(this.result, 0); _(); },
+], done)();
+```
+
+should fail when given a patch that modifies the state.
+
+```js
+app.query(h0, {type: 'add', amount: 2}, function(err) {
+		if(!err) {
+		    done(new Error('No error emitted'));
+		} else if(err.message != 'Attempted query changed state') {
+		    done(new Error('Wrong error received: ' + err.message));
+		} else {
+		    done();
+		}
+});
 ```
 

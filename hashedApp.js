@@ -90,4 +90,16 @@ module.exports = function(app, hash, kvs) {
 	    function(_) { self.apply(h1, {type: '_inv', patch: this.patch}, cb); },
 	], cb)();
     };
+    this.query = function(h1, patch, cb) {
+	var self = this;
+	util.seq([
+	    function(_) { self.apply(h1, patch, _.to('h2', 'result')); },
+	    function(_) {
+		if(this.h2.$hash$ != h1.$hash$) {
+		    throw new Error('Attempted query changed state');
+		}
+		cb(undefined, this.result);
+	    },
+	], cb)();
+    };
 };

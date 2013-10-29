@@ -160,4 +160,38 @@ describe('HashedApp', function(){
 	    ], done)();
 	});
     });
+    describe('query', function(){
+	var h0;
+	var app;
+	var kvs;
+	beforeEach(function(done) {
+	    var hash = new Hash(new DummyKVS());
+	    kvs = new DummyKVS();
+	    app  = new HashedApp(new App(hash), hash, kvs);
+	    util.seq([
+		function(_) { hash.hash(counter_app, _.to('appHash')); },
+		function(_) { app.initialState(this.appHash, _.to('h0')); },
+		function(_) { h0 = this.h0; _(); }
+	    ], done)();
+	});
+	it('should return the result of applying a patch', function(done){
+	    util.seq([
+		function(_) { app.query(h0, {type: 'get'}, _.to('result')); },
+		function(_) { assert.equal(this.result, 0); _(); },
+	    ], done)();
+	});
+	it('should fail when given a patch that modifies the state', function(done){
+	    app.query(h0, {type: 'add', amount: 2}, function(err) {
+		if(!err) {
+		    done(new Error('No error emitted'));
+		} else if(err.message != 'Attempted query changed state') {
+		    done(new Error('Wrong error received: ' + err.message));
+		} else {
+		    done();
+		}
+	    });
+	});
+
+    });
+
 });

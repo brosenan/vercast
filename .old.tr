@@ -20,6 +20,8 @@
     HashedApp trans should return the hash of the target state when given a source state and a patch: [2K[0G  ․ HashedApp trans should return the hash of the target state when given a source state and a patch
     HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered: [2K[0G  ․ HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
     HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead: [2K[0G  ․ HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead
+    HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
+    HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
 
-  21 passing (30 ms)
+  23 passing (30 ms)
 
