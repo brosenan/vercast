@@ -6,6 +6,8 @@
     counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
+    DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
+    DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
     hash should give any two different JSONable objects a different hash code: [2K[0G  ․ hash should give any two different JSONable objects a different hash code
     hash should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ hash should reconstruct an object from the hash that is identical to the origianl object
     hash should store its own copy of the object: [2K[0G  ․ hash should store its own copy of the object
@@ -24,5 +26,5 @@
     HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
 
-  24 passing (32 ms)
+  26 passing (31 ms)
 

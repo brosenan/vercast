@@ -6,6 +6,9 @@
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
+   - [DummyVersionGraph](#dummyversiongraph)
+     - [as VersionGraph](#dummyversiongraph-as-versiongraph)
+       - [addEdge](#dummyversiongraph-as-versiongraph-addedge)
    - [hash](#hash)
    - [HashedApp](#hashedapp)
      - [initialState](#hashedapp-initialstate)
@@ -117,6 +120,32 @@ util.seq([
 		    assert.deepEqual(this.s0, s0Copy);
 		    _();
 		},
+], done)();
+```
+
+<a name="dummyversiongraph"></a>
+# DummyVersionGraph
+<a name="dummyversiongraph-as-versiongraph"></a>
+## as VersionGraph
+<a name="dummyversiongraph-as-versiongraph-addedge"></a>
+### addEdge
+should accept an edge and add it to the graph.
+
+```js
+util.seq([
+    function(_) { versionGraph.addEdge("foo", "likes", "bar", _); },
+    function(_) { versionGraph.queryEdge("foo", "likes", _.to('shouldBeBar')); },
+    function(_) { assert.equal(this.shouldBeBar, 'bar'); _(); },
+], done)();
+```
+
+should create a dual mapping, mapping also the destination to the source.
+
+```js
+util.seq([
+    function(_) { versionGraph.addEdge("foo", "likes", "bar", _); },
+    function(_) { versionGraph.queryBackEdge("bar", "likes", _.to('shouldBeFoo')); },
+    function(_) { assert.equal(this.shouldBeFoo, 'foo'); _(); },
 ], done)();
 ```
 
