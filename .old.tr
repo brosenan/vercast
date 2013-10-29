@@ -18,6 +18,7 @@
     HashedApp apply _inv should support _inv of _inv patches: [2K[0G  ․ HashedApp apply _inv should support _inv of _inv patches
     HashedApp apply _comp should handle _comp patches: [2K[0G  ․ HashedApp apply _comp should handle _comp patches
     HashedApp apply _comp should support _inv of _comp patches: [2K[0G  ․ HashedApp apply _comp should support _inv of _comp patches
+    HashedApp apply _comp should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch: [2K[0G  ․ HashedApp apply _comp should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch
     HashedApp apply _comp should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches: [2K[0G  ․ HashedApp apply _comp should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches
     HashedApp apply _hashed should handle _hashed patches: [2K[0G  ․ HashedApp apply _hashed should handle _hashed patches
     HashedApp apply _hashed should support _inv of _hashed: [2K[0G  ․ HashedApp apply _hashed should support _inv of _hashed
@@ -27,5 +28,5 @@
     HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
 
-  27 passing (34 ms)
+  28 passing (34 ms)
 

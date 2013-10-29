@@ -99,6 +99,20 @@ describe('HashedApp', function(){
 		    function(_) { assert.equal(this.r2, -6); _(); },
 		], done)();	    
 	    });
+	    it('should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch', function(done){
+		util.seq([
+		    function(_) { app.apply(h0, {type: '_comp', patches: [
+			{type: 'set', from: 0, to: 2},
+			{type: 'set', from: 100, to: 101}, // This cannot be safely applied
+			{type: 'add', amount: 2}
+		    ]}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { assert(!this.sf1, 'applied patch should not be reported safe'); _(); },
+		    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
+		    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
+		    function(_) { assert.equal(this.result, 103); _(); },
+		], done)();
+	    });
+
 	    it('should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches', function(done){
 		util.seq([
 		    function(_) { app.apply(h0, {type: '_comp', weak: true, patches: [
@@ -107,7 +121,6 @@ describe('HashedApp', function(){
 			{type: 'add', amount: 2}
 		    ]}, _.to('h1', 'r1', 'sf1')); },
 		    function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
-		    // The respective result from patches that were not applied contain the patch, keyed by $badPatch
 		    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
 		    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
 		    function(_) { assert.equal(this.result, 4); _(); },
