@@ -109,4 +109,11 @@ module.exports = function(app, hash, kvs) {
 	    },
 	], cb)();
     };
+
+    this.branchQuery = function(branch, patch, cb) {
+	util.seq([
+	    function(_) { branch.tip(_.to('h1')); },
+	    function(_) { self.query(this.h1, patch, cb); },
+	], cb)();
+    };
 };

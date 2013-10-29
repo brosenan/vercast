@@ -5,6 +5,7 @@ var assert = require('assert');
 var Hash = require('../hash.js');
 var counter_app = require('./counter-example.js').counter_app;
 var DummyKVS = require('../keyvalue.js');
+var DummyBranch = require('../dummyBranch.js');
 
 var hash = new Hash(new DummyKVS());
 var appHash;
@@ -230,7 +231,29 @@ describe('HashedApp', function(){
 		}
 	    });
 	});
+    });
+    describe('branchQuery', function(){
+	var branch = new DummyBranch();
+	var app;
+	var kvs;
+	beforeEach(function(done) {
+	    var hash = new Hash(new DummyKVS());
+	    kvs = new DummyKVS();
+	    app  = new HashedApp(new App(hash), hash, kvs);
+	    util.seq([
+		function(_) { hash.hash(counter_app, _.to('appHash')); },
+		function(_) { app.initialState(this.appHash, _.to('h0')); },
+		function(_) { branch.reset(this.h0, _); },
+	    ], done)();
+	});
+	it('should perform a query on the tip of the given branch', function(done){
+	    util.seq([
+		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 0); _(); },
+	    ], done)();
+	});
 
     });
+
 
 });

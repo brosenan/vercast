@@ -30,6 +30,7 @@
     HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead: [2K[0G  ․ HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead
     HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
+    HashedApp branchQuery should perform a query on the tip of the given branch: [2K[0G  ․ HashedApp branchQuery should perform a query on the tip of the given branch
 
-  31 passing (40 ms)
+  32 passing (39 ms)
 

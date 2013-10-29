@@ -22,6 +22,7 @@
        - [_hashed](#hashedapp-apply-_hashed)
      - [trans](#hashedapp-trans)
      - [query](#hashedapp-query)
+     - [branchQuery](#hashedapp-branchquery)
 <a name=""></a>
  
 <a name="application"></a>
@@ -476,5 +477,16 @@ app.query(h0, {type: 'add', amount: 2}, function(err) {
 		    done();
 		}
 });
+```
+
+<a name="hashedapp-branchquery"></a>
+## branchQuery
+should perform a query on the tip of the given branch.
+
+```js
+util.seq([
+		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 0); _(); },
+], done)();
 ```
 
