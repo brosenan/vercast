@@ -99,7 +99,8 @@ describe('HashedApp', function(){
 		    function(_) { assert.equal(this.r2, -6); _(); },
 		], done)();	    
 	    });
-	    it('should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch', function(done){
+	    it('should replace the output from patches that were not safely ' +
+	       'applied with an object containing a $badPatch field, containing the patch', function(done){
 		util.seq([
 		    function(_) { app.apply(h0, {type: '_comp', patches: [
 			{type: 'set', from: 0, to: 2},
@@ -107,7 +108,8 @@ describe('HashedApp', function(){
 			{type: 'add', amount: 2}
 		    ]}, _.to('h1', 'r1', 'sf1')); },
 		    function(_) { assert(!this.sf1, 'applied patch should not be reported safe'); _(); },
-		    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
+		    function(_) { assert.deepEqual(this.r1[1].$badPatch, {type: 'set', from: 100, to: 101}); _(); },
+		    function(_) { assert.equal(this.r1[1].res, 2); _(); }, // The original result
 		    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
 		    function(_) { assert.equal(this.result, 103); _(); },
 		], done)();
@@ -121,12 +123,11 @@ describe('HashedApp', function(){
 			{type: 'add', amount: 2}
 		    ]}, _.to('h1', 'r1', 'sf1')); },
 		    function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
-		    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
+		    function(_) { assert.deepEqual(this.r1[1].$badPatch, {type: 'set', from: 100, to: 101}); _(); },
 		    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
 		    function(_) { assert.equal(this.result, 4); _(); },
 		], done)();
 	    });
-
 	});
 	describe('_hashed', function(){
 	    it('should handle _hashed patches', function(done){

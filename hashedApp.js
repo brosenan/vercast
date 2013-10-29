@@ -62,7 +62,7 @@ module.exports = function(app, hash, kvs) {
 	util.seq([
 	    function(_) { self.trans(h1, patch.patches[0], _.to('h2', 'r1', 'sf1')); },
 	    function(_) { if(!this.sf1) { 
-		this.r1 = {$badPatch: patch.patches[0]}; } _(); },
+		this.r1 = {$badPatch: patch.patches[0], res: this.r1}; } _(); },
 	    function(_) { if(patch.weak && !this.sf1) { 
 		this.sf1 = true; 
 		this.h2 = h1; } _(); },

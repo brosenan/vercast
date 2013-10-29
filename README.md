@@ -6,6 +6,9 @@
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
+   - [DummyBranch](#dummybranch)
+     - [as Branch](#dummybranch-as-branch)
+       - [checkedUpdate](#dummybranch-as-branch-checkedupdate)
    - [DummyVersionGraph](#dummyversiongraph)
      - [as VersionGraph](#dummyversiongraph-as-versiongraph)
        - [addEdge](#dummyversiongraph-as-versiongraph-addedge)
@@ -121,6 +124,43 @@ util.seq([
 		    assert.deepEqual(this.s0, s0Copy);
 		    _();
 		},
+], done)();
+```
+
+<a name="dummybranch"></a>
+# DummyBranch
+<a name="dummybranch-as-branch"></a>
+## as Branch
+<a name="dummybranch-as-branch-checkedupdate"></a>
+### checkedUpdate
+should update the branch state if given that the state condition is met.
+
+```js
+util.seq([
+    function(_) { branch.checkedUpdate('root', 's1', _); },
+    function(_) { branch.tip(_.to('tip')); },
+    function(_) { assert.equal(this.tip, 's1'); _(); },
+], done)();
+```
+
+should return the tip state before modification.
+
+```js
+util.seq([
+    function(_) { branch.checkedUpdate('root', 's1', _.to('shouldBeRoot')); },
+    function(_) { assert.equal(this.shouldBeRoot, 'root'); _(); },
+    function(_) { branch.tip(_.to('tip')); },
+    function(_) { assert.equal(this.tip, 's1'); _(); },
+], done)();
+```
+
+should not update the branch state if the first argument does not match the current tip value.
+
+```js
+util.seq([
+    function(_) { branch.checkedUpdate('foo', 's1', _); },
+    function(_) { branch.tip(_.to('tip')); },
+    function(_) { assert.equal(this.tip, 'root'); _(); },
 ], done)();
 ```
 
@@ -320,7 +360,8 @@ util.seq([
 	{type: 'add', amount: 2}
     ]}, _.to('h1', 'r1', 'sf1')); },
     function(_) { assert(!this.sf1, 'applied patch should not be reported safe'); _(); },
-    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
+    function(_) { assert.deepEqual(this.r1[1].$badPatch, {type: 'set', from: 100, to: 101}); _(); },
+    function(_) { assert.equal(this.r1[1].res, 2); _(); }, // The original result
     function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
     function(_) { assert.equal(this.result, 103); _(); },
 ], done)();
@@ -336,7 +377,7 @@ util.seq([
 	{type: 'add', amount: 2}
     ]}, _.to('h1', 'r1', 'sf1')); },
     function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
-    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
+    function(_) { assert.deepEqual(this.r1[1].$badPatch, {type: 'set', from: 100, to: 101}); _(); },
     function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
     function(_) { assert.equal(this.result, 4); _(); },
 ], done)();

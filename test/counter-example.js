@@ -10,9 +10,9 @@ exports.counter_app = convertApp({
 	_(undefined, undefined, true);
     },
     do_set : function(patch, ctx, _) {
-	var sf = (this.val == patch.from);
+	var oldVal = this.val;
 	this.val = patch.to;
-	_(undefined, undefined, sf);
+	_(undefined, oldVal, oldVal == patch.from);
     },
     inv_add: function(patch) {
 	patch.amount *= -1;
