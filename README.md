@@ -9,6 +9,7 @@
    - [DummyVersionGraph](#dummyversiongraph)
      - [as VersionGraph](#dummyversiongraph-as-versiongraph)
        - [addEdge](#dummyversiongraph-as-versiongraph-addedge)
+       - [findCommonAncestor](#dummyversiongraph-as-versiongraph-findcommonancestor)
    - [hash](#hash)
    - [HashedApp](#hashedapp)
      - [initialState](#hashedapp-initialstate)
@@ -146,6 +147,24 @@ util.seq([
     function(_) { versionGraph.addEdge("foo", "likes", "bar", _); },
     function(_) { versionGraph.queryBackEdge("bar", "likes", _.to('shouldBeFoo')); },
     function(_) { assert.equal(this.shouldBeFoo, 'foo'); _(); },
+], done)();
+```
+
+<a name="dummyversiongraph-as-versiongraph-findcommonancestor"></a>
+### findCommonAncestor
+should find the common ancestor of two nodes, and the path to each of them.
+
+```js
+util.seq([
+    function(_) { versionGraph.addEdge('terah', 'p1', 'abraham', _); },
+    function(_) { versionGraph.addEdge('abraham', 'p2', 'isaac', _); },
+    function(_) { versionGraph.addEdge('isaac', 'p3', 'jacob', _); },
+    function(_) { versionGraph.addEdge('jacob', 'p4', 'joseph', _); },
+    function(_) { versionGraph.addEdge('abraham', 'p5', 'ismael', _); },
+    function(_) { versionGraph.addEdge('isaac', 'p6', 'esaw', _); },
+    function(_) { versionGraph.addEdge('jacob', 'p7', 'simon', _); },
+    function(_) { versionGraph.findCommonAncestor('simon', 'ismael', _.to('ancestor', 'path1', 'path2')); },
+    function(_) { assert.equal(this.ancestor, 'abraham'); _(); },
 ], done)();
 ```
 

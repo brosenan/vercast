@@ -8,6 +8,7 @@
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
     DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
     DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
+    DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
     hash should give any two different JSONable objects a different hash code: [2K[0G  ․ hash should give any two different JSONable objects a different hash code
     hash should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ hash should reconstruct an object from the hash that is identical to the origianl object
     hash should store its own copy of the object: [2K[0G  ․ hash should store its own copy of the object
@@ -26,5 +27,5 @@
     HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
 
-  26 passing (31 ms)
+  27 passing (33 ms)
 

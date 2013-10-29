@@ -29,4 +29,28 @@ module.exports = function() {
     this.queryBackEdge = function(dest, label, cb) {
 	cb(undefined, G[dest].i[label]);
     };
+    this.findCommonAncestor = function(node1, node2, cb) {
+	var q = [{n: node1, p: []}];
+	while(q.length > 0 && q[0].n != node2) {
+	    var n = q.shift();
+	    for(var l in G[n.n].o) {
+		q.push({n: G[n.n].o[l], p: n.p.concat([{l:l, d:true}])});
+	    }
+	    for(var l in G[n.n].i) {
+		q.push({n: G[n.n].i[l], p: n.p.concat([{l:l, d:false}])});
+	    }
+	}
+	if(q.length == 0) {
+	    cb(new Error('Common ancestor not found'));
+	} else {
+	    var path = q[0].p;
+	    var i = 0;
+	    var n = node1;
+	    while(!path[i].d) {
+		n = G[n].i[path[i].l];
+		i++;
+	    }
+	    cb(undefined, n);
+	}
+    };
 };
