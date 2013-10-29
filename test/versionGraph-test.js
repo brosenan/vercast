@@ -36,8 +36,6 @@ module.exports = function(versionGraph) {
 		    function(_) { assert.equal(this.ancestor, 'abraham'); _(); },
 		], done)();
 	    });
-
 	});
-
     });
 };

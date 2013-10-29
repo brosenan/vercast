@@ -35,11 +35,11 @@ module.exports = function(app, hash, kvs) {
 		}
 	    },
 	    function(_) { kvs.check(h1.$hash$ + ':' + this.hp.$hash$, _.to('cached')); },
-	    function(_) { if(this.cached) {cb(undefined, {$hash$: this.cached}, true);} else _(); },
+	    function(_) { if(this.cached) {cb(undefined, {$hash$: this.cached}, undefined, true);} else _(); },
 	    function(_) { self.apply(h1, patch, _.to('h2', 'result', 'sf')); },
-	    function(_) { if(!this.sf) {cb(undefined, this.h2, this.sf);} else _(); },
+	    function(_) { if(!this.sf) {cb(undefined, this.h2, this.result, this.sf);} else _(); },
 	    function(_) { kvs.store(h1.$hash$ + ':' + this.hp.$hash$, this.h2.$hash$, _); },
-	    function(_) { cb(undefined, this.h2, this.sf); },
+	    function(_) { cb(undefined, this.h2, this.result, this.sf); },
 	], cb)();
     };
 
@@ -57,15 +57,18 @@ module.exports = function(app, hash, kvs) {
 
     this.do__comp = function(h1, patch, cb) {
 	if(patch.patches.length == 0) {
-	    return cb(undefined, h1, undefined, true);
+	    return cb(undefined, h1, [], true);
 	}
 	util.seq([
-	    function(_) { self.trans(h1, patch.patches[0], _.to('h2', 'sf1')); },
-	    function(_) { if(patch.weak && !this.sf1) { this.sf1 = true; this.h2 = h1; } _(); },
+	    function(_) { self.trans(h1, patch.patches[0], _.to('h2', 'r1', 'sf1')); },
+	    function(_) { if(patch.weak && !this.sf1) { 
+		this.sf1 = true; 
+		this.h2 = h1; 
+		this.r1 = {$badPatch: patch.patches[0]}; } _(); },
 	    function(_) { 
 		patch.patches = patch.patches.slice(1);
-		self.do__comp(this.h2, patch, _.to('h3', 'res', 'sf2')); },
-	    function(_) { cb(undefined, this.h3, undefined, this.sf1 && this.sf2); },
+		self.do__comp(this.h2, patch, _.to('h3', 'r2', 'sf2')); },
+	    function(_) { cb(undefined, this.h3, [this.r1].concat(this.r2), this.sf1 && this.sf2); },
 	], cb)();
     };
     this.do__hashed = function(h1, patch, cb) {

@@ -80,6 +80,9 @@ describe('HashedApp', function(){
 									  {type: 'add', amount: 2}, 
 									  {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
 		    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+		    // The result should be an array of the same size as the patches array.
+		    // The values in the arrays may either be the results of the applied patches, or undefined.
+		    function(_) { assert.equal(this.r1.length, 3); _(); },
 		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
 		    function(_) { assert.equal(this.r2, 6); _(); },
 		], done)();	    
@@ -104,6 +107,8 @@ describe('HashedApp', function(){
 			{type: 'add', amount: 2}
 		    ]}, _.to('h1', 'r1', 'sf1')); },
 		    function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
+		    // The respective result from patches that were not applied contain the patch, keyed by $badPatch
+		    function(_) { assert.deepEqual(this.r1[1], {$badPatch: {type: 'set', from: 100, to: 101}}); _(); },
 		    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
 		    function(_) { assert.equal(this.result, 4); _(); },
 		], done)();
@@ -147,23 +152,23 @@ describe('HashedApp', function(){
 	});
 	it('should return the hash of the target state when given a source state and a patch', function(done){
 	    util.seq([
-		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'sf1')); },
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'r1', 'sf1')); },
 		function(_) { assert(this.sf1, 'add operation should be safe'); _(); },
 		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h1', 'r1')); },
 		function(_) { assert.equal(this.r1, 3); _(); },
-		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'sf2')); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'r2', 'sf2')); },
 		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
 	    ], done)();
 	});
 	it('should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered', function(done){
 	    process._counter = 0; // The counter's 'add' method increments this counter as a side effect.
 	    util.seq([
-		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'sf1')); },
-		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'sf2')); },
-		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3', 'sf3')); },
-		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4', 'sf4')); },
-		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5', 'sf5')); },
-		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6', 'sf6')); },
+		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'r1', 'sf1')); },
+		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'r2', 'sf2')); },
+		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3', 'r3', 'sf3')); },
+		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4', 'r4', 'sf4')); },
+		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5', 'r5', 'sf5')); },
+		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6', 'r6', 'sf6')); },
 		function(_) { assert(this.sf6, 'all operations should be safe'); _(); },
 		function(_) { assert.equal(process._counter, 2); _(); }, // We expect only two invocations. The rest should be cached.
 	    ], done)();
