@@ -61,7 +61,10 @@ module.exports = function(app, hash, kvs) {
 	}
 	util.seq([
 	    function(_) { self.trans(h1, patch.patches[0], _.to('h2', 'sf1')); },
-	    function(_) { self.do__comp(this.h2, {type: '_comp', patches: patch.patches.slice(1)}, _.to('h3', 'res', 'sf2')); },
+	    function(_) { if(patch.weak && !this.sf1) { this.sf1 = true; this.h2 = h1; } _(); },
+	    function(_) { 
+		patch.patches = patch.patches.slice(1);
+		self.do__comp(this.h2, patch, _.to('h3', 'res', 'sf2')); },
 	    function(_) { cb(undefined, this.h3, undefined, this.sf1 && this.sf2); },
 	], cb)();
     };

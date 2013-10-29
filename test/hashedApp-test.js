@@ -49,67 +49,87 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.h3.$hash$, h0.$hash$); _(); },
 	    ], done)();
 	});
-	it('should handle _inv patches', function(done){
-	    util.seq([
-		function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, -2); _(); },
-	    ], done)();
+	describe('_inv', function(){
+	    it('should handle _inv patches', function(done){
+		util.seq([
+		    function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
+		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		    function(_) { assert.equal(this.r2, -2); _(); },
+		], done)();
+	    });
+	    it('should support _inv of _inv patches', function(done){
+		util.seq([
+		    function(_) { app.apply(h0, {type: '_inv', patch: 
+						 {type: '_inv', patch: 
+						  {type: 'add', amount: 2}}}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		    function(_) { 
+			assert(this.sf1, 'sf1');
+			assert(this.sf2, 'sf2');
+			assert.equal(this.r2, 2); 
+			_(); 
+		    },
+		], done)();
+	    });
 	});
-	it('should handle _comp patches', function(done){
-	    util.seq([
-		function(_) { app.apply(h0, {type: '_comp', patches: [{type: 'add', amount: 1}, 
-								      {type: 'add', amount: 2}, 
-								      {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, 6); _(); },
-	    ], done)();	    
+	describe('_comp', function(){
+	    it('should handle _comp patches', function(done){
+		util.seq([
+		    function(_) { app.apply(h0, {type: '_comp', patches: [{type: 'add', amount: 1}, 
+									  {type: 'add', amount: 2}, 
+									  {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		    function(_) { assert.equal(this.r2, 6); _(); },
+		], done)();	    
+	    });
+	    it('should support _inv of _comp patches', function(done){
+		util.seq([
+		    function(_) { app.apply(h0, {type: '_inv', patch: 
+						 {type: '_comp', patches: [
+						     {type: 'add', amount: 1}, 
+						     {type: 'add', amount: 2}, 
+						     {type: 'add', amount: 3}]}}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		    function(_) { assert.equal(this.r2, -6); _(); },
+		], done)();	    
+	    });
+	    it('should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches', function(done){
+		util.seq([
+		    function(_) { app.apply(h0, {type: '_comp', weak: true, patches: [
+			{type: 'set', from: 0, to: 2},
+			{type: 'set', from: 100, to: 101}, // This should not take effect
+			{type: 'add', amount: 2}
+		    ]}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
+		    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
+		    function(_) { assert.equal(this.result, 4); _(); },
+		], done)();
+	    });
+
 	});
-	it('should handle _hashed patches', function(done){
-	    util.seq([
-		function(_) { hash.hash({type: 'add', amount: 3}, _.to('ph')); },
-		function(_) { app.apply(h0, {type: '_hashed', hash: this.ph}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, 3); _(); },
-	    ], done)();
+	describe('_hashed', function(){
+	    it('should handle _hashed patches', function(done){
+		util.seq([
+		    function(_) { hash.hash({type: 'add', amount: 3}, _.to('ph')); },
+		    function(_) { app.apply(h0, {type: '_hashed', hash: this.ph}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		    function(_) { assert.equal(this.r2, 3); _(); },
+		], done)();
+	    });
+	    it('should support _inv of _hashed', function(done){
+		var patch = {type: 'add', amount: 5};
+		util.seq([
+		    function(_) { hash.hash(patch, _.to('hp')); },
+		    function(_) { app.apply(h0, {type: '_inv', patch: {type: '_hashed', hash: this.hp}}, _.to('h1', 'r1', 'sf1')); },
+		    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+		    function(_) { assert.equal(this.r2, -5); _(); },
+		], done)();
+	    });
 	});
-	it('should support _inv of _comp patches', function(done){
-	    util.seq([
-		function(_) { app.apply(h0, {type: '_inv', patch: 
-					     {type: '_comp', patches: [
-						 {type: 'add', amount: 1}, 
-						 {type: 'add', amount: 2}, 
-						 {type: 'add', amount: 3}]}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, -6); _(); },
-	    ], done)();	    
-	});
-	it('should support _inv of _inv patches', function(done){
-	    util.seq([
-		function(_) { app.apply(h0, {type: '_inv', patch: 
-					     {type: '_inv', patch: 
-					      {type: 'add', amount: 2}}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { 
-		    assert(this.sf1, 'sf1');
-		    assert(this.sf2, 'sf2');
-		    assert.equal(this.r2, 2); 
-		    _(); 
-		},
-	    ], done)();
-	});
-	it('should support _inv of _hashed', function(done){
-	    var patch = {type: 'add', amount: 5};
-	    util.seq([
-		function(_) { hash.hash(patch, _.to('hp')); },
-		function(_) { app.apply(h0, {type: '_inv', patch: {type: '_hashed', hash: this.hp}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, -5); _(); },
-	    ], done)();
-	});
+
     });
     describe('trans', function(){
 	var h0;

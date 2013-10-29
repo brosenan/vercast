@@ -10,6 +10,9 @@
    - [HashedApp](#hashedapp)
      - [initialState](#hashedapp-initialstate)
      - [apply](#hashedapp-apply)
+       - [_inv](#hashedapp-apply-_inv)
+       - [_comp](#hashedapp-apply-_comp)
+       - [_hashed](#hashedapp-apply-_hashed)
      - [trans](#hashedapp-trans)
      - [query](#hashedapp-query)
 <a name=""></a>
@@ -196,53 +199,16 @@ util.seq([
 ], done)();
 ```
 
+<a name="hashedapp-apply-_inv"></a>
+### _inv
 should handle _inv patches.
 
 ```js
 util.seq([
-		function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, -2); _(); },
-], done)();
-```
-
-should handle _comp patches.
-
-```js
-util.seq([
-		function(_) { app.apply(h0, {type: '_comp', patches: [{type: 'add', amount: 1}, 
-								      {type: 'add', amount: 2}, 
-								      {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, 6); _(); },
-], done)();
-```
-
-should handle _hashed patches.
-
-```js
-util.seq([
-		function(_) { hash.hash({type: 'add', amount: 3}, _.to('ph')); },
-		function(_) { app.apply(h0, {type: '_hashed', hash: this.ph}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, 3); _(); },
-], done)();
-```
-
-should support _inv of _comp patches.
-
-```js
-util.seq([
-		function(_) { app.apply(h0, {type: '_inv', patch: 
-					     {type: '_comp', patches: [
-						 {type: 'add', amount: 1}, 
-						 {type: 'add', amount: 2}, 
-						 {type: 'add', amount: 3}]}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, -6); _(); },
+    function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
+    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+    function(_) { assert.equal(this.r2, -2); _(); },
 ], done)();
 ```
 
@@ -250,16 +216,74 @@ should support _inv of _inv patches.
 
 ```js
 util.seq([
-		function(_) { app.apply(h0, {type: '_inv', patch: 
-					     {type: '_inv', patch: 
-					      {type: 'add', amount: 2}}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { 
-		    assert(this.sf1, 'sf1');
-		    assert(this.sf2, 'sf2');
-		    assert.equal(this.r2, 2); 
-		    _(); 
-		},
+    function(_) { app.apply(h0, {type: '_inv', patch: 
+				 {type: '_inv', patch: 
+				  {type: 'add', amount: 2}}}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+    function(_) { 
+	assert(this.sf1, 'sf1');
+	assert(this.sf2, 'sf2');
+	assert.equal(this.r2, 2); 
+	_(); 
+    },
+], done)();
+```
+
+<a name="hashedapp-apply-_comp"></a>
+### _comp
+should handle _comp patches.
+
+```js
+util.seq([
+    function(_) { app.apply(h0, {type: '_comp', patches: [{type: 'add', amount: 1}, 
+							  {type: 'add', amount: 2}, 
+							  {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+    function(_) { assert.equal(this.r2, 6); _(); },
+], done)();
+```
+
+should support _inv of _comp patches.
+
+```js
+util.seq([
+    function(_) { app.apply(h0, {type: '_inv', patch: 
+				 {type: '_comp', patches: [
+				     {type: 'add', amount: 1}, 
+				     {type: 'add', amount: 2}, 
+				     {type: 'add', amount: 3}]}}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
+    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+    function(_) { assert.equal(this.r2, -6); _(); },
+], done)();
+```
+
+should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches.
+
+```js
+util.seq([
+    function(_) { app.apply(h0, {type: '_comp', weak: true, patches: [
+	{type: 'set', from: 0, to: 2},
+	{type: 'set', from: 100, to: 101}, // This should not take effect
+	{type: 'add', amount: 2}
+    ]}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
+    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
+    function(_) { assert.equal(this.result, 4); _(); },
+], done)();
+```
+
+<a name="hashedapp-apply-_hashed"></a>
+### _hashed
+should handle _hashed patches.
+
+```js
+util.seq([
+    function(_) { hash.hash({type: 'add', amount: 3}, _.to('ph')); },
+    function(_) { app.apply(h0, {type: '_hashed', hash: this.ph}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+    function(_) { assert.equal(this.r2, 3); _(); },
 ], done)();
 ```
 
@@ -268,10 +292,10 @@ should support _inv of _hashed.
 ```js
 var patch = {type: 'add', amount: 5};
 util.seq([
-		function(_) { hash.hash(patch, _.to('hp')); },
-		function(_) { app.apply(h0, {type: '_inv', patch: {type: '_hashed', hash: this.hp}}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.r2, -5); _(); },
+    function(_) { hash.hash(patch, _.to('hp')); },
+    function(_) { app.apply(h0, {type: '_inv', patch: {type: '_hashed', hash: this.hp}}, _.to('h1', 'r1', 'sf1')); },
+    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
+    function(_) { assert.equal(this.r2, -5); _(); },
 ], done)();
 ```
 
