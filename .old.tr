@@ -27,5 +27,5 @@
     HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
 
-  27 passing (33 ms)
+  27 passing (32 ms)
 
