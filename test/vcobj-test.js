@@ -173,4 +173,40 @@ describe('VCObj', function(){
 	    ], done)();
 	});
     });
+    describe('createChainPatch(patches, cb(err, patch))', function(){
+	it('should create a patch that applies all given patches one by one', function(done){
+	    function createCounter(obj, hashDB, cb) {
+		var cls = {
+		    add: function(patch, ctx) {
+			this.val += patch.amount;
+			ctx.ret();
+		    },
+		    get: function(patch, ctx) {
+			ctx.ret(this.val);
+		    },
+		};
+		var invAdd = function(patch) {
+		    patch.amount = -patch.amount;
+		    return patch;
+		};
+		util.seq([
+		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
+		    function(_) { hashDB.hash(invAdd.toString(), _.to('invAdd')); },
+		    function(_) { cb(undefined, this.h0, this.invAdd); },
+		], done)();
+	    }
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB);
+	    util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.createChainPatch([{type: 'add', amount: 2, inv: this.invAdd}, 
+						    {type: 'add', amount: 3, inv: this.invAdd}], _.to('p')); },
+		function(_) { obj.apply(this.h0, this.p, _.to('h1')); },
+		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
+		function(_) { assert.equal(this.res, 5); _(); },
+	    ], done)();
+	});
+
+    });
+
 });

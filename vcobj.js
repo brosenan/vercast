@@ -79,6 +79,12 @@ module.exports = function(hashDB) {
 	    conflict: function() {
 		this.conflictFlag = true;
 	    },
+	    hash: function(obj, cb) {
+		hashDB.hash(obj, cb);
+	    },
+	    unhash: function(hash, cb) {
+		hashDB.unhash(hash, cb);
+	    },
 	};
 	func.call(state, patch, ctx);
     }
@@ -91,6 +97,38 @@ module.exports = function(hashDB) {
 	    function(_) { hashDB.unhash(patch.inv, _.to('code')); },
 	    function(_) { var func = eval('(' + this.code + ')');
 			  cb(undefined, func(patch)); },
+	], cb)();
+    };
+
+    this.createChainPatch = function(patches, cb) {
+	var code = function(patch, ctx) {
+	    var state = this;
+	    util.seq([
+		function(_) { ctx.hash(state, _.to('h1')); },
+		function(_) { applyPatches(patch.patches, this.h1, _.to('h3')); },
+		function(_) { ctx.unhash(this.h3, _.to('state')); },
+		function(_) { 
+		    for(var key in this.state) {
+			state[key] = this.state[key];
+		    }
+		    ctx.ret();
+		},
+	    ], cb)();
+
+	    function applyPatches(patches, h1, cb) {
+		if(patches.length == 0) {
+		    return cb(undefined, h1);
+		}
+		util.seq([
+		    function(_) { ctx.apply(h1, patches[0], _.to('h2')); },
+		    function(_) { applyPatches(patches.slice(1), this.h2, _.to('h3')); },
+		    function(_) { cb(undefined, this.h3); },
+		], cb)();
+	    }
+	};
+	util.seq([
+	    function(_) { hashDB.hash(code.toString(), _.to('code')); },
+	    function(_) { cb(undefined, {code: this.code, patches: patches}); },
 	], cb)();
     };
 };

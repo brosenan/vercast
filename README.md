@@ -28,6 +28,7 @@
      - [createObject(cls, s0, cb(err, h0))](#vcobj-createobjectcls-s0-cberr-h0)
      - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
      - [invert(patch, cb(err, invPatch))](#vcobj-invertpatch-cberr-invpatch)
+     - [createChainPatch(patches, cb(err, patch))](#vcobj-createchainpatchpatches-cberr-patch)
 <a name=""></a>
  
 <a name="application"></a>
@@ -706,6 +707,43 @@ var obj = new VCObj(hashDB);
 util.seq([
 		function(_) { obj.invert({type: 'add', amount: 2}, _.to('inv')); },
 		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: 2}); _(); },
+], done)();
+```
+
+<a name="vcobj-createchainpatchpatches-cberr-patch"></a>
+## createChainPatch(patches, cb(err, patch))
+should create a patch that applies all given patches one by one.
+
+```js
+function createCounter(obj, hashDB, cb) {
+		var cls = {
+		    add: function(patch, ctx) {
+			this.val += patch.amount;
+			ctx.ret();
+		    },
+		    get: function(patch, ctx) {
+			ctx.ret(this.val);
+		    },
+		};
+		var invAdd = function(patch) {
+		    patch.amount = -patch.amount;
+		    return patch;
+		};
+		util.seq([
+		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
+		    function(_) { hashDB.hash(invAdd.toString(), _.to('invAdd')); },
+		    function(_) { cb(undefined, this.h0, this.invAdd); },
+		], done)();
+}
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB);
+util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.createChainPatch([{type: 'add', amount: 2, inv: this.invAdd}, 
+						    {type: 'add', amount: 3, inv: this.invAdd}], _.to('p')); },
+		function(_) { obj.apply(this.h0, this.p, _.to('h1')); },
+		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
+		function(_) { assert.equal(this.res, 5); _(); },
 ], done)();
 ```
 
