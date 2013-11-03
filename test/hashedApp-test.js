@@ -252,8 +252,28 @@ describe('HashedApp', function(){
 		function(_) { assert.equal(this.res, 0); _(); },
 	    ], done)();
 	});
-
     });
-
+    describe('branchTrans', function(){
+	var branch = new DummyBranch();
+	var app;
+	var kvs;
+	beforeEach(function(done) {
+	    var hash = new Hash(new DummyKVS());
+	    kvs = new DummyKVS();
+	    app  = new HashedApp(new App(hash), hash, kvs);
+	    util.seq([
+		function(_) { hash.hash(counter_app, _.to('appHash')); },
+		function(_) { app.initialState(this.appHash, _.to('h0')); },
+		function(_) { branch.reset(this.h0, _); },
+	    ], done)();
+	});
+	it('should perform a transition, updating the tip of the branch', function(done){
+	    util.seq([
+		function(_) { app.branchTrans(branch, {type: 'add', amount: 2}, 3, _); },
+		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 2); _(); },
+	    ], done)();
+	});
+    });
 
 });

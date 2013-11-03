@@ -23,6 +23,7 @@
      - [trans](#hashedapp-trans)
      - [query](#hashedapp-query)
      - [branchQuery](#hashedapp-branchquery)
+     - [branchTrans](#hashedapp-branchtrans)
 <a name=""></a>
  
 <a name="application"></a>
@@ -487,6 +488,18 @@ should perform a query on the tip of the given branch.
 util.seq([
 		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 0); _(); },
+], done)();
+```
+
+<a name="hashedapp-branchtrans"></a>
+## branchTrans
+should perform a transition, updating the tip of the branch.
+
+```js
+util.seq([
+		function(_) { app.branchTrans(branch, {type: 'add', amount: 2}, 3, _); },
+		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 2); _(); },
 ], done)();
 ```
 

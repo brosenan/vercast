@@ -116,4 +116,13 @@ module.exports = function(app, hash, kvs) {
 	    function(_) { self.query(this.h1, patch, cb); },
 	], cb)();
     };
+
+    this.branchTrans = function(branch, patch, retries, cb) {
+	util.seq([
+	    function(_) { branch.tip(_.to('h1')); },
+	    function(_) { self.trans(this.h1, patch, _.to('h2', 'r1', 'sf1')); },
+	    function(_) { branch.checkedUpdate(this.h1, this.h2, _.to('prev')); },
+	    function(_) { cb(undefined, this.r1, this.sf1); },
+	], cb)();
+    };
 };
