@@ -49,7 +49,10 @@ module.exports = function(hashDB) {
 		cb(err);
 	    },
 	    apply: function(h1, p, cb) {
-		self.apply(h1, p, cb);
+		self.apply(h1, p, util.protect(cb, function(err, h2, ret, effect, conflict) {
+		    ctx.conflictFlag = conflict || ctx.conflictFlag;
+		    cb(err, h2, ret);
+		}));
 	    },
 	    conflictFlag: false,
 	    conflict: function() {

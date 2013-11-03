@@ -39,6 +39,7 @@
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects
 
-  40 passing (462 ms)
+  41 passing (468 ms)
 

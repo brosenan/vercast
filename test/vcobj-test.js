@@ -108,6 +108,31 @@ describe('VCObj', function(){
 		function(_) { assert(this.conflict, 'The conflict flag should be true'); _();},
 	    ], done)();
 	});
-
+	it('should propagate conflicts reported in child objects', function(done){
+	    var cls1 = {
+		foo: function(p, ctx) {
+		    var state = this;
+		    util.seq([
+			function(_) { ctx.apply(state.child, {type: 'bar', val: 2}, _.to('child', 'res')); },
+			function(_) { ctx.ret(this.res); },
+		    ], ctx.done)();
+		}
+	    };
+	    var cls2 = {
+		bar: function(p, ctx) {
+		    var state = this;
+		    state.val = p.val;
+		    ctx.conflict(); // The child conflicts
+		    ctx.ret(p.val + 1);
+		}
+	    }
+	    var obj = new VCObj(new HashDB(new DummyKVS()));
+	    util.seq([
+		function(_) { obj.createObject(cls2, {}, _.to('child')); },
+		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
+		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
+		function(_) { assert(this.conflict, 'the conflict flag should be true'); _(); },
+	    ], done)();
+	});
     });
 });
