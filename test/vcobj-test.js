@@ -33,18 +33,16 @@ describe('VCObj', function(){
 		function(_) { assert.equal(process._beenThere, rand); _(); },
 	    ], done)();
 	});
-	it('should emit the new state hash, the result, effect and conflict flag emitted by the invoked method', function(done){
+	it('should emit the new state hash, and the result emitted by the invoked method', function(done){
 	    var cls = {
-		foo: function(p, ctx) { ctx.ret(1, 2, 3); }
+		foo: function(p, ctx) { ctx.ret('result'); }
 	    };
 	    var obj = new VCObj(new HashDB(new DummyKVS()));
 	    util.seq([
 		function(_) { obj.createObject(cls, {}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
 		function(_) { assert.deepEqual(this.h1, this.h0);
-			      assert.equal(this.res, 1);
-			      assert.equal(this.effect, 2);
-			      assert.equal(this.conflict, 3); _();},
+			      assert.equal(this.res, 'result'); _();},
 	    ], done)();
 	});
 	it('should pass the invoked method the state as its this parameter', function(done){
@@ -73,7 +71,6 @@ describe('VCObj', function(){
 	    ], done)();
 	});
 
-
 	it('should allow objects to further call other objects by sending them patches', function(done){
 	    var cls1 = {
 		foo: function(p, ctx) {
@@ -97,6 +94,18 @@ describe('VCObj', function(){
 		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res')); },
 		function(_) { assert.equal(this.res, 3); _(); },
+	    ], done)();
+	});
+	it('should report conflict if the context conflict() method was called', function(done){
+	    var cls = {
+		foo: function(p, ctx) { ctx.conflict(); ctx.ret(); }
+	    };
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB);
+	    util.seq([
+		function(_) { obj.createObject(cls, {}, _.to('h0')); },
+		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
+		function(_) { assert(this.conflict, 'The conflict flag should be true'); _();},
 	    ], done)();
 	});
 

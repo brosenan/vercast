@@ -42,16 +42,19 @@ module.exports = function(hashDB) {
     }
     function callFunc(func, state, patch, cb) {
 	var ctx = {
-	    ret: function() {
-		var args = [].splice.call(arguments,0);
-		cb.apply(this, [undefined].concat(args));
+	    ret: function(ret) {
+		cb.call(this, undefined, ret, undefined, this.conflictFlag);
 	    },
 	    done: function(err) {
 		cb(err);
 	    },
 	    apply: function(h1, p, cb) {
 		self.apply(h1, p, cb);
-	    }
+	    },
+	    conflictFlag: false,
+	    conflict: function() {
+		this.conflictFlag = true;
+	    },
 	};
 	func.call(state, patch, ctx);
     }
