@@ -1,17 +1,17 @@
 var App = require('../app.js');
 var util = require('../util.js');
 var assert = require('assert');
-var Hash = require('../hash.js');
+var HashDB = require('../hashDB.js');
 var counter_app = require('./counter-example.js').counter_app;
 var DummyKVS = require('../keyvalue.js');
 
-var hash = new Hash(new DummyKVS());
-var appHash;
+var hash = new HashDB(new DummyKVS());
+var appHashDB;
 
 describe('application', function(){
     before(function(done) {
 	hash.hash(counter_app, util.protect(done, function(err, hash) {
-	    appHash = hash;
+	    appHashDB = hash;
 	    done();
 	}));
     });
@@ -19,7 +19,7 @@ describe('application', function(){
 	it('should properly create an initial state', function(done){
 	    var app = new App(hash);
 	    util.seq([
-		function(_) { app.initialState(appHash, _.to('s0')); },
+		function(_) { app.initialState(appHashDB, _.to('s0')); },
 		function(_) { assert.equal(this.s0.val, 0); _(); },
 	    ], done)();
 	});
@@ -30,7 +30,7 @@ describe('application', function(){
 	beforeEach(function(done) {
 	    app = new App(hash);
 	    util.seq([
-		function(_) { app.initialState(appHash, _.to('s0')); },
+		function(_) { app.initialState(appHashDB, _.to('s0')); },
 		function(_) { state = this.s0; _(); },
 	    ], done)();
 	});
@@ -53,7 +53,7 @@ describe('application', function(){
 	it('should invert patches', function(done){
 	    var app = new App(hash);
 	    util.seq([
-		function(_) { app.inv(appHash, {type: 'add', amount: 2}, _.to('inv')); },
+		function(_) { app.inv(appHashDB, {type: 'add', amount: 2}, _.to('inv')); },
 		function(_) { assert.equal(this.inv.type, 'add');
 			      assert.equal(this.inv.amount, -2); 
 			      _();},

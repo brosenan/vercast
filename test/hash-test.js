@@ -1,11 +1,11 @@
-var Hash = require('../hash.js');
+var HashDB = require('../hashDB.js');
 var util = require('../util.js');
 var assert = require('assert');
 var DummyKVS = require('../keyvalue.js');
 
 describe('hash', function(){
     it('should give any two different JSONable objects a different hash code', function(done){
-	var hash = new Hash(new DummyKVS());
+	var hash = new HashDB(new DummyKVS());
 	var obj1 = {foo: 'bar', count: [1, 2, 3]};
 	var obj2 = {foo: 'bar', count: [1, 2, 4]};
 	util.seq([
@@ -20,7 +20,7 @@ describe('hash', function(){
 	], done)();
     });
     it('should reconstruct an object from the hash that is identical to the origianl object', function(done){
-	var hash = new Hash(new DummyKVS());
+	var hash = new HashDB(new DummyKVS());
 	var obj = {foo: 'bar', count: [1, 2, 3]};
 	util.seq([
 	    function(_) { hash.hash(obj, _.to('h')); },
@@ -29,7 +29,7 @@ describe('hash', function(){
 	], done)();
     });
     it('should store its own copy of the object', function(done){
-	var hash = new Hash(new DummyKVS());
+	var hash = new HashDB(new DummyKVS());
 	var obj = {foo: 'bar', count: [1, 2, 3]};
 	util.seq([
 	    function(_) { hash.hash(obj, _.to('h')); },

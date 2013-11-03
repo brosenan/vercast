@@ -24,6 +24,8 @@
      - [query](#hashedapp-query)
      - [branchQuery](#hashedapp-branchquery)
      - [branchTrans](#hashedapp-branchtrans)
+   - [CVObj](#cvobj)
+     - [createObject](#cvobj-createobject)
 <a name=""></a>
  
 <a name="application"></a>
@@ -35,7 +37,7 @@ should properly create an initial state.
 ```js
 var app = new App(hash);
 util.seq([
-		function(_) { app.initialState(appHash, _.to('s0')); },
+		function(_) { app.initialState(appHashDB, _.to('s0')); },
 		function(_) { assert.equal(this.s0.val, 0); _(); },
 ], done)();
 ```
@@ -68,7 +70,7 @@ should invert patches.
 ```js
 var app = new App(hash);
 util.seq([
-		function(_) { app.inv(appHash, {type: 'add', amount: 2}, _.to('inv')); },
+		function(_) { app.inv(appHashDB, {type: 'add', amount: 2}, _.to('inv')); },
 		function(_) { assert.equal(this.inv.type, 'add');
 			      assert.equal(this.inv.amount, -2); 
 			      _();},
@@ -215,7 +217,7 @@ util.seq([
 should give any two different JSONable objects a different hash code.
 
 ```js
-var hash = new Hash(new DummyKVS());
+var hash = new HashDB(new DummyKVS());
 var obj1 = {foo: 'bar', count: [1, 2, 3]};
 var obj2 = {foo: 'bar', count: [1, 2, 4]};
 util.seq([
@@ -233,7 +235,7 @@ util.seq([
 should reconstruct an object from the hash that is identical to the origianl object.
 
 ```js
-var hash = new Hash(new DummyKVS());
+var hash = new HashDB(new DummyKVS());
 var obj = {foo: 'bar', count: [1, 2, 3]};
 util.seq([
     function(_) { hash.hash(obj, _.to('h')); },
@@ -245,7 +247,7 @@ util.seq([
 should store its own copy of the object.
 
 ```js
-var hash = new Hash(new DummyKVS());
+var hash = new HashDB(new DummyKVS());
 var obj = {foo: 'bar', count: [1, 2, 3]};
 util.seq([
     function(_) { hash.hash(obj, _.to('h')); },
@@ -444,7 +446,7 @@ util.seq([
 should avoid hashing _hashed patches, and should used the undelying hash instead.
 
 ```js
-var newHash = new Hash(new DummyKVS());
+var newHash = new HashDB(new DummyKVS());
 var patch = {type: 'add', amount: 2};
 util.seq([
 		function(_) { hash.hash(patch, _.to('patchHash')); },
@@ -500,6 +502,26 @@ util.seq([
 		function(_) { app.branchTrans(branch, {type: 'add', amount: 2}, 3, _); },
 		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 2); _(); },
+], done)();
+```
+
+<a name="cvobj"></a>
+# CVObj
+<a name="cvobj-createobject"></a>
+## createObject
+should create an object state hash for the given class and initial state.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB);
+var cls = { foo: function() { console.log("bar"); }, 
+			bar: function() { console.log("baz"); } };
+util.seq([
+		function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
+		function(_) { hashDB.unhash(this.h0, _.to('s0')); },
+		function(_) { assert.equal(this.s0.val, 0);
+			      hashDB.unhash(this.s0._class, _.to('cls'));},
+		function(_) { assert.equal(this.cls.foo, 'function () { console.log("bar"); }'); _(); },
 ], done)();
 ```
 

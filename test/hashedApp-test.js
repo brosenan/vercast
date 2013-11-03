@@ -2,12 +2,12 @@ var HashedApp = require('../hashedApp.js');
 var App = require('../app.js');
 var util = require('../util.js');
 var assert = require('assert');
-var Hash = require('../hash.js');
+var HashDB = require('../hashDB.js');
 var counter_app = require('./counter-example.js').counter_app;
 var DummyKVS = require('../keyvalue.js');
 var DummyBranch = require('../dummyBranch.js');
 
-var hash = new Hash(new DummyKVS());
+var hash = new HashDB(new DummyKVS());
 var appHash;
 
 describe('HashedApp', function(){
@@ -156,7 +156,7 @@ describe('HashedApp', function(){
 	var app;
 	var kvs;
 	beforeEach(function(done) {
-	    var hash = new Hash(new DummyKVS());
+	    var hash = new HashDB(new DummyKVS());
 	    kvs = new DummyKVS();
 	    app  = new HashedApp(new App(hash), hash, kvs);
 	    util.seq([
@@ -189,7 +189,7 @@ describe('HashedApp', function(){
 	    ], done)();
 	});
 	it('should avoid hashing _hashed patches, and should used the undelying hash instead', function(done){
-	    var newHash = new Hash(new DummyKVS());
+	    var newHash = new HashDB(new DummyKVS());
 	    var patch = {type: 'add', amount: 2};
 	    util.seq([
 		function(_) { hash.hash(patch, _.to('patchHash')); },
@@ -205,7 +205,7 @@ describe('HashedApp', function(){
 	var app;
 	var kvs;
 	beforeEach(function(done) {
-	    var hash = new Hash(new DummyKVS());
+	    var hash = new HashDB(new DummyKVS());
 	    kvs = new DummyKVS();
 	    app  = new HashedApp(new App(hash), hash, kvs);
 	    util.seq([
@@ -237,7 +237,7 @@ describe('HashedApp', function(){
 	var app;
 	var kvs;
 	beforeEach(function(done) {
-	    var hash = new Hash(new DummyKVS());
+	    var hash = new HashDB(new DummyKVS());
 	    kvs = new DummyKVS();
 	    app  = new HashedApp(new App(hash), hash, kvs);
 	    util.seq([
@@ -258,7 +258,7 @@ describe('HashedApp', function(){
 	var app;
 	var kvs;
 	beforeEach(function(done) {
-	    var hash = new Hash(new DummyKVS());
+	    var hash = new HashDB(new DummyKVS());
 	    kvs = new DummyKVS();
 	    app  = new HashedApp(new App(hash), hash, kvs);
 	    util.seq([
