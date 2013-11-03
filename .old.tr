@@ -35,6 +35,9 @@
     VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, the result, effect and conflict flag emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, the result, effect and conflict flag emitted by the invoked method
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should pass the invoked method the state as its this parameter: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should pass the invoked method the state as its this parameter
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches
 
-  36 passing (405 ms)
+  39 passing (440 ms)
 

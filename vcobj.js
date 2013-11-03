@@ -1,6 +1,7 @@
 var util = require('./util.js');
 
 module.exports = function(hashDB) {
+    var self = this;
     this.createObject = function(cls, state, cb) {
 	var strCls = {};
 	for(var key in cls) {
@@ -44,8 +45,14 @@ module.exports = function(hashDB) {
 	    ret: function() {
 		var args = [].splice.call(arguments,0);
 		cb.apply(this, [undefined].concat(args));
+	    },
+	    done: function(err) {
+		cb(err);
+	    },
+	    apply: function(h1, p, cb) {
+		self.apply(h1, p, cb);
 	    }
 	};
-	func.call(this.state, patch, ctx);
+	func.call(state, patch, ctx);
     }
 };
