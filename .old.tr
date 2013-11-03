@@ -46,6 +46,8 @@
     VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one: [2K[0G  ․ VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one
     VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2
     VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation
+    VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
+    VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  47 passing (560 ms)
+  49 passing (601 ms)
 

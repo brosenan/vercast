@@ -76,21 +76,19 @@ describe('VCObj', function(){
 		foo: function(p, ctx) {
 		    var state = this;
 		    util.seq([
-			function(_) { ctx.apply(state.child, {type: 'bar', val: 2}, _.to('child', 'res')); },
+			function(_) { ctx.query(state.child, {type: 'bar'}, _.to('res')); },
 			function(_) { ctx.ret(this.res); },
 		    ], ctx.done)();
 		}
 	    };
 	    var cls2 = {
 		bar: function(p, ctx) {
-		    var state = this;
-		    state.val = p.val;
-		    ctx.ret(p.val + 1);
+		    ctx.ret(this.val + 1);
 		}
 	    }
 	    var obj = new VCObj(new HashDB(new DummyKVS()));
 	    util.seq([
-		function(_) { obj.createObject(cls2, {}, _.to('child')); },
+		function(_) { obj.createObject(cls2, {val:2}, _.to('child')); },
 		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res')); },
 		function(_) { assert.equal(this.res, 3); _(); },
@@ -113,8 +111,9 @@ describe('VCObj', function(){
 		foo: function(p, ctx) {
 		    var state = this;
 		    util.seq([
-			function(_) { ctx.apply(state.child, {type: 'bar', val: 2}, _.to('child', 'res')); },
-			function(_) { ctx.ret(this.res); },
+			function(_) { ctx.trans(state.child, {type: 'bar', val: 2}, _.to('child')); },
+			function(_) { state.child = this.child;
+				      ctx.ret(); },
 		    ], ctx.done)();
 		}
 	    };
@@ -123,10 +122,10 @@ describe('VCObj', function(){
 		    var state = this;
 		    state.val = p.val;
 		    ctx.conflict(); // The child conflicts
-		    ctx.ret(p.val + 1);
+		    ctx.ret();
 		}
 	    }
-	    var obj = new VCObj(new HashDB(new DummyKVS()));
+	    var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
 	    util.seq([
 		function(_) { obj.createObject(cls2, {}, _.to('child')); },
 		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
@@ -196,7 +195,7 @@ describe('VCObj', function(){
 		], cb)();
 	    }
 	    var hashDB = new HashDB(new DummyKVS());
-	    var obj = new VCObj(hashDB);
+	    var obj = new VCObj(hashDB, new DummyKVS());
 	    util.seq([
 		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
 		function(_) { obj.createChainPatch([{type: 'add', amount: 2, inv: this.invAdd}, 
@@ -276,6 +275,35 @@ describe('VCObj', function(){
 		function(_) { assert.equal(process._counterTest, 2); _(); },
 	    ], done)();
 	});
+    });
+    describe('query(h1, patch, cb(err, ret))', function(){
+	it('should return the result of applying the patch on an object with the given state', function(done){
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB, new DummyKVS());
+	    util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.trans(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h1')); },
+		function(_) { obj.query(this.h1, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 2); _(); },
+	    ], done)();
+	});
+	it('should fail if the patch modifies the state', function(done){
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB, new DummyKVS());
+	    util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.query(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _); },
+	    ], function(err) {
+		if(!err) {
+		    done(new Error('Error not emitted'));
+		} else if(err.message == 'Query patches should not change object state') {
+		    done();
+		} else {
+		    done(err);
+		}
+	    })();
+	});
 
     });
+
 });

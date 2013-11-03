@@ -69,12 +69,12 @@ module.exports = function(hashDB, kvs) {
 	    done: function(err) {
 		cb(err);
 	    },
-	    apply: function(h1, p, cb) {
+	    /*apply: function(h1, p, cb) {
 		self.apply(h1, p, util.protect(cb, function(err, h2, ret, effect, conflict) {
 		    ctx.conflictFlag = conflict || ctx.conflictFlag;
 		    cb(err, h2, ret);
 		}));
-	    },
+	    },*/
 	    conflictFlag: false,
 	    conflict: function() {
 		this.conflictFlag = true;
@@ -84,6 +84,15 @@ module.exports = function(hashDB, kvs) {
 	    },
 	    unhash: function(hash, cb) {
 		hashDB.unhash(hash, cb);
+	    },
+	    query: function(h1, patch, cb) {
+		self.query(h1, patch, cb);
+	    },
+	    trans: function(h1, patch, cb) {
+		self.trans(h1, patch, util.protect(cb, function(err, h2, ret, effect, conflict) {
+		    ctx.conflictFlag = conflict || ctx.conflictFlag;
+		    cb(err, h2);
+		}));
 	    },
 	};
 	func.call(state, patch, ctx);
@@ -120,7 +129,7 @@ module.exports = function(hashDB, kvs) {
 		    return cb(undefined, h1);
 		}
 		util.seq([
-		    function(_) { ctx.apply(h1, patches[0], _.to('h2')); },
+		    function(_) { ctx.trans(h1, patches[0], _.to('h2')); },
 		    function(_) { applyPatches(patches.slice(1), this.h2, _.to('h3')); },
 		    function(_) { cb(undefined, this.h3); },
 		], cb)();
@@ -135,11 +144,24 @@ module.exports = function(hashDB, kvs) {
     this.trans = function(h1, patch, cb) {
 	util.seq([
 	    function(_) { hashDB.hash(patch, _.to('p')); },
-	    function(_) { kvs.check(h1.$hash$ + ':' + this.p.$hash$, _.to('cached')); },
+	    function(_) { this.key = h1.$hash$ + ':' + this.p.$hash$;
+			  kvs.check(this.key, _.to('cached')); },
 	    function(_) { if(this.cached) { cb(undefined, this.cached[0]); } else { _(); } },
 	    function(_) { self.apply(h1, patch, _.to('h2', 'res', 'effect', 'conflict')); },
-	    function(_) { kvs.store(h1.$hash$ + ':' + this.p.$hash$, [this.h2], _); },
+	    function(_) { kvs.store(this.key, [this.h2], _); },
 	    function(_) { cb(undefined, this.h2, this.res, this.effect, this.conflict); },
+	], cb)();
+    };
+
+    this.query = function(h1, patch, cb) {
+	util.seq([
+	    function(_) { self.apply(h1, patch, _.to('h2', 'res')); },
+	    function(_) { 
+		if(this.h2.$hash$ != h1.$hash$) { 
+		    cb(new Error('Query patches should not change object state'));
+		} else {
+		    cb(undefined, this.res); 
+		}},
 	], cb)();
     };
 };
