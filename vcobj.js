@@ -31,20 +31,35 @@ module.exports = function(hashDB) {
 
     var methodCache = {};
     function retrieveMethod(cls, patch, cb) {
-	var cached = methodCache[cls.$hash$ + ':' + patch.type];
-	if(cached) {
-	    return cb(undefined, cached);
+	if(patch.type) {
+	    var cached = methodCache[cls.$hash$ + ':' + patch.type];
+	    if(cached) {
+		return cb(undefined, cached);
+	    }
 	}
 	util.seq([
-	    function(_) { hashDB.unhash(cls, _.to('clsBody')); },
-	    function(_) { var funcStr = this.clsBody[patch.type];
-			  if(!funcStr) {
+	    function(_) { methodCode(cls, patch, _.to('funcStr')); },
+	    function(_) { if(!this.funcStr) {
 			      cb(new Error('Unsupported patch type: ' + patch.type));
 			  }
-			  var func = eval('(' + funcStr + ')');
+			  var func = eval('(' + this.funcStr + ')');
 			  methodCache[cls.$hash$ + ':' + patch.type] = func;
 			  cb(undefined, func);},
 	], cb)();
+    }
+
+    function methodCode(cls, patch, cb) {
+	if(patch.type) {
+	    util.seq([
+		function(_) { hashDB.unhash(cls, _.to('clsBody')); },
+		function(_) { cb(undefined, this.clsBody[patch.type]); },
+	    ], cb)();
+	} else {
+	    util.seq([
+		function(_) { hashDB.unhash(patch.code, _.to('code')); },
+		function(_) { cb(undefined, this.code); },
+	    ], cb)();
+	}
     }
     function callFunc(func, state, patch, cb) {
 	var ctx = {

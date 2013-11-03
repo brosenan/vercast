@@ -662,6 +662,24 @@ util.seq([
 ], done)();
 ```
 
+should accept patches that have a "code" field instead of "type".
+
+```js
+var code = function(patch, ctx) {
+		this.val += patch.amount;
+		ctx.ret();
+}
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB);
+util.seq([
+		function(_) { hashDB.hash(code.toString(), _.to('code')); },
+		function(_) { obj.createObject({}, {val:0}, _.to('h0')); },
+		function(_) { obj.apply(this.h0, {code: this.code, amount: 3}, _.to('h1')); },
+		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
+		function(_) { assert.equal(this.s1.val, 3); _(); },
+], done)();
+```
+
 <a name="vcobj-invertpatch-cberr-invpatch"></a>
 ## invert(patch, cb(err, invPatch))
 should invert any patch that has an inv field specifying its inversion logic.

@@ -134,6 +134,21 @@ describe('VCObj', function(){
 		function(_) { assert(this.conflict, 'the conflict flag should be true'); _(); },
 	    ], done)();
 	});
+	it('should accept patches that have a "code" field instead of "type"', function(done){
+	    var code = function(patch, ctx) {
+		this.val += patch.amount;
+		ctx.ret();
+	    }
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB);
+	    util.seq([
+		function(_) { hashDB.hash(code.toString(), _.to('code')); },
+		function(_) { obj.createObject({}, {val:0}, _.to('h0')); },
+		function(_) { obj.apply(this.h0, {code: this.code, amount: 3}, _.to('h1')); },
+		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
+		function(_) { assert.equal(this.s1.val, 3); _(); },
+	    ], done)();
+	});
     });
     describe('invert(patch, cb(err, invPatch))', function(){
 	it('should invert any patch that has an inv field specifying its inversion logic', function(done){
@@ -157,7 +172,5 @@ describe('VCObj', function(){
 		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: 2}); _(); },
 	    ], done)();
 	});
-
     });
-
 });

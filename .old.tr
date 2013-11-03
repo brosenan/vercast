@@ -40,8 +40,9 @@
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should accept patches that have a "code" field instead of "type": [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should accept patches that have a "code" field instead of "type"
     VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic
     VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist
 
-  43 passing (467 ms)
+  44 passing (480 ms)
 
