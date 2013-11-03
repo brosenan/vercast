@@ -32,8 +32,9 @@
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
     HashedApp branchQuery should perform a query on the tip of the given branch: [2K[0G  ․ HashedApp branchQuery should perform a query on the tip of the given branch
     HashedApp branchTrans should perform a transition, updating the tip of the branch: [2K[0G  ․ HashedApp branchTrans should perform a transition, updating the tip of the branch
-    CVObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ CVObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
-    CVObj apply(h1, patch, cb(err, h2, res, effect, sf)) should apply a patch to the given state, activating a class method: [2K[0G  ․ CVObj apply(h1, patch, cb(err, h2, res, effect, sf)) should apply a patch to the given state, activating a class method
+    VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
+    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, the result, effect and conflict flag emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, the result, effect and conflict flag emitted by the invoked method
 
-  35 passing (395 ms)
+  36 passing (404 ms)
 

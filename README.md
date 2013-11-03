@@ -24,9 +24,9 @@
      - [query](#hashedapp-query)
      - [branchQuery](#hashedapp-branchquery)
      - [branchTrans](#hashedapp-branchtrans)
-   - [CVObj](#cvobj)
-     - [createObject(cls, s0, cb(err, h0))](#cvobj-createobjectcls-s0-cberr-h0)
-     - [apply(h1, patch, cb(err, h2, res, effect, sf))](#cvobj-applyh1-patch-cberr-h2-res-effect-sf)
+   - [VCObj](#vcobj)
+     - [createObject(cls, s0, cb(err, h0))](#vcobj-createobjectcls-s0-cberr-h0)
+     - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
 <a name=""></a>
  
 <a name="application"></a>
@@ -506,9 +506,9 @@ util.seq([
 ], done)();
 ```
 
-<a name="cvobj"></a>
-# CVObj
-<a name="cvobj-createobjectcls-s0-cberr-h0"></a>
+<a name="vcobj"></a>
+# VCObj
+<a name="vcobj-createobjectcls-s0-cberr-h0"></a>
 ## createObject(cls, s0, cb(err, h0))
 should create an object state hash for the given class and initial state.
 
@@ -526,8 +526,8 @@ util.seq([
 ], done)();
 ```
 
-<a name="cvobj-applyh1-patch-cberr-h2-res-effect-sf"></a>
-## apply(h1, patch, cb(err, h2, res, effect, sf))
+<a name="vcobj-applyh1-patch-cberr-h2-res-effect-conflict"></a>
+## apply(h1, patch, cb(err, h2, res, effect, conflict))
 should apply a patch to the given state, activating a class method.
 
 ```js
@@ -540,6 +540,23 @@ util.seq([
 		function(_) { obj.createObject(cls, {}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo', rand: rand}, _); },
 		function(_) { assert.equal(process._beenThere, rand); _(); },
+], done)();
+```
+
+should emit the new state hash, the result, effect and conflict flag emitted by the invoked method.
+
+```js
+var cls = {
+		foo: function(p, cb) { cb(undefined, 1, 2, 3); }
+};
+var obj = new VCObj(new HashDB(new DummyKVS()));
+util.seq([
+		function(_) { obj.createObject(cls, {}, _.to('h0')); },
+		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
+		function(_) { assert.deepEqual(this.h1, this.h0);
+			      assert.equal(this.res, 1);
+			      assert.equal(this.effect, 2);
+			      assert.equal(this.conflict, 3); _();},
 ], done)();
 ```
 
