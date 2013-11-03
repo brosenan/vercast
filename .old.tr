@@ -44,6 +44,8 @@
     VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic
     VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist
     VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one: [2K[0G  ․ VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one
+    VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2
+    VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation
 
-  45 passing (501 ms)
+  47 passing (560 ms)
 

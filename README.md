@@ -29,6 +29,7 @@
      - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
      - [invert(patch, cb(err, invPatch))](#vcobj-invertpatch-cberr-invpatch)
      - [createChainPatch(patches, cb(err, patch))](#vcobj-createchainpatchpatches-cberr-patch)
+     - [trans(h1, patch, cb(h2, res, effect, conflict))](#vcobj-transh1-patch-cbh2-res-effect-conflict)
 <a name=""></a>
  
 <a name="application"></a>
@@ -733,7 +734,7 @@ function createCounter(obj, hashDB, cb) {
 		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
 		    function(_) { hashDB.hash(invAdd.toString(), _.to('invAdd')); },
 		    function(_) { cb(undefined, this.h0, this.invAdd); },
-		], done)();
+		], cb)();
 }
 var hashDB = new HashDB(new DummyKVS());
 var obj = new VCObj(hashDB);
@@ -744,6 +745,62 @@ util.seq([
 		function(_) { obj.apply(this.h0, this.p, _.to('h1')); },
 		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
 		function(_) { assert.equal(this.res, 5); _(); },
+], done)();
+```
+
+<a name="vcobj-transh1-patch-cbh2-res-effect-conflict"></a>
+## trans(h1, patch, cb(h2, res, effect, conflict))
+should apply the given patch on h1 to receive h2.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB, new DummyKVS());
+util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.trans(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h1')); },
+		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
+		function(_) { assert.equal(this.res, 2); _(); },
+], done)();
+```
+
+should cache previous state/patch pairs and avoid re-calculation.
+
+```js
+function createCounter(obj, hashDB, cb) {
+		var cls = {
+		    add: function(patch, ctx) {
+			process._counterTest++; // Count the applications as a side-effect
+			this.val += patch.amount;
+			ctx.ret();
+		    },
+		    get: function(patch, ctx) {
+			ctx.ret(this.val);
+		    },
+		};
+		var invAdd = function(patch) {
+		    patch.amount = -patch.amount;
+		    return patch;
+		};
+		util.seq([
+		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
+		    function(_) { hashDB.hash(invAdd.toString(), _.to('invAdd')); },
+		    function(_) { cb(undefined, this.h0, this.invAdd); },
+		], cb)();
+}
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB, new DummyKVS());
+process._counterTest = 0;
+util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.trans(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h1')); },
+		function(_) { obj.trans(this.h1, {type: 'add', inv: this.invAdd, amount: -2}, _.to('h2')); },
+		function(_) { obj.trans(this.h2, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h3')); },
+		function(_) { obj.trans(this.h3, {type: 'add', inv: this.invAdd, amount: -2}, _.to('h4')); },
+		function(_) { obj.trans(this.h4, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h5')); },
+		function(_) { obj.trans(this.h5, {type: 'add', inv: this.invAdd, amount: -2}, _.to('h6')); },
+		function(_) { obj.trans(this.h6, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h7')); },
+		function(_) { obj.trans(this.h7, {type: 'add', inv: this.invAdd, amount: -2}, _); },
+		function(_) { assert.equal(process._counterTest, 2); _(); },
 ], done)();
 ```
 

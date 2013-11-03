@@ -1,6 +1,6 @@
 var util = require('./util.js');
 
-module.exports = function(hashDB) {
+module.exports = function(hashDB, kvs) {
     var self = this;
     this.createObject = function(cls, state, cb) {
 	var strCls = {};
@@ -129,6 +129,17 @@ module.exports = function(hashDB) {
 	util.seq([
 	    function(_) { hashDB.hash(code.toString(), _.to('code')); },
 	    function(_) { cb(undefined, {code: this.code, patches: patches}); },
+	], cb)();
+    };
+
+    this.trans = function(h1, patch, cb) {
+	util.seq([
+	    function(_) { hashDB.hash(patch, _.to('p')); },
+	    function(_) { kvs.check(h1.$hash$ + ':' + this.p.$hash$, _.to('cached')); },
+	    function(_) { if(this.cached) { cb(undefined, this.cached[0]); } else { _(); } },
+	    function(_) { self.apply(h1, patch, _.to('h2', 'res', 'effect', 'conflict')); },
+	    function(_) { kvs.store(h1.$hash$ + ':' + this.p.$hash$, [this.h2], _); },
+	    function(_) { cb(undefined, this.h2, this.res, this.effect, this.conflict); },
 	], cb)();
     };
 };
