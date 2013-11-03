@@ -17,4 +17,24 @@ module.exports = function(hashDB) {
 	    function(_) { cb(undefined, this.h0); },
 	], cb)();
     };
+
+    this.apply = function(h1, patch, cb) {
+	util.seq([
+	    function(_) { hashDB.unhash(h1, _.to('state')); },
+	    function(_) { retrieveMethod(this.state._class, patch, _.to('func')); },
+	    function(_) { this.func.call(this.state, patch, cb); },
+	], cb)();
+    };
+
+    function retrieveMethod(cls, patch, cb) {
+	util.seq([
+	    function(_) { hashDB.unhash(cls, _.to('clsBody')); },
+	    function(_) { var funcStr = this.clsBody[patch.type];
+			  if(!funcStr) {
+			      cb(new Error('Unsupported patch type: ' + patch.type));
+			  }
+			  var func = eval('(' + funcStr + ')');
+			  cb(undefined, func);},
+	], cb)();
+    }
 };

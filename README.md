@@ -25,7 +25,8 @@
      - [branchQuery](#hashedapp-branchquery)
      - [branchTrans](#hashedapp-branchtrans)
    - [CVObj](#cvobj)
-     - [createObject](#cvobj-createobject)
+     - [createObject(cls, s0, cb(err, h0))](#cvobj-createobjectcls-s0-cberr-h0)
+     - [apply(h1, patch, cb(err, h2, res, effect, sf))](#cvobj-applyh1-patch-cberr-h2-res-effect-sf)
 <a name=""></a>
  
 <a name="application"></a>
@@ -507,8 +508,8 @@ util.seq([
 
 <a name="cvobj"></a>
 # CVObj
-<a name="cvobj-createobject"></a>
-## createObject
+<a name="cvobj-createobjectcls-s0-cberr-h0"></a>
+## createObject(cls, s0, cb(err, h0))
 should create an object state hash for the given class and initial state.
 
 ```js
@@ -522,6 +523,23 @@ util.seq([
 		function(_) { assert.equal(this.s0.val, 0);
 			      hashDB.unhash(this.s0._class, _.to('cls'));},
 		function(_) { assert.equal(this.cls.foo, 'function () { console.log("bar"); }'); _(); },
+], done)();
+```
+
+<a name="cvobj-applyh1-patch-cberr-h2-res-effect-sf"></a>
+## apply(h1, patch, cb(err, h2, res, effect, sf))
+should apply a patch to the given state, activating a class method.
+
+```js
+var rand = Math.random();
+var cls = {
+		foo: function(p, cb) { process._beenThere = p.rand; cb(); }
+};
+var obj = new VCObj(new HashDB(new DummyKVS()));
+util.seq([
+		function(_) { obj.createObject(cls, {}, _.to('h0')); },
+		function(_) { obj.apply(this.h0, {type: 'foo', rand: rand}, _); },
+		function(_) { assert.equal(process._beenThere, rand); _(); },
 ], done)();
 ```
 
