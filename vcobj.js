@@ -29,7 +29,12 @@ module.exports = function(hashDB) {
 	], cb)();
     };
 
+    var methodCache = {};
     function retrieveMethod(cls, patch, cb) {
+	var cached = methodCache[cls.$hash$ + ':' + patch.type];
+	if(cached) {
+	    return cb(undefined, cached);
+	}
 	util.seq([
 	    function(_) { hashDB.unhash(cls, _.to('clsBody')); },
 	    function(_) { var funcStr = this.clsBody[patch.type];
@@ -37,6 +42,7 @@ module.exports = function(hashDB) {
 			      cb(new Error('Unsupported patch type: ' + patch.type));
 			  }
 			  var func = eval('(' + funcStr + ')');
+			  methodCache[cls.$hash$ + ':' + patch.type] = func;
 			  cb(undefined, func);},
 	], cb)();
     }
@@ -61,4 +67,15 @@ module.exports = function(hashDB) {
 	};
 	func.call(state, patch, ctx);
     }
+
+    this.invert = function(patch, cb) {
+	if(!patch.inv) {
+	    return cb(undefined, patch);
+	}
+	util.seq([
+	    function(_) { hashDB.unhash(patch.inv, _.to('code')); },
+	    function(_) { var func = eval('(' + this.code + ')');
+			  cb(undefined, func(patch)); },
+	], cb)();
+    };
 };

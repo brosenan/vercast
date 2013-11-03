@@ -135,4 +135,29 @@ describe('VCObj', function(){
 	    ], done)();
 	});
     });
+    describe('invert(patch, cb(err, invPatch))', function(){
+	it('should invert any patch that has an inv field specifying its inversion logic', function(done){
+	    var inv = function(patch) {
+		patch.amount = -patch.amount;
+		return patch;
+	    }
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB);
+	    util.seq([
+		function(_) { hashDB.hash(inv.toString(), _.to('invHash')); },
+		function(_) { obj.invert({type: 'add', amount: 2, inv: this.invHash}, _.to('inv')); },
+		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: -2, inv: this.invHash}); _(); },
+	    ], done)();
+	});
+	it('should return the patch unchanged in case an inv field does not exist', function(done){
+	    var hashDB = new HashDB(new DummyKVS());
+	    var obj = new VCObj(hashDB);
+	    util.seq([
+		function(_) { obj.invert({type: 'add', amount: 2}, _.to('inv')); },
+		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: 2}); _(); },
+	    ], done)();
+	});
+
+    });
+
 });

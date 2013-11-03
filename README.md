@@ -27,6 +27,7 @@
    - [VCObj](#vcobj)
      - [createObject(cls, s0, cb(err, h0))](#vcobj-createobjectcls-s0-cberr-h0)
      - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
+     - [invert(patch, cb(err, invPatch))](#vcobj-invertpatch-cberr-invpatch)
 <a name=""></a>
  
 <a name="application"></a>
@@ -658,6 +659,35 @@ util.seq([
 		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
 		function(_) { assert(this.conflict, 'the conflict flag should be true'); _(); },
+], done)();
+```
+
+<a name="vcobj-invertpatch-cberr-invpatch"></a>
+## invert(patch, cb(err, invPatch))
+should invert any patch that has an inv field specifying its inversion logic.
+
+```js
+var inv = function(patch) {
+		patch.amount = -patch.amount;
+		return patch;
+}
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB);
+util.seq([
+		function(_) { hashDB.hash(inv.toString(), _.to('invHash')); },
+		function(_) { obj.invert({type: 'add', amount: 2, inv: this.invHash}, _.to('inv')); },
+		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: -2, inv: this.invHash}); _(); },
+], done)();
+```
+
+should return the patch unchanged in case an inv field does not exist.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB);
+util.seq([
+		function(_) { obj.invert({type: 'add', amount: 2}, _.to('inv')); },
+		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: 2}); _(); },
 ], done)();
 ```
 
