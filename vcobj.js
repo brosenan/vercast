@@ -22,7 +22,7 @@ module.exports = function(hashDB) {
 	util.seq([
 	    function(_) { hashDB.unhash(h1, _.to('state')); },
 	    function(_) { retrieveMethod(this.state._class, patch, _.to('func')); },
-	    function(_) { this.func.call(this.state, patch, _.to('res', 'effect', 'conflict')); },
+	    function(_) { callFunc(this.func, this.state, patch, _.to('res', 'effect', 'conflict')); },
 	    function(_) { hashDB.hash(this.state, _.to('h2')); },
 	    function(_) { cb(undefined, this.h2, this.res, this.effect, this.conflict); },
 	], cb)();
@@ -38,5 +38,14 @@ module.exports = function(hashDB) {
 			  var func = eval('(' + funcStr + ')');
 			  cb(undefined, func);},
 	], cb)();
+    }
+    function callFunc(func, state, patch, cb) {
+	var ctx = {
+	    ret: function() {
+		var args = [].splice.call(arguments,0);
+		cb.apply(this, [undefined].concat(args));
+	    }
+	};
+	func.call(this.state, patch, ctx);
     }
 };

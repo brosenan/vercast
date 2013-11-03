@@ -24,7 +24,7 @@ describe('VCObj', function(){
 	it('should apply a patch to the given state, activating a class method', function(done){
 	    var rand = Math.random();
 	    var cls = {
-		foo: function(p, cb) { process._beenThere = p.rand; cb(); }
+		foo: function(p, ctx) { process._beenThere = p.rand; ctx.ret(); }
 	    };
 	    var obj = new VCObj(new HashDB(new DummyKVS()));
 	    util.seq([
@@ -35,7 +35,7 @@ describe('VCObj', function(){
 	});
 	it('should emit the new state hash, the result, effect and conflict flag emitted by the invoked method', function(done){
 	    var cls = {
-		foo: function(p, cb) { cb(undefined, 1, 2, 3); }
+		foo: function(p, ctx) { ctx.ret(1, 2, 3); }
 	    };
 	    var obj = new VCObj(new HashDB(new DummyKVS()));
 	    util.seq([

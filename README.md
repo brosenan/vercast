@@ -533,7 +533,7 @@ should apply a patch to the given state, activating a class method.
 ```js
 var rand = Math.random();
 var cls = {
-		foo: function(p, cb) { process._beenThere = p.rand; cb(); }
+		foo: function(p, ctx) { process._beenThere = p.rand; ctx.ret(); }
 };
 var obj = new VCObj(new HashDB(new DummyKVS()));
 util.seq([
@@ -547,7 +547,7 @@ should emit the new state hash, the result, effect and conflict flag emitted by 
 
 ```js
 var cls = {
-		foo: function(p, cb) { cb(undefined, 1, 2, 3); }
+		foo: function(p, ctx) { ctx.ret(1, 2, 3); }
 };
 var obj = new VCObj(new HashDB(new DummyKVS()));
 util.seq([

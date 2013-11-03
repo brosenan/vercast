@@ -36,5 +36,5 @@
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, the result, effect and conflict flag emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, the result, effect and conflict flag emitted by the invoked method
 
-  36 passing (404 ms)
+  36 passing (405 ms)
 
