@@ -44,10 +44,11 @@
     VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic
     VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist
     VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one: [2K[0G  ․ VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one
+    VCObj createChainPatch(patches, cb(err, patch)) should support correct inversion of the resulting patch: [2K[0G  ․ VCObj createChainPatch(patches, cb(err, patch)) should support correct inversion of the resulting patch
     VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2
     VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  49 passing (601 ms)
+  50 passing (673 ms)
 

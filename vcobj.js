@@ -105,7 +105,7 @@ module.exports = function(hashDB, kvs) {
 	util.seq([
 	    function(_) { hashDB.unhash(patch.inv, _.to('code')); },
 	    function(_) { var func = eval('(' + this.code + ')');
-			  cb(undefined, func(patch)); },
+			  func(patch, cb); },
 	], cb)();
     };
 
@@ -135,9 +135,26 @@ module.exports = function(hashDB, kvs) {
 		], cb)();
 	    }
 	};
+	var inv = function(patch, cb) {
+	    var patches = patch.patches;
+	    patch.patches = [];
+	    invertPatches(patches, patch, patches.length - 1, cb);
+
+	    function invertPatches(patches, invPatch, index, cb) {
+		if(index < 0) {
+		    return cb(undefined, invPatch);
+		}
+		util.seq([
+		    function(_) { self.invert(patches[index], _.to('inv')); },
+		    function(_) { invPatch.patches.push(this.inv);
+				  invertPatches(patches, invPatch, index - 1, cb);},
+		], cb)();
+	    }
+	};
 	util.seq([
 	    function(_) { hashDB.hash(code.toString(), _.to('code')); },
-	    function(_) { cb(undefined, {code: this.code, patches: patches}); },
+	    function(_) { hashDB.hash(inv.toString(), _.to('inv')); },
+	    function(_) { cb(undefined, {code: this.code, inv: this.inv, patches: patches}); },
 	], cb)();
     };
 

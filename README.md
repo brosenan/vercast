@@ -518,7 +518,7 @@ should create an object state hash for the given class and initial state.
 
 ```js
 var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB);
+var obj = new VCObj(hashDB, new DummyKVS());
 var cls = { foo: function() { console.log("bar"); }, 
 			bar: function() { console.log("baz"); } };
 util.seq([
@@ -539,7 +539,7 @@ var rand = Math.random();
 var cls = {
 		foo: function(p, ctx) { process._beenThere = p.rand; ctx.ret(); }
 };
-var obj = new VCObj(new HashDB(new DummyKVS()));
+var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
 util.seq([
 		function(_) { obj.createObject(cls, {}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo', rand: rand}, _); },
@@ -553,7 +553,7 @@ should emit the new state hash, and the result emitted by the invoked method.
 var cls = {
 		foo: function(p, ctx) { ctx.ret('result'); }
 };
-var obj = new VCObj(new HashDB(new DummyKVS()));
+var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
 util.seq([
 		function(_) { obj.createObject(cls, {}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
@@ -568,7 +568,7 @@ should pass the invoked method the state as its this parameter.
 var cls = {
 		foo: function(p, ctx) { ctx.ret(this.baz); }
 };
-var obj = new VCObj(new HashDB(new DummyKVS()));
+var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
 util.seq([
 		function(_) { obj.createObject(cls, {baz: 'bat'}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res')); },
@@ -584,7 +584,7 @@ var cls = {
 		foo: function(p, ctx) { this.bar = 'baz'; ctx.ret(); }
 };
 var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB);
+var obj = new VCObj(hashDB, new DummyKVS());
 util.seq([
 		function(_) { obj.createObject(cls, {}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1')); },
@@ -610,7 +610,7 @@ var cls2 = {
 		    ctx.ret(this.val + 1);
 		}
 }
-var obj = new VCObj(new HashDB(new DummyKVS()));
+var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
 util.seq([
 		function(_) { obj.createObject(cls2, {val:2}, _.to('child')); },
 		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
@@ -626,7 +626,7 @@ var cls = {
 		foo: function(p, ctx) { ctx.conflict(); ctx.ret(); }
 };
 var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB);
+var obj = new VCObj(hashDB, new DummyKVS());
 util.seq([
 		function(_) { obj.createObject(cls, {}, _.to('h0')); },
 		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
@@ -672,7 +672,7 @@ var code = function(patch, ctx) {
 		ctx.ret();
 }
 var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB);
+var obj = new VCObj(hashDB, new DummyKVS());
 util.seq([
 		function(_) { hashDB.hash(code.toString(), _.to('code')); },
 		function(_) { obj.createObject({}, {val:0}, _.to('h0')); },
@@ -687,12 +687,12 @@ util.seq([
 should invert any patch that has an inv field specifying its inversion logic.
 
 ```js
-var inv = function(patch) {
+var inv = function(patch, cb) {
 		patch.amount = -patch.amount;
-		return patch;
+		cb(undefined, patch);
 }
 var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB);
+var obj = new VCObj(hashDB, new DummyKVS());
 util.seq([
 		function(_) { hashDB.hash(inv.toString(), _.to('invHash')); },
 		function(_) { obj.invert({type: 'add', amount: 2, inv: this.invHash}, _.to('inv')); },
@@ -704,7 +704,7 @@ should return the patch unchanged in case an inv field does not exist.
 
 ```js
 var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB);
+var obj = new VCObj(hashDB, new DummyKVS());
 util.seq([
 		function(_) { obj.invert({type: 'add', amount: 2}, _.to('inv')); },
 		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: 2}); _(); },
@@ -726,9 +726,9 @@ function createCounter(obj, hashDB, cb) {
 			ctx.ret(this.val);
 		    },
 		};
-		var invAdd = function(patch) {
+		var invAdd = function(patch, cb) {
 		    patch.amount = -patch.amount;
-		    return patch;
+		    cb(undefined, patch);
 		};
 		util.seq([
 		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
@@ -745,6 +745,22 @@ util.seq([
 		function(_) { obj.apply(this.h0, this.p, _.to('h1')); },
 		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
 		function(_) { assert.equal(this.res, 5); _(); },
+], done)();
+```
+
+should support correct inversion of the resulting patch.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = new VCObj(hashDB, new DummyKVS());
+util.seq([
+		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
+		function(_) { obj.createChainPatch([{type: 'add', amount: 2, inv: this.invAdd}, 
+						    {type: 'add', amount: 3, inv: this.invAdd}], _.to('p')); },
+		function(_) { obj.invert(this.p, _.to('invP')); },
+		function(_) { obj.trans(this.h0, this.invP, _.to('h1')); },
+		function(_) { obj.query(this.h1, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, -5); _(); },
 ], done)();
 ```
 
@@ -777,9 +793,9 @@ function createCounter(obj, hashDB, cb) {
 			ctx.ret(this.val);
 		    },
 		};
-		var invAdd = function(patch) {
+		var invAdd = function(patch, cb) {
 		    patch.amount = -patch.amount;
-		    return patch;
+		    cb(undefined, patch);
 		};
 		util.seq([
 		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
