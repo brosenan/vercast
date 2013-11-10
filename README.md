@@ -3,6 +3,7 @@
      - [initialState](#application-initialstate)
      - [apply](#application-apply)
      - [inv](#application-inv)
+   - [composite patch](#composite-patch)
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)

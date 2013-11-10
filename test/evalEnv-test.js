@@ -192,7 +192,5 @@ describe('EvalEnv', function(){
 		function(_) { assert.equal(this.s1.val, -4); _(); },
 	    ], done)();
 	});
-
     });
-
 });
