@@ -13,7 +13,15 @@
      - [as VersionGraph](#dummyversiongraph-as-versiongraph)
        - [addEdge](#dummyversiongraph-as-versiongraph-addedge)
        - [findCommonAncestor](#dummyversiongraph-as-versiongraph-findcommonancestor)
-   - [hash](#hash)
+   - [EvalEnv](#evalenv)
+     - [init(evaluator, args, cb(err, h0))](#evalenv-initevaluator-args-cberr-h0)
+     - [apply(s1, patch, cb(err, s2, res, eff, conf))](#evalenv-applys1-patch-cberr-s2-res-eff-conf)
+     - [trans(h1, patch, cb(err, h2, res, eff, conf))](#evalenv-transh1-patch-cberr-h2-res-eff-conf)
+     - [query(s, q, cb(err, res))](#evalenv-querys-q-cberr-res)
+     - [unapply(s1, patch, cb(err, s2, res, eff, conf))](#evalenv-unapplys1-patch-cberr-s2-res-eff-conf)
+   - [HashDB](#hashdb)
+     - [hash(obj, cb(err, hash))](#hashdb-hashobj-cberr-hash)
+     - [unhash(hash, cb(err, obj))](#hashdb-unhashhash-cberr-obj)
    - [HashedApp](#hashedapp)
      - [initialState](#hashedapp-initialstate)
      - [apply](#hashedapp-apply)
@@ -217,48 +225,253 @@ util.seq([
 ], done)();
 ```
 
-<a name="hash"></a>
-# hash
-should give any two different JSONable objects a different hash code.
+<a name="evalenv"></a>
+# EvalEnv
+<a name="evalenv-initevaluator-args-cberr-h0"></a>
+## init(evaluator, args, cb(err, h0))
+should return a hash to an object constructed by the evaluator's init() method.
 
 ```js
-var hash = new HashDB(new DummyKVS());
-var obj1 = {foo: 'bar', count: [1, 2, 3]};
-var obj2 = {foo: 'bar', count: [1, 2, 4]};
+var evaluators = {foo: {
+		init: function(args, ctx) {
+		    ctx.ret({bar: args.bar, baz: 2});
+		}
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
-    function(_) { hash.hash(obj1, _.to('h1')); },
-    function(_) { hash.hash(obj2, _.to('h2')); },
-    function(_) {
-	assert.equal(typeof this.h1.$hash$, 'string');
-	assert.equal(typeof this.h2.$hash$, 'string');
-	assert(this.h1.$hash$ != this.h2.$hash$, 'hash objects should differ');
-	_();
-    },
+		function(_) { evalEnv.init('foo', {bar: 3}, _.to('h0')); },
+		function(_) { assert(this.h0.$hash$, 'h0 must be a hash'); hashDB.unhash(this.h0, _.to('s0')); },
+		function(_) { assert.deepEqual(this.s0, {_type: 'foo', bar: 3, baz: 2}); _(); },
 ], done)();
 ```
 
-should reconstruct an object from the hash that is identical to the origianl object.
+<a name="evalenv-applys1-patch-cberr-s2-res-eff-conf"></a>
+## apply(s1, patch, cb(err, s2, res, eff, conf))
+should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res.
 
 ```js
-var hash = new HashDB(new DummyKVS());
-var obj = {foo: 'bar', count: [1, 2, 3]};
+var evaluators = { foo: {
+		init: function(args, ctx) { ctx.ret({val:0}); },
+		apply: function(s1, patch, ctx) { assert.equal(patch._type, 'bar');
+						  var old = s1.val;
+						  s1.val += patch.amount; 
+						  ctx.ret(s1, old); },
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
-    function(_) { hash.hash(obj, _.to('h')); },
-    function(_) { hash.unhash(this.h, _.to('obj')); },
-    function(_) { assert.deepEqual(this.obj, obj); _(); },
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
+		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, _.to('h1', 'res')); },
+		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
+		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: 2});
+			      assert.equal(this.res, 0); _();},
 ], done)();
 ```
 
+should use the patch evaluator if one exists for the patch type.
+
+```js
+var evaluators = { 
+		foo: {
+		    init: function(args, ctx) { ctx.ret({val:0}); },
+		    apply: function(s1, patch, ctx) { var old = s1.val;
+						      s1.val += patch.amount; 
+						      ctx.ret(s1, old); },
+		},
+		'patch:bar': function(s1, patch, ctx) { var old = s1.val;
+							s1.val -= patch.amount; // Does the opposite
+							ctx.ret(s1, old); },
+};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
+		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, _.to('h1', 'res')); },
+		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
+		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: -2});
+			      assert.equal(this.res, 0); _();},
+], done)();
+```
+
+<a name="evalenv-transh1-patch-cberr-h2-res-eff-conf"></a>
+## trans(h1, patch, cb(err, h2, res, eff, conf))
+should apply the patch.
+
+```js
+var evaluators = { foo: {
+		init: function(args, ctx) { ctx.ret({val:0}); },
+		apply: function(s1, patch, ctx) { var old = s1.val;
+						  s1.val += patch.amount; 
+						  ctx.ret(s1, old); },
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
+		function(_) { evalEnv.trans(this.h0, {_type: 'bar', amount: 2}, _.to('h1', 'res')); },
+		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
+		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: 2});
+			      assert.equal(this.res, 0); _();},
+], done)();
+```
+
+should avoid repeating calculations already done.
+
+```js
+var count = 0;
+var evaluators = { foo: {
+		init: function(args, ctx) { ctx.ret({val:0}); },
+		apply: function(s1, patch, ctx) { s1.val += patch.amount;
+						  count++; // Side effect: count the number of calls
+						  ctx.ret(s1); },
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
+		function(_) { evalEnv.trans(this.h0, {_type: 'bar', amount: 2}, _.to('h1')); },
+		function(_) { evalEnv.trans(this.h1, {_type: 'bar', amount: -2}, _.to('h2')); },
+		function(_) { evalEnv.trans(this.h2, {_type: 'bar', amount: 2}, _.to('h3')); },
+		function(_) { evalEnv.trans(this.h3, {_type: 'bar', amount: -2}, _.to('h4')); },
+		function(_) { evalEnv.trans(this.h4, {_type: 'bar', amount: 2}, _.to('h5')); },
+		function(_) { evalEnv.trans(this.h5, {_type: 'bar', amount: -2}, _.to('h6')); },
+		function(_) { evalEnv.trans(this.h6, {_type: 'bar', amount: 2}, _.to('h7')); },
+		function(_) { evalEnv.trans(this.h7, {_type: 'bar', amount: -2}, _.to('h8')); },
+		function(_) { assert.equal(count, 2); _(); },
+], done)();
+```
+
+<a name="evalenv-querys-q-cberr-res"></a>
+## query(s, q, cb(err, res))
+should apply query patch q to object with state s, emitting res.
+
+```js
+var evaluators = { foo: {
+		init: function(args, ctx) { ctx.ret({val:args.val}); },
+		apply: function(s, query, ctx) { if(query._type == 'get') { ctx.ret(s, s.val); } },
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {val:7}, _.to('h0')); },
+		function(_) { evalEnv.query(this.h0, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 7); _();},
+], done)();
+```
+
+should emit an error if the query changes the state.
+
+```js
+var evaluators = { foo: {
+		init: function(args, ctx) { ctx.ret({val:0}); },
+		apply: function(s1, patch, ctx) { var old = s1.val;
+						  s1.val += patch.amount; 
+						  ctx.ret(s1, old); },
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
+		function(_) { evalEnv.query(this.h0, {_type: 'bar', amount: 2}, _); },
+], function(err) {
+		if(!err) {
+		    done(new Error('Error not emitted'));
+		} else if(err.message == 'Query patch bar changed object state') {
+		    done();
+		} else {
+		    done(err);
+		}
+})();
+```
+
+<a name="evalenv-unapplys1-patch-cberr-s2-res-eff-conf"></a>
+## unapply(s1, patch, cb(err, s2, res, eff, conf))
+should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false.
+
+```js
+var evaluators = { foo: {
+		init: function(args, ctx) { ctx.ret({val:0}); },
+		apply: function(s1, patch, ctx) { var old = s1.val;
+						  s1.val += patch.amount; 
+						  ctx.ret(s1, old); },
+		unapply: function(s1, patch, ctx) { var old = s1.val;
+						    s1.val -= patch.amount;
+						    ctx.ret(s1, old); },
+}};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+var patch = {_type: 'bar', amount: 2};
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
+		function(_) { evalEnv.apply(this.h0, patch, _.to('h1')); },
+		function(_) { evalEnv.unapply(this.h1, patch, _.to('h2')); },
+		function(_) { hashDB.hash(this.h2, _.to('h2')); },
+		function(_) { assert.equal(this.h2.$hash$, this.h0.$hash$); _(); },
+], done)();
+```
+
+<a name="hashdb"></a>
+# HashDB
 should store its own copy of the object.
 
 ```js
-var hash = new HashDB(new DummyKVS());
+var hashDB = new HashDB(new DummyKVS());
 var obj = {foo: 'bar', count: [1, 2, 3]};
 util.seq([
-    function(_) { hash.hash(obj, _.to('h')); },
+    function(_) { hashDB.hash(obj, _.to('h')); },
     function(_) { obj.foo = 'baz'; _(); },
-    function(_) { hash.unhash(this.h, _.to('obj')); },
+    function(_) { hashDB.unhash(this.h, _.to('obj')); },
     function(_) { assert.equal(this.obj.foo, 'bar'); _(); },
+], done)();
+```
+
+<a name="hashdb-hashobj-cberr-hash"></a>
+## hash(obj, cb(err, hash))
+should give any two different JSONable objects a different hash code.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj1 = {foo: 'bar', count: [1, 2, 3]};
+var obj2 = {foo: 'bar', count: [1, 2, 4]};
+util.seq([
+		function(_) { hashDB.hash(obj1, _.to('h1')); },
+		function(_) { hashDB.hash(obj2, _.to('h2')); },
+		function(_) {
+		    assert.equal(typeof this.h1.$hash$, 'string');
+		    assert.equal(typeof this.h2.$hash$, 'string');
+		    assert(this.h1.$hash$ != this.h2.$hash$, 'hash objects should differ');
+		    _();
+		},
+], done)();
+```
+
+should act as an identity function when given a hash as input.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = {foo: 'bar', count: [1, 2, 3]};
+util.seq([
+		function(_) { hashDB.hash(obj, _.to('h1')); },
+		function(_) { hashDB.hash(this.h1, _.to('h2')); },
+		function(_) { assert.deepEqual(this.h1, this.h2); _(); },
+], done)();
+```
+
+<a name="hashdb-unhashhash-cberr-obj"></a>
+## unhash(hash, cb(err, obj))
+should reconstruct an object from the hash that is identical to the origianl object.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = {foo: 'bar', count: [1, 2, 3]};
+util.seq([
+		function(_) { hashDB.hash(obj, _.to('h')); },
+		function(_) { hashDB.unhash(this.h, _.to('obj')); },
+		function(_) { assert.deepEqual(this.obj, obj); _(); },
+], done)();
+```
+
+should act as an identity when given a non-hash object as input.
+
+```js
+var hashDB = new HashDB(new DummyKVS());
+var obj = {foo: 'bar', count: [1, 2, 3]};
+util.seq([
+		function(_) { hashDB.unhash(obj, _.to('obj')); },
+		function(_) { assert.deepEqual(obj, this.obj); _(); },
 ], done)();
 ```
 

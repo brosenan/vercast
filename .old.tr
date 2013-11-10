@@ -12,9 +12,19 @@
     DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
     DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
     DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    hash should give any two different JSONable objects a different hash code: [2K[0G  ․ hash should give any two different JSONable objects a different hash code
-    hash should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ hash should reconstruct an object from the hash that is identical to the origianl object
-    hash should store its own copy of the object: [2K[0G  ․ hash should store its own copy of the object
+    EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
+    EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res: [2K[0G  ․ EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
+    EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
+    EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch
+    EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done
+    EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res
+    EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state
+    EvalEnv unapply(s1, patch, cb(err, s2, res, eff, conf)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false: [2K[0G  ․ EvalEnv unapply(s1, patch, cb(err, s2, res, eff, conf)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false
+    HashDB should store its own copy of the object: [2K[0G  ․ HashDB should store its own copy of the object
+    HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code: [2K[0G  ․ HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code
+    HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input: [2K[0G  ․ HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input
+    HashDB unhash(hash, cb(err, obj)) should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ HashDB unhash(hash, cb(err, obj)) should reconstruct an object from the hash that is identical to the origianl object
+    HashDB unhash(hash, cb(err, obj)) should act as an identity when given a non-hash object as input: [2K[0G  ․ HashDB unhash(hash, cb(err, obj)) should act as an identity when given a non-hash object as input
     HashedApp initialState should return the initial state's hash: [2K[0G  ․ HashedApp initialState should return the initial state's hash
     HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch: [2K[0G  ․ HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch
     HashedApp apply _inv should handle _inv patches: [2K[0G  ․ HashedApp apply _inv should handle _inv patches
@@ -50,5 +60,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  50 passing (673 ms)
+  60 passing (734 ms)
 
