@@ -52,9 +52,13 @@ describe('EvalEnv', function(){
 						      s1.val += patch.amount; 
 						      ctx.ret(s1, old); },
 		},
-		'patch:bar': function(s1, patch, ctx) { var old = s1.val;
-							s1.val -= patch.amount; // Does the opposite
-							ctx.ret(s1, old); },
+		bar: { 
+		    apply: function(s1, patch, ctx) {
+			var old = s1.val;
+			s1.val -= patch.amount; // Does the opposite
+			ctx.ret(s1, old); 
+		    }
+		},
 	    };
 	    var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 	    util.seq([
@@ -160,6 +164,32 @@ describe('EvalEnv', function(){
 		function(_) { evalEnv.unapply(this.h1, patch, _.to('h2')); },
 		function(_) { hashDB.hash(this.h2, _.to('h2')); },
 		function(_) { assert.equal(this.h2.$hash$, this.h0.$hash$); _(); },
+	    ], done)();
+	});
+	it('should use the unpatch evaluator if one exists for the patch type', function(done){
+	    var evaluators = { 
+		foo: {
+		    init: function(args, ctx) { ctx.ret({val:0}); },
+		    apply: function(s1, patch, ctx) { var old = s1.val;
+						      s1.val += patch.amount; 
+						      ctx.ret(s1, old); },
+		    unapply: function(s1, patch, ctx) { var old = s1.val;
+						      s1.val -= patch.amount; 
+						      ctx.ret(s1, old); },
+		},
+		bar: {
+		    unapply: function(s1, patch, ctx) { var old = s1.val;
+							s1.val -= patch.amount * 2;
+							ctx.ret(s1, old); },
+		},
+	    };
+	    var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+	    var patch = {_type: 'bar', amount: 2};
+	    util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('h0')); }, // 0
+		function(_) { evalEnv.unapply(this.h0, patch, _.to('h1')); }, // -4
+		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
+		function(_) { assert.equal(this.s1.val, -4); _(); },
 	    ], done)();
 	});
 

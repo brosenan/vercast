@@ -26,19 +26,16 @@ module.exports = function(hashDB, opCache, evaluators) {
     }
 
     this.apply = function(h1, patch, cb) {
-	var patchMethod = evaluators['patch:' + patch._type];
 	util.seq([
 	    function(_) { hashDB.unhash(h1, _.to('s1')); },
-	    function(_) { var method = patchMethod || getMethod(this.s1, 'apply');
+	    function(_) { var method = getMethod(patch, 'apply') || getMethod(this.s1, 'apply');
 			  method(this.s1, patch, createContext(cb)); },
 	], cb)();
     };
 
     function getMethod(state, methodName) {
 	var ev = evaluators[state._type];
-	if(!ev) {
-	    throw new Error('No evaluator ' + evaluator);
-	}
+	if(!ev) return undefined;
 	var method = ev[methodName];
 	if(!method) {
 	    throw new Error('Evaluator ' + state._type + ' does not provide a method named ' + methodName);
@@ -79,8 +76,7 @@ module.exports = function(hashDB, opCache, evaluators) {
     this.unapply = function(h1, patch, cb) {
 	util.seq([
 	    function(_) { hashDB.unhash(h1, _.to('s1')); },
-	    function(_) { var unapplyMethod = getMethod(this.s1, 'unapply');
-			  //var method = unapplyMethod || getMethod(this.s1, 'apply');
+	    function(_) { var unapplyMethod = getMethod(patch, 'unapply') || getMethod(this.s1, 'unapply');
 			  unapplyMethod(this.s1, patch, createContext(cb)); },
 	], cb)();
     };
