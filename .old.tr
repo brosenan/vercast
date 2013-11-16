@@ -3,6 +3,8 @@
     application apply should return the query result based on the state: [2K[0G  ․ application apply should return the query result based on the state
     application apply should apply the patch to the state: [2K[0G  ․ application apply should apply the patch to the state
     application inv should invert patches: [2K[0G  ․ application inv should invert patches
+    composite patch should apply the given patches one by one: [2K[0G  ․ composite patch should apply the given patches one by one
+    composite patch should return an array of the underlying results: [2K[0G  ․ composite patch should return an array of the underlying results
     counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
@@ -63,5 +65,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  63 passing (747 ms)
+  65 passing (824 ms)
 

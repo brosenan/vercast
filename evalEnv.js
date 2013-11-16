@@ -25,6 +25,9 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    err : function(err) {
 		cb(err);
 	    },
+	    trans : function(s1, patch, cb) {
+		self.trans(s1, patch, cb);
+	    },
 	};
     }
 

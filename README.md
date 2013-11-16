@@ -91,6 +91,39 @@ util.seq([
 ], done)();
 ```
 
+<a name="composite-patch"></a>
+# composite patch
+should apply the given patches one by one.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+    function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
+	{_type: 'add', amount: 2},
+	{_type: 'add', amount: 2},
+	{_type: 'add', amount: 2},
+	{_type: 'add', amount: 2},
+    ]}, _.to('s1')); },
+    function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
+    function(_) { assert.equal(this.res, 8); _(); },
+], done)();
+```
+
+should return an array of the underlying results.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+    function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
+	{_type: 'add', amount: 2},
+	{_type: 'get'},
+	{_type: 'add', amount: 2},
+	{_type: 'get'},
+    ]}, _.to('s1', 'res')); },
+    function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
+], done)();
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-get"></a>
