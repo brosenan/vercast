@@ -24,6 +24,16 @@ describe('atom', function(){
 		function(_) { assert.equal(this.res, 'foo'); _(); },
 	    ], done)();
 	});
+	it('should return the last set value even at the event of a conflict', function(done){
+	    util.seq([
+		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
+		function(_) { evalEnv.trans(this.s1, {_type: 'set', from: 'foo', to: 'baz'}, _.to('s2')); },
+		function(_) { evalEnv.query(this.s2, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'baz'); _(); },
+	    ], done)();
+	});
+
     });
     describe('set', function(){
 	it('should change the state to contain the "to" value, given that the "from" value matches the current state', function(done){
@@ -42,4 +52,17 @@ describe('atom', function(){
 	    ], done)();
 	});
     });
+    describe('get_all', function(){
+	it('should return all possible values', function(done){
+	    util.seq([
+		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
+		function(_) { evalEnv.trans(this.s1, {_type: 'set', from: 'foo', to: 'baz'}, _.to('s2')); },
+		function(_) { evalEnv.query(this.s2, {_type: 'get_all'}, _.to('res')); },
+		function(_) { assert.deepEqual(this.res, ['baz', 'bar']); _(); },
+	    ], done)();
+	});
+
+    });
+
 });

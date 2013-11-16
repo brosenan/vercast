@@ -4,8 +4,10 @@
     application apply should apply the patch to the state: [2K[0G  ․ application apply should apply the patch to the state
     application inv should invert patches: [2K[0G  ․ application inv should invert patches
     atom get should return the atom's value: [2K[0G  ․ atom get should return the atom's value
+    atom get should return the last set value even at the event of a conflict: [2K[0G  ․ atom get should return the last set value even at the event of a conflict
     atom set should change the state to contain the "to" value, given that the "from" value matches the current state: [2K[0G  ․ atom set should change the state to contain the "to" value, given that the "from" value matches the current state
     atom set should report a conflict if the "from" value does not match: [2K[0G  ․ atom set should report a conflict if the "from" value does not match
+    atom get_all should return all possible values: [2K[0G  ․ atom get_all should return all possible values
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
     composite patch unapply should unapply the given patches in reverse order: [2K[0G  ․ composite patch unapply should unapply the given patches in reverse order
@@ -71,5 +73,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  71 passing (96 ms)
+  73 passing (109 ms)
 
