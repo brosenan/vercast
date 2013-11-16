@@ -47,6 +47,8 @@
     HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
     HashedApp branchQuery should perform a query on the tip of the given branch: [2K[0G  ․ HashedApp branchQuery should perform a query on the tip of the given branch
     HashedApp branchTrans should perform a transition, updating the tip of the branch: [2K[0G  ․ HashedApp branchTrans should perform a transition, updating the tip of the branch
+    inverse patch patch should unapply the underlying patch: [2K[0G  ․ inverse patch patch should unapply the underlying patch
+    inverse patch unpatch should apply the undelying patch: [2K[0G  ․ inverse patch unpatch should apply the undelying patch
     VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method
@@ -65,5 +67,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  65 passing (824 ms)
+  67 passing (859 ms)
 

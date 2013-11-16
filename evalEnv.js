@@ -28,6 +28,12 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    trans : function(s1, patch, cb) {
 		self.trans(s1, patch, cb);
 	    },
+	    apply: function(s1, patch, cb) {
+		self.apply(s1, patch, cb);
+	    },
+	    unapply: function(s1, patch, cb) {
+		self.unapply(s1, patch, cb);
+	    },
 	};
     }
 

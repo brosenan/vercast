@@ -33,6 +33,9 @@
      - [query](#hashedapp-query)
      - [branchQuery](#hashedapp-branchquery)
      - [branchTrans](#hashedapp-branchtrans)
+   - [inverse patch](#inverse-patch)
+     - [patch](#inverse-patch-patch)
+     - [unpatch](#inverse-patch-unpatch)
    - [VCObj](#vcobj)
      - [createObject(cls, s0, cb(err, h0))](#vcobj-createobjectcls-s0-cberr-h0)
      - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
@@ -822,6 +825,34 @@ should perform a transition, updating the tip of the branch.
 util.seq([
 		function(_) { app.branchTrans(branch, {type: 'add', amount: 2}, 3, _); },
 		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 2); _(); },
+], done)();
+```
+
+<a name="inverse-patch"></a>
+# inverse patch
+<a name="inverse-patch-patch"></a>
+## patch
+should unapply the underlying patch.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, -2); _(); },
+], done)();
+```
+
+<a name="inverse-patch-unpatch"></a>
+## unpatch
+should apply the undelying patch.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.unapply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 2); _(); },
 ], done)();
 ```
