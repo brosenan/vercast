@@ -25,6 +25,22 @@ describe('EvalEnv', function(){
 		function(_) { assert.deepEqual(this.s0, {_type: 'foo', bar: 3, baz: 2}); _(); },
 	    ], done)();
 	});
+	it('should pass the evaluator as the "this" of the called method', function(done){
+	    var evaluators = {
+		foo: {
+		    init: function(args, ctx) {
+			ctx.ret({val: this.def});
+		    },
+		    def: 100,
+		},
+	    };
+	    var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+	    util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
+		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
+		function(_) { assert.equal(this.s0.val, 100); _(); },
+	    ], done)();
+	});
     });
     describe('apply(s1, patch, cb(err, s2, res, eff, conf))', function(){
 	it('should apply patch to s1 by invoking the evaluator\'s apply method, to retrieve s2 and res', function(done){
@@ -67,6 +83,27 @@ describe('EvalEnv', function(){
 		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
 		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: -2});
 			      assert.equal(this.res, 0); _();},
+	    ], done)();
+	});
+	it('should pass the evaluator as the "this" of the called method', function(done){
+	    var evaluators = {
+		foo: {
+		    init: function(args, ctx) {
+			ctx.ret({val: 0});
+		    },
+		    apply: function(s1, patch, ctx) {
+			s1.val += this.amount;
+			ctx.ret(s1);
+		    },
+		    amount: 50,
+		},
+	    };
+	    var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+	    util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {}, _.to('s1')); },
+		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
+		function(_) { assert.equal(this.s1.val, 50); _(); },
 	    ], done)();
 	});
     });

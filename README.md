@@ -98,14 +98,14 @@ util.seq([
 should initially return 0.
 
 ```js
-var counter = new Counter();
-var s0 = counter.getInitialState();
 util.seq([
-		function(_) { counter.apply(s0, {type: 'get'}, _.to('s1', 'val', 'sf')); },
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'get'}, _.to('s1', 'val')); },
+		function(_) { hashDB.hash(this.s0, _.to('h0')); },
+		function(_) { hashDB.hash(this.s1, _.to('h1')); },
 		function(_) {
-		    assert.deepEqual(this.s1, s0, 'get should not change the state');
+		    assert.deepEqual(this.h1, this.h0, 'get should not change the state');
 		    assert.equal(this.val, 0);
-		    assert.equal(this.sf, true);
 		    _();
 		},
 ], done)();
@@ -116,11 +116,10 @@ util.seq([
 should increase the counter value by the given amount.
 
 ```js
-var counter = new Counter();
-var s0 = counter.getInitialState();
 util.seq([
-		function(_) { counter.apply(s0, {type: 'add', amount: 2}, _.to('s1')); },
-		function(_) { counter.apply(this.s1, {type: 'get'}, _.to('s2', 'val')); },
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'add', amount: 2}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, _.to('s2', 'val')); },
 		function(_) {
 		    assert.equal(this.val, 2);
 		    _();
@@ -131,17 +130,11 @@ util.seq([
 should be reversible.
 
 ```js
-var counter = new Counter();
-var s0 = counter.getInitialState();
-var s0Copy = JSON.parse(JSON.stringify(s0));
-var patch = {type: 'add', amount: 2};
 util.seq([
-		function(_) { counter.apply(s0, patch, _.to('s1')); },
-		function(_) { counter.apply(this.s1, counter.inv(patch), _.to('s0')); },
-		function(_) {
-		    assert.deepEqual(this.s0, s0Copy);
-		    _();
-		},
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.unapply(this.s0, {_type: 'add', amount: 2}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, _.to('s2', 'res')); },
+		function(_) { assert.equal(this.res, -2); _(); },
 ], done)();
 ```
 
@@ -246,6 +239,25 @@ util.seq([
 ], done)();
 ```
 
+should pass the evaluator as the "this" of the called method.
+
+```js
+var evaluators = {
+		foo: {
+		    init: function(args, ctx) {
+			ctx.ret({val: this.def});
+		    },
+		    def: 100,
+		},
+};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
+		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
+		function(_) { assert.equal(this.s0.val, 100); _(); },
+], done)();
+```
+
 <a name="evalenv-applys1-patch-cberr-s2-res-eff-conf"></a>
 ## apply(s1, patch, cb(err, s2, res, eff, conf))
 should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res.
@@ -293,6 +305,30 @@ util.seq([
 		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
 		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: -2});
 			      assert.equal(this.res, 0); _();},
+], done)();
+```
+
+should pass the evaluator as the "this" of the called method.
+
+```js
+var evaluators = {
+		foo: {
+		    init: function(args, ctx) {
+			ctx.ret({val: 0});
+		    },
+		    apply: function(s1, patch, ctx) {
+			s1.val += this.amount;
+			ctx.ret(s1);
+		    },
+		    amount: 50,
+		},
+};
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {}, _.to('s1')); },
+		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
+		function(_) { assert.equal(this.s1.val, 50); _(); },
 ], done)();
 ```
 

@@ -11,7 +11,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    throw new Error('Evaluator ' + evaluator + ' does not define in init method');
 	}
 	util.seq([
-	    function(_) { initMethod(args, createContext(_.to('s0'))); },
+	    function(_) { initMethod.call(evaluators[evaluator], args, createContext(_.to('s0'))); },
 	    function(_) { this.s0._type = evaluator;
 			  hashDB.hash(this.s0, cb); },
 	], cb)();
@@ -21,6 +21,9 @@ module.exports = function(hashDB, opCache, evaluators) {
 	return {
 	    ret: function(state, res) {
 		cb(undefined, state, res);
+	    },
+	    err : function(err) {
+		cb(err);
 	    },
 	};
     }
@@ -40,7 +43,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 	if(!method) {
 	    throw new Error('Evaluator ' + state._type + ' does not provide a method named ' + methodName);
 	}
-	return method;
+	return function() { return method.apply(ev, arguments); };
     }
 
     this.trans = function(s1, patch, cb) {

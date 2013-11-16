@@ -1,35 +1,44 @@
-module.exports = function() {
-    this.getInitialState = function() { return {val: 0}; }
-    this.apply = function(s0, patch, _) {
-	if(!patch.type) {
-	    console.log(s0);
-	    _(undefined, s0, undefined, true);
-	    return;
-	}
-	var methodName = 'do_' + patch.type;
-	if(this[methodName]) {
-	    this[methodName](s0, patch, _);
-	} else {
-	    _(new Error('Unsupported patch: ' + patch.type));
-	}
+exports.init= function(args, ctx) { 
+    ctx.ret({val: 0}); 
+};
+
+exports.apply = function(s0, patch, ctx) {
+    var methodName = 'do_' + patch._type;
+    if(this[methodName]) {
+	this[methodName](s0, patch, ctx);
+    } else {
+	ctx.err(new Error('Unsupported patch: ' + patch._type));
     }
-    this.do_get = function(s, patch, _) {
-	_(undefined, s, s.val, true);
-    };
-    this.do_add = function(s, patch, _) {
-	s.val += patch.amount;
-	_(undefined, s, undefined, true);
-    };
-    this.inv = function(patch) {
-	var methodName = 'inv_' + patch.type;
-	if(this[methodName]) {
-	    return this[methodName](patch);
-	} else {
-	    return {};
-	}
+}
+
+exports.unapply = function(s0, patch, ctx) {
+    var methodName = 'undo_' + patch._type;
+    if(this[methodName]) {
+	this[methodName](s0, patch, ctx);
+    } else {
+	return this.apply(s0, patch, ctx);
     }
-    this.inv_add = function(patch) {
-	patch.amount *= -1;
-	return patch;
+};
+exports.do_get = function(s, patch, ctx) {
+    ctx.ret(s, s.val);
+};
+exports.do_add = function(s, patch, ctx) {
+    s.val += patch.amount;
+    ctx.ret(s);
+};
+exports.undo_add = function(s, patch, ctx) {
+    s.val -= patch.amount;
+    ctx.ret(s);
+};
+exports.inv = function(patch) {
+    var methodName = 'inv_' + patch.type;
+    if(this[methodName]) {
+	return this[methodName](patch);
+    } else {
+	return {};
     }
+}
+exports.inv_add = function(patch) {
+    patch.amount *= -1;
+    return patch;
 }
