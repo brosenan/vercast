@@ -4,6 +4,8 @@
      - [apply](#application-apply)
      - [inv](#application-inv)
    - [composite patch](#composite-patch)
+     - [apply](#composite-patch-apply)
+     - [unapply](#composite-patch-unapply)
    - [counter](#counter)
      - [get](#counter-get)
      - [add](#counter-add)
@@ -96,19 +98,21 @@ util.seq([
 
 <a name="composite-patch"></a>
 # composite patch
+<a name="composite-patch-apply"></a>
+## apply
 should apply the given patches one by one.
 
 ```js
 util.seq([
-    function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-    function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-	{_type: 'add', amount: 2},
-	{_type: 'add', amount: 2},
-	{_type: 'add', amount: 2},
-	{_type: 'add', amount: 2},
-    ]}, _.to('s1')); },
-    function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
-    function(_) { assert.equal(this.res, 8); _(); },
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
+		    {_type: 'add', amount: 2},
+		    {_type: 'add', amount: 2},
+		    {_type: 'add', amount: 2},
+		    {_type: 'add', amount: 2},
+		]}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 8); _(); },
 ], done)();
 ```
 
@@ -116,14 +120,31 @@ should return an array of the underlying results.
 
 ```js
 util.seq([
-    function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-    function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-	{_type: 'add', amount: 2},
-	{_type: 'get'},
-	{_type: 'add', amount: 2},
-	{_type: 'get'},
-    ]}, _.to('s1', 'res')); },
-    function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
+		    {_type: 'add', amount: 2},
+		    {_type: 'get'},
+		    {_type: 'add', amount: 2},
+		    {_type: 'get'},
+		]}, _.to('s1', 'res')); },
+		function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
+], done)();
+```
+
+<a name="composite-patch-unapply"></a>
+## unapply
+should unapply the given patches in reverse order.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.unapply(this.s0, {_type: 'comp', patches: [
+		    {_type: 'add', amount: 2},
+		    {_type: 'get'},
+		    {_type: 'add', amount: 3},
+		    {_type: 'get'},
+		]}, _.to('s1', 'res')); },
+		function(_) { assert.deepEqual(this.res, [0, undefined, -3, undefined]); _(); },
 ], done)();
 ```
 

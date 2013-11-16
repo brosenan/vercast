@@ -12,3 +12,8 @@ exports.apply = function(s1, patch, ctx) {
 	function(_) { ctx.ret(this.s3, [this.r1].concat(this.r2)); },
     ], ctx.err)();
 };
+exports.unapply = function(s1, patch, ctx) {
+    var unpatch = patch;
+    unpatch.patches = patch.patches.reverse().map(function(p) { return {_type: 'inv', patch: p}; });
+    return this.apply(s1, unpatch, ctx);
+};
