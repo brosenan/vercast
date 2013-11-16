@@ -59,7 +59,5 @@ describe('composite patch', function(){
 		function(_) { assert.deepEqual(this.res, [0, undefined, -3, undefined]); _(); },
 	    ], done)();
 	});
-
     });
-
 });

@@ -3,6 +3,9 @@
      - [initialState](#application-initialstate)
      - [apply](#application-apply)
      - [inv](#application-inv)
+   - [atom](#atom)
+     - [init](#atom-init)
+     - [set](#atom-set)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
      - [unapply](#composite-patch-unapply)
@@ -93,6 +96,33 @@ util.seq([
 		function(_) { assert.equal(this.inv.type, 'add');
 			      assert.equal(this.inv.amount, -2); 
 			      _();},
+], done)();
+```
+
+<a name="atom"></a>
+# atom
+<a name="atom-init"></a>
+## init
+should create an atom with the given value.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
+		function(_) { assert.deepEqual(this.s0, {_type: 'atom', val: 'foo'}); _(); },
+], done)();
+```
+
+<a name="atom-set"></a>
+## set
+should change the state to contain the "to" value, given that the "from" value matches the current state.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
+		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
+		function(_) { assert.deepEqual(this.s1, {_type: 'atom', val: 'bar'}); _(); },
 ], done)();
 ```
 
