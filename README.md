@@ -4,7 +4,7 @@
      - [apply](#application-apply)
      - [inv](#application-inv)
    - [atom](#atom)
-     - [init](#atom-init)
+     - [get](#atom-get)
      - [set](#atom-set)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
@@ -101,15 +101,15 @@ util.seq([
 
 <a name="atom"></a>
 # atom
-<a name="atom-init"></a>
-## init
-should create an atom with the given value.
+<a name="atom-get"></a>
+## get
+should return the atom's value.
 
 ```js
 util.seq([
 		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
-		function(_) { assert.deepEqual(this.s0, {_type: 'atom', val: 'foo'}); _(); },
+		function(_) { evalEnv.query(this.s0, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'foo'); _(); },
 ], done)();
 ```
 
@@ -121,8 +121,18 @@ should change the state to contain the "to" value, given that the "from" value m
 util.seq([
 		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
-		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
-		function(_) { assert.deepEqual(this.s1, {_type: 'atom', val: 'bar'}); _(); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+should report a conflict if the "from" value does not match.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'bar', to: 'baz'}, _.to('s1', 'res', 'eff', 'conf')); },
+		function(_) { assert(this.conf, 'A conflict should be reported'); _(); },
 ], done)();
 ```
 

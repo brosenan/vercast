@@ -16,12 +16,12 @@ describe('atom', function(){
 	hashDB = new HashDB(kvs);
 	evalEnv = new EvalEnv(hashDB, kvs, evaluators);
     });
-    describe('init', function(){
-	it('should create an atom with the given value', function(done){
+    describe('get', function(){
+	it('should return the atom\'s value', function(done){
 	    util.seq([
 		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
-		function(_) { assert.deepEqual(this.s0, {_type: 'atom', val: 'foo'}); _(); },
+		function(_) { evalEnv.query(this.s0, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'foo'); _(); },
 	    ], done)();
 	});
     });
@@ -30,11 +30,16 @@ describe('atom', function(){
 	    util.seq([
 		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
-		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
-		function(_) { assert.deepEqual(this.s1, {_type: 'atom', val: 'bar'}); _(); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
 	    ], done)();
 	});
-
+	it('should report a conflict if the "from" value does not match', function(done){
+	    util.seq([
+		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'bar', to: 'baz'}, _.to('s1', 'res', 'eff', 'conf')); },
+		function(_) { assert(this.conf, 'A conflict should be reported'); _(); },
+	    ], done)();
+	});
     });
-
 });

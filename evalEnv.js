@@ -20,7 +20,7 @@ module.exports = function(hashDB, opCache, evaluators) {
     function createContext(cb) {
 	return {
 	    ret: function(state, res) {
-		cb(undefined, state, res);
+		cb(undefined, state, res, undefined, this.conflicting);
 	    },
 	    err : function(err) {
 		cb(err);
@@ -34,6 +34,10 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    unapply: function(s1, patch, cb) {
 		self.unapply(s1, patch, cb);
 	    },
+	    conflict: function() {
+		this.conflicting = true;
+	    },
+	    conflicting: false,
 	};
     }
 
@@ -41,6 +45,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 	util.seq([
 	    function(_) { hashDB.unhash(h1, _.to('s1')); },
 	    function(_) { var method = getMethod(patch, 'apply') || getMethod(this.s1, 'apply');
+			  if(!method) { throw new Error('Cannot apply patch ' + patch._type + ' on object of type ' + this.s1._type); }
 			  method(this.s1, patch, createContext(cb)); },
 	], cb)();
     };
