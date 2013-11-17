@@ -106,4 +106,17 @@ describe('directory', function(){
 	});
 
     });
+    describe('get_hash', function(){
+	it('should return the hash of the child at the given path', function(done){
+	    util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('child')); },
+		function(_) { evalEnv.query(this.child, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+	    ], done)();
+	});
+
+    });
+
 });

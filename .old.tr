@@ -22,6 +22,7 @@
     directory delete should report a conflic if the removed child state does not match the given hash: [2K[0G  ․ directory delete should report a conflic if the removed child state does not match the given hash
     directory delete should re-create a child if unapplied: [2K[0G  ․ directory delete should re-create a child if unapplied
     directory delete should conflict when unapplied if the child already exists: [2K[0G  ․ directory delete should conflict when unapplied if the child already exists
+    directory get_hash should return the hash of the child at the given path: [2K[0G  ․ directory get_hash should return the hash of the child at the given path
     DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met: [2K[0G  ․ DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
     DummyBranch as Branch checkedUpdate should return the tip state before modification: [2K[0G  ․ DummyBranch as Branch checkedUpdate should return the tip state before modification
     DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value: [2K[0G  ․ DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
@@ -81,5 +82,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  81 passing (120 ms)
+  82 passing (91 ms)
 

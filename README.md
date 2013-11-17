@@ -16,6 +16,7 @@
    - [directory](#directory)
      - [create](#directory-create)
      - [delete](#directory-delete)
+     - [get_hash](#directory-get_hash)
    - [DummyBranch](#dummybranch)
      - [as Branch](#dummybranch-as-branch)
        - [checkedUpdate](#dummybranch-as-branch-checkedupdate)
@@ -373,6 +374,20 @@ util.seq([
 		function(_) { evalEnv.unapply(this.s1, {_type: 'delete', _path: ['foo'], hash: this.child}, _.to('s2', 'res', 'eff', 'conf')); },
 		function(_) { assert(this.conf, 'should be conflicting'); _(); },
 		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+<a name="directory-get_hash"></a>
+## get_hash
+should return the hash of the child at the given path.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('child')); },
+		function(_) { evalEnv.query(this.child, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 ], done)();
 ```
