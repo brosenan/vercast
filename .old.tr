@@ -11,6 +11,8 @@
     atom get_all should return all possible values: [2K[0G  ․ atom get_all should return all possible values
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
+    composite patch apply weak should not apply conflicting patches: [2K[0G  ․ composite patch apply weak should not apply conflicting patches
+    composite patch apply weak should report the conflicting patch in the results: [2K[0G  ․ composite patch apply weak should report the conflicting patch in the results
     composite patch unapply should unapply the given patches in reverse order: [2K[0G  ․ composite patch unapply should unapply the given patches in reverse order
     counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
@@ -84,5 +86,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  84 passing (97 ms)
+  86 passing (98 ms)
 

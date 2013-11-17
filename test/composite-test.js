@@ -8,6 +8,8 @@ var evaluators = {
     counter: require('../counter.js'),
     comp: require('../composite.js'),
     inv: require('../inv.js'),
+    dir: require('../dir.js'),
+    atom: require('../atom.js'),
 };
 
 describe('composite patch', function(){
@@ -44,6 +46,35 @@ describe('composite patch', function(){
 		]}, _.to('s1', 'res')); },
 		function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
 	    ], done)();
+	});
+	describe('weak', function(){
+	    it('should not apply conflicting patches', function(done){
+		util.seq([
+		    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
+			{_type: 'set', from: 'foo', to: 'bar'},
+			{_type: 'set', from: 'foo', to: 'baz'},
+		    ]}, _.to('s1')); },
+		    function(_) { evalEnv.query(this.s1, {_type: 'get_all'}, _.to('res')); },
+		    // Only the non-conflicting change should be performed
+		    function(_) { assert.deepEqual(this.res, ['bar']); _(); },
+		], done)();
+	    });
+	    it('should report the conflicting patch in the results', function(done){
+		util.seq([
+		    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+		    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
+			{_type: 'set', from: 'foo', to: 'bar'},
+			{_type: 'set', from: 'foo', to: 'baz'},
+		    ]}, _.to('s1', 'res')); },
+		    function(_) { assert.deepEqual(this.res, [undefined, 
+							      {$badPatch: 
+							       {_type: 'set', 
+								from: 'foo', 
+								to: 'baz'}}]); _(); },
+		], done)();
+	    });
+
 	});
     });
     describe('unapply', function(){

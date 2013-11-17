@@ -9,6 +9,7 @@
      - [get_all](#atom-get_all)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
+       - [weak](#composite-patch-apply-weak)
      - [unapply](#composite-patch-unapply)
    - [counter](#counter)
      - [get](#counter-get)
@@ -210,6 +211,40 @@ util.seq([
 		    {_type: 'get'},
 		]}, _.to('s1', 'res')); },
 		function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
+], done)();
+```
+
+<a name="composite-patch-apply-weak"></a>
+### weak
+should not apply conflicting patches.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
+	{_type: 'set', from: 'foo', to: 'bar'},
+	{_type: 'set', from: 'foo', to: 'baz'},
+    ]}, _.to('s1')); },
+    function(_) { evalEnv.query(this.s1, {_type: 'get_all'}, _.to('res')); },
+    // Only the non-conflicting change should be performed
+    function(_) { assert.deepEqual(this.res, ['bar']); _(); },
+], done)();
+```
+
+should report the conflicting patch in the results.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
+	{_type: 'set', from: 'foo', to: 'bar'},
+	{_type: 'set', from: 'foo', to: 'baz'},
+    ]}, _.to('s1', 'res')); },
+    function(_) { assert.deepEqual(this.res, [undefined, 
+					      {$badPatch: 
+					       {_type: 'set', 
+						from: 'foo', 
+						to: 'baz'}}]); _(); },
 ], done)();
 ```
 
