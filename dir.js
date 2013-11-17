@@ -66,6 +66,12 @@ exports.do_delete = function(name, state, patch, ctx) {
     ctx.ret(state);
 };
 
+exports.undo_delete = function(name, state, patch, ctx) {
+    if(state[name]) ctx.conflict();
+    state[name] = patch.hash;
+    ctx.ret(state);
+};
+
 exports.do_get_hash = function(name, state, patch, ctx) {
     ctx.ret(state, state[name]);
 };

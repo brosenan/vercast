@@ -349,6 +349,34 @@ util.seq([
 ], done)();
 ```
 
+should re-create a child if unapplied.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('child')); },
+		function(_) { hashDB.hash(this.child, _.to('child')); },
+		function(_) { evalEnv.unapply(this.s0, {_type: 'delete', _path: ['foo'], hash: this.child}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get', _path: ['foo']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+should conflict when unapplied if the child already exists.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('child')); },
+		function(_) { hashDB.hash(this.child, _.to('child')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: '!@#!@#'}}, _.to('s1')); },
+		function(_) { evalEnv.unapply(this.s1, {_type: 'delete', _path: ['foo'], hash: this.child}, _.to('s2', 'res', 'eff', 'conf')); },
+		function(_) { assert(this.conf, 'should be conflicting'); _(); },
+		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
 <a name="dummybranch"></a>
 # DummyBranch
 <a name="dummybranch-as-branch"></a>
