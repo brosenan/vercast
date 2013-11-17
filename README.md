@@ -292,6 +292,33 @@ util.seq([
 ], done)();
 ```
 
+should delete a child when unapplied.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+		function(_) { evalEnv.unapply(this.s1, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s2', 'res', 'eff', 'conf')); },
+		function(_) { assert(!this.conf, 'should not be conflicting'); _(); },
+		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _); },
+], function(err) {
+		assert(err, 'an error should be emitted');
+		done((err.message != 'Invalid path: foo' && err) || undefined);
+})();
+```
+
+should report a conflict when unpatched if the child state does not match the construction parameters.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+		function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
+		function(_) { evalEnv.unapply(this.s2, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s3', 'res', 'eff', 'conf')); },
+		function(_) { assert(this.conf, 'should be conflicting'); _(); },
+], done)();
+```
+
 <a name="directory-delete"></a>
 ## delete
 should remove the object at the given path from the directory.
@@ -300,13 +327,26 @@ should remove the object at the given path from the directory.
 util.seq([
 		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.trans(this.s1, {_type: 'delete', _path: ['foo']}, _.to('s2')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('childHash')); },
+		function(_) { evalEnv.trans(this.s1, {_type: 'delete', _path: ['foo'], hash: this.childHash}, _.to('s2')); },
 		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _); },
 ], function(err) {
 		assert(err, 'an error should be emitted');
-		assert.equal(err.message, 'Invalid path: foo');
-		done();
+		done((err.message != 'Invalid path: foo' && err) || undefined);
 })();
+```
+
+should report a conflic if the removed child state does not match the given hash.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('beforeChange')); },
+		function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
+		function(_) { evalEnv.trans(this.s2, {_type: 'delete', _path: ['foo'], hash: this.beforeChange}, _.to('s3', 'res', 'eff', 'conf')); },
+		function(_) { assert(this.conf, 'should be conflicting'); _(); },
+], done)();
 ```
 
 <a name="dummybranch"></a>

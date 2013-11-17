@@ -16,7 +16,10 @@
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
     directory should propagate any patches it does not handle itself to child objects: [2K[0G  ․ directory should propagate any patches it does not handle itself to child objects
     directory create should create a child node using the given evaluator type and arguments: [2K[0G  ․ directory create should create a child node using the given evaluator type and arguments
+    directory create should delete a child when unapplied: [2K[0G  ․ directory create should delete a child when unapplied
+    directory create should report a conflict when unpatched if the child state does not match the construction parameters: [2K[0G  ․ directory create should report a conflict when unpatched if the child state does not match the construction parameters
     directory delete should remove the object at the given path from the directory: [2K[0G  ․ directory delete should remove the object at the given path from the directory
+    directory delete should report a conflic if the removed child state does not match the given hash: [2K[0G  ․ directory delete should report a conflic if the removed child state does not match the given hash
     DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met: [2K[0G  ․ DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
     DummyBranch as Branch checkedUpdate should return the tip state before modification: [2K[0G  ․ DummyBranch as Branch checkedUpdate should return the tip state before modification
     DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value: [2K[0G  ․ DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
@@ -76,5 +79,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  76 passing (114 ms)
+  79 passing (117 ms)
 
