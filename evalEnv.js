@@ -38,6 +38,12 @@ module.exports = function(hashDB, opCache, evaluators) {
 		this.conflicting = true;
 	    },
 	    conflicting: false,
+	    init: function(evaluator, args, cb) {
+		self.init(evaluator, args, cb);
+	    },
+	    hash: function(obj, cb) {
+		hashDB.hash(obj, cb);
+	    },
 	};
     }
 
