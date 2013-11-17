@@ -14,7 +14,9 @@
     counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
+    directory should propagate any patches it does not handle itself to child objects: [2K[0G  ․ directory should propagate any patches it does not handle itself to child objects
     directory create should create a child node using the given evaluator type and arguments: [2K[0G  ․ directory create should create a child node using the given evaluator type and arguments
+    directory delete should remove the object at the given path from the directory: [2K[0G  ․ directory delete should remove the object at the given path from the directory
     DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met: [2K[0G  ․ DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
     DummyBranch as Branch checkedUpdate should return the tip state before modification: [2K[0G  ․ DummyBranch as Branch checkedUpdate should return the tip state before modification
     DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value: [2K[0G  ․ DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
@@ -74,5 +76,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  74 passing (112 ms)
+  76 passing (114 ms)
 

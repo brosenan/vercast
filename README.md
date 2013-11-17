@@ -15,6 +15,7 @@
      - [add](#counter-add)
    - [directory](#directory)
      - [create](#directory-create)
+     - [delete](#directory-delete)
    - [DummyBranch](#dummybranch)
      - [as Branch](#dummybranch-as-branch)
        - [checkedUpdate](#dummybranch-as-branch-checkedupdate)
@@ -266,6 +267,18 @@ util.seq([
 
 <a name="directory"></a>
 # directory
+should propagate any patches it does not handle itself to child objects.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+    function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+    function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
+    function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
+    function(_) { assert.equal(this.res, 'baz'); _(); },
+], done)();
+```
+
 <a name="directory-create"></a>
 ## create
 should create a child node using the given evaluator type and arguments.
@@ -277,6 +290,23 @@ util.seq([
 		function(_) { evalEnv.query(this.s1, {_type: 'get', _path: ['foo']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 ], done)();
+```
+
+<a name="directory-delete"></a>
+## delete
+should remove the object at the given path from the directory.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
+		function(_) { evalEnv.trans(this.s1, {_type: 'delete', _path: ['foo']}, _.to('s2')); },
+		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _); },
+], function(err) {
+		assert(err, 'an error should be emitted');
+		assert.equal(err.message, 'Invalid path: foo');
+		done();
+})();
 ```
 
 <a name="dummybranch"></a>

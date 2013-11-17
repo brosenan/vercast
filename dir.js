@@ -31,3 +31,8 @@ exports.do_create = function(name, state, patch, ctx) {
 		      ctx.ret(state); },
     ], ctx.err)();
 };
+
+exports.do_delete = function(name, state, patch, ctx) {
+    delete state[name];
+    ctx.ret(state);
+};
