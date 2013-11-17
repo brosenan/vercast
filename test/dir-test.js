@@ -118,5 +118,4 @@ describe('directory', function(){
 	});
 
     });
-
 });

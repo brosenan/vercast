@@ -19,6 +19,12 @@ exports.do_set = function(state, p, ctx) {
     state.vals.unshift(p.to);
     ctx.ret(state);
 };
+exports.undo_set = function(state, p, ctx) {
+    var to = p.from;
+    p.from = p.to;
+    p.to = to;
+    this.do_set(state, p, ctx);
+};
 
 exports.do_get = function(state, p, ctx) {
     ctx.ret(state, state.vals[0]);

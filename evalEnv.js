@@ -26,13 +26,25 @@ module.exports = function(hashDB, opCache, evaluators) {
 		cb(err);
 	    },
 	    trans : function(s1, patch, cb) {
-		self.trans(s1, patch, cb);
+		var ctx = this;
+		self.trans(s1, patch, function(err, state, res, eff, conf) {
+		    ctx.conflicting = ctx.conflicting || conf;
+		    cb(err, state, res, eff, ctx.conflicting);
+		});
 	    },
 	    apply: function(s1, patch, cb) {
-		self.apply(s1, patch, cb);
+		var ctx = this;
+		self.apply(s1, patch, function(err, state, res, eff, conf) {
+		    ctx.conflicting = ctx.conflicting || conf;
+		    cb(err, state, res, eff, ctx.conflicting);
+		});
 	    },
 	    unapply: function(s1, patch, cb) {
-		self.unapply(s1, patch, cb);
+		var ctx = this;
+		self.unapply(s1, patch, function(err, state, res, eff, conf) {
+		    ctx.conflicting = ctx.conflicting || conf;
+		    cb(err, state, res, eff, ctx.conflicting);
+		});
 	    },
 	    conflict: function() {
 		this.conflicting = true;

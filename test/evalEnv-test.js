@@ -106,6 +106,23 @@ describe('EvalEnv', function(){
 		function(_) { assert.equal(this.s1.val, 50); _(); },
 	    ], done)();
 	});
+	it('should report a conflict if a propagated patch conflicted', function(done){
+	    var evaluators = {
+		atom: require('../atom.js'),
+		dir: require('../dir.js'),
+		comp: require('../composite.js'),
+	    };
+
+	    var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+	    util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'comp', patches: [
+		    {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}},
+		    {_type: 'set', _path: ['foo'], from: 'baz', to: 'bat'}, // This is conflicting
+		]}, _.to('s1', 'res', 'eff', 'conf')); },
+		function(_) { assert(this.conf, 'should be conflicting'); _(); },
+	    ], done)();
+	});
     });
     describe('trans(h1, patch, cb(err, h2, res, eff, conf))', function(){
 	it('should apply the patch', function(done){
