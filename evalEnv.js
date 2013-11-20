@@ -32,16 +32,9 @@ module.exports = function(hashDB, opCache, evaluators) {
 		    cb(err, state, res, eff, ctx.conflicting);
 		});
 	    },
-	    apply: function(s1, patch, cb) {
+	    apply: function(s1, patch, unapply, cb) {
 		var ctx = this;
-		self.apply(s1, patch, function(err, state, res, eff, conf) {
-		    ctx.conflicting = ctx.conflicting || conf;
-		    cb(err, state, res, eff, ctx.conflicting);
-		});
-	    },
-	    unapply: function(s1, patch, cb) {
-		var ctx = this;
-		self.unapply(s1, patch, function(err, state, res, eff, conf) {
+		self.apply(s1, patch, unapply, function(err, state, res, eff, conf) {
 		    ctx.conflicting = ctx.conflicting || conf;
 		    cb(err, state, res, eff, ctx.conflicting);
 		});
@@ -59,12 +52,12 @@ module.exports = function(hashDB, opCache, evaluators) {
 	};
     }
 
-    this.apply = function(h1, patch, cb) {
+    this.apply = function(h1, patch, unapply, cb) {
 	util.seq([
 	    function(_) { hashDB.unhash(h1, _.to('s1')); },
 	    function(_) { var method = getMethod(patch, 'apply') || getMethod(this.s1, 'apply');
 			  if(!method) { throw new Error('Cannot apply patch ' + patch._type + ' on object of type ' + this.s1._type); }
-			  method(this.s1, patch, createContext(cb)); },
+			  method(this.s1, patch, unapply, createContext(cb)); },
 	], cb)();
     };
 
@@ -86,7 +79,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 			  opCache.check(this.key, _.to('cached')); },
 	    function(_) { if(this.cached) { cb(undefined, this.cached.s, undefined, this.cached.eff, false); }
 			  else { _(); } },
-	    function(_) { self.apply(s1, patch, _.to('s2', 'res', 'eff', 'conf')); },
+	    function(_) { self.apply(s1, patch, false, _.to('s2', 'res', 'eff', 'conf')); },
 	    function(_) { hashDB.hash(this.s2, _.to('h2')); },
 	    function(_) { 
 		if(!this.conf && typeof(this.res) == 'undefined') { 
@@ -99,7 +92,7 @@ module.exports = function(hashDB, opCache, evaluators) {
     this.query = function(s, q, cb) {
 	util.seq([
 	    function(_) { hashDB.hash(s, _.to('before')); },
-	    function(_) { self.apply(s, q, _.to('s', 'res')); },
+	    function(_) { self.apply(s, q, false, _.to('s', 'res')); },
 	    function(_) { hashDB.hash(this.s, _.to('after')); },
 	    function(_) { if(this.before.$hash$ != this.after.$hash$) { 
 		throw new Error('Query patch ' + q._type + ' changed object state');
@@ -107,12 +100,4 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    function(_) { cb(undefined, this.res); },
 	], cb)();
     }
-
-    this.unapply = function(h1, patch, cb) {
-	util.seq([
-	    function(_) { hashDB.unhash(h1, _.to('s1')); },
-	    function(_) { var unapplyMethod = getMethod(patch, 'unapply') || getMethod(this.s1, 'unapply');
-			  unapplyMethod(this.s1, patch, createContext(cb)); },
-	], cb)();
-    };
 }

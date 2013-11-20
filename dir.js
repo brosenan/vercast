@@ -4,10 +4,10 @@ exports.init = function(args, ctx) {
     ctx.ret({});
 };
 
-exports.apply = function(state, patch, ctx) {
+exports.apply = function(state, patch, unapply, ctx) {
     var name = patch._path.shift();
     if(patch._path.length == 0) {
-	var methodName = 'do_' + patch._type;
+	var methodName = (unapply ? 'undo_' : 'do_') + patch._type;
 	if(this[methodName]) {
 	    return this[methodName](name, state, patch, ctx);
 	}
@@ -16,26 +16,7 @@ exports.apply = function(state, patch, ctx) {
 	throw new Error('Invalid path: ' + name);
     }
     util.seq([
-	function(_) { ctx.apply(state[name], patch, _.to('child', 'res')); },
-	function(_) { ctx.hash(this.child, _.to('child')); },
-	function(_) { state[name] = this.child;
-		      ctx.ret(state, this.res); },
-    ], ctx.err)();
-};
-
-exports.unapply = function(state, patch, ctx) {
-    var name = patch._path.shift();
-    if(patch._path.length == 0) {
-	var methodName = 'undo_' + patch._type;
-	if(this[methodName]) {
-	    return this[methodName](name, state, patch, ctx);
-	}
-    }
-    if(!state[name]) {
-	throw new Error('Invalid path: ' + name);
-    }
-    util.seq([
-	function(_) { ctx.unapply(state[name], patch, _.to('child', 'res')); },
+	function(_) { ctx.apply(state[name], patch, unapply, _.to('child', 'res')); },
 	function(_) { ctx.hash(this.child, _.to('child')); },
 	function(_) { state[name] = this.child;
 		      ctx.ret(state, this.res); },

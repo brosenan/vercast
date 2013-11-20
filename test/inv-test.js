@@ -32,7 +32,7 @@ describe('inverse patch', function(){
 	it('should apply the undelying patch', function(done){
 	    util.seq([
 		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, true, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 2); _(); },
 	    ], done)();

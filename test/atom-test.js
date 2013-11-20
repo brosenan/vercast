@@ -54,7 +54,7 @@ describe('atom', function(){
 	it('should invert patches correctly', function(done){
 	    util.seq([
 		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'set', from: 'bar', to: 'foo'}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'set', from: 'bar', to: 'foo'}, true, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 	    ], done)();

@@ -27,10 +27,9 @@
        - [findCommonAncestor](#dummyversiongraph-as-versiongraph-findcommonancestor)
    - [EvalEnv](#evalenv)
      - [init(evaluator, args, cb(err, h0))](#evalenv-initevaluator-args-cberr-h0)
-     - [apply(s1, patch, cb(err, s2, res, eff, conf))](#evalenv-applys1-patch-cberr-s2-res-eff-conf)
+     - [apply(s1, patch, unapply, cb(err, s2, res, eff, conf))](#evalenv-applys1-patch-unapply-cberr-s2-res-eff-conf)
      - [trans(h1, patch, cb(err, h2, res, eff, conf))](#evalenv-transh1-patch-cberr-h2-res-eff-conf)
      - [query(s, q, cb(err, res))](#evalenv-querys-q-cberr-res)
-     - [unapply(s1, patch, cb(err, s2, res, eff, conf))](#evalenv-unapplys1-patch-cberr-s2-res-eff-conf)
    - [HashDB](#hashdb)
      - [hash(obj, cb(err, hash))](#hashdb-hashobj-cberr-hash)
      - [unhash(hash, cb(err, obj))](#hashdb-unhashhash-cberr-obj)
@@ -159,7 +158,7 @@ should invert patches correctly.
 ```js
 util.seq([
 		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'set', from: 'bar', to: 'foo'}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'set', from: 'bar', to: 'foo'}, true, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 ], done)();
@@ -193,7 +192,7 @@ util.seq([
 		    {_type: 'add', amount: 2},
 		    {_type: 'add', amount: 2},
 		    {_type: 'add', amount: 2},
-		]}, _.to('s1')); },
+		]}, false, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 8); _(); },
 ], done)();
@@ -209,7 +208,7 @@ util.seq([
 		    {_type: 'get'},
 		    {_type: 'add', amount: 2},
 		    {_type: 'get'},
-		]}, _.to('s1', 'res')); },
+		]}, false, _.to('s1', 'res')); },
 		function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
 ], done)();
 ```
@@ -234,17 +233,30 @@ util.seq([
 should report the conflicting patch in the results.
 
 ```js
+var confPatch = {_type: 'set', from: 'foo', to: 'baz'};
 util.seq([
     function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
     function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
 	{_type: 'set', from: 'foo', to: 'bar'},
-	{_type: 'set', from: 'foo', to: 'baz'},
+	confPatch,
     ]}, _.to('s1', 'res')); },
-    function(_) { assert.deepEqual(this.res, [undefined, 
-					      {$badPatch: 
-					       {_type: 'set', 
-						from: 'foo', 
-						to: 'baz'}}]); _(); },
+    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatch, orig: undefined}]); _(); },
+], done)();
+```
+
+should provide the original result (with possible conflict information) in the result's "orig" field.
+
+```js
+var confPatch = {_type: 'set', from: 'foo', to: 'baz'};
+var confPatchWrapper = {_type: 'comp', weak: true, patches: [confPatch]};
+util.seq([
+    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
+    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
+	{_type: 'set', from: 'foo', to: 'bar'},
+	confPatchWrapper,
+    ]}, _.to('s1', 'res')); },
+    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatchWrapper, 
+							  orig: [{$badPatch: confPatch, orig: undefined}]}]); _(); },
 ], done)();
 ```
 
@@ -255,12 +267,12 @@ should unapply the given patches in reverse order.
 ```js
 util.seq([
 		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'comp', patches: [
+		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
 		    {_type: 'add', amount: 2},
 		    {_type: 'get'},
 		    {_type: 'add', amount: 3},
 		    {_type: 'get'},
-		]}, _.to('s1', 'res')); },
+		]}, true, _.to('s1', 'res')); },
 		function(_) { assert.deepEqual(this.res, [0, undefined, -3, undefined]); _(); },
 ], done)();
 ```
@@ -274,7 +286,7 @@ should initially return 0.
 ```js
 util.seq([
 		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'get'}, _.to('s1', 'val')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'get'}, false, _.to('s1', 'val')); },
 		function(_) { hashDB.hash(this.s0, _.to('h0')); },
 		function(_) { hashDB.hash(this.s1, _.to('h1')); },
 		function(_) {
@@ -292,8 +304,8 @@ should increase the counter value by the given amount.
 ```js
 util.seq([
 		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'add', amount: 2}, _.to('s1')); },
-		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, _.to('s2', 'val')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'add', amount: 2}, false, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, false, _.to('s2', 'val')); },
 		function(_) {
 		    assert.equal(this.val, 2);
 		    _();
@@ -306,8 +318,8 @@ should be reversible.
 ```js
 util.seq([
 		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'add', amount: 2}, _.to('s1')); },
-		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, _.to('s2', 'res')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'add', amount: 2}, true, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, false, _.to('s2', 'res')); },
 		function(_) { assert.equal(this.res, -2); _(); },
 ], done)();
 ```
@@ -345,7 +357,7 @@ should delete a child when unapplied.
 util.seq([
 		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.unapply(this.s1, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s2', 'res', 'eff', 'conf')); },
+		function(_) { evalEnv.apply(this.s1, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, true, _.to('s2', 'res', 'eff', 'conf')); },
 		function(_) { assert(!this.conf, 'should not be conflicting'); _(); },
 		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _); },
 ], function(err) {
@@ -361,7 +373,7 @@ util.seq([
 		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
 		function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
-		function(_) { evalEnv.unapply(this.s2, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s3', 'res', 'eff', 'conf')); },
+		function(_) { evalEnv.apply(this.s2, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, true, _.to('s3', 'res', 'eff', 'conf')); },
 		function(_) { assert(this.conf, 'should be conflicting'); _(); },
 ], done)();
 ```
@@ -403,7 +415,7 @@ util.seq([
 		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
 		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('child')); },
 		function(_) { hashDB.hash(this.child, _.to('child')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'delete', _path: ['foo'], hash: this.child}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'delete', _path: ['foo'], hash: this.child}, true, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get', _path: ['foo']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 ], done)();
@@ -417,7 +429,7 @@ util.seq([
 		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('child')); },
 		function(_) { hashDB.hash(this.child, _.to('child')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: '!@#!@#'}}, _.to('s1')); },
-		function(_) { evalEnv.unapply(this.s1, {_type: 'delete', _path: ['foo'], hash: this.child}, _.to('s2', 'res', 'eff', 'conf')); },
+		function(_) { evalEnv.apply(this.s1, {_type: 'delete', _path: ['foo'], hash: this.child}, true, _.to('s2', 'res', 'eff', 'conf')); },
 		function(_) { assert(this.conf, 'should be conflicting'); _(); },
 		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
@@ -558,22 +570,22 @@ util.seq([
 ], done)();
 ```
 
-<a name="evalenv-applys1-patch-cberr-s2-res-eff-conf"></a>
-## apply(s1, patch, cb(err, s2, res, eff, conf))
+<a name="evalenv-applys1-patch-unapply-cberr-s2-res-eff-conf"></a>
+## apply(s1, patch, unapply, cb(err, s2, res, eff, conf))
 should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res.
 
 ```js
 var evaluators = { foo: {
 		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, ctx) { assert.equal(patch._type, 'bar');
-						  var old = s1.val;
-						  s1.val += patch.amount; 
-						  ctx.ret(s1, old); },
+		apply: function(s1, patch, unapply, ctx) { assert.equal(patch._type, 'bar');
+							   var old = s1.val;
+							   s1.val += patch.amount; 
+							   ctx.ret(s1, old); },
 }};
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
 		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, _.to('h1', 'res')); },
+		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, false, _.to('h1', 'res')); },
 		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
 		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: 2});
 			      assert.equal(this.res, 0); _();},
@@ -586,12 +598,12 @@ should use the patch evaluator if one exists for the patch type.
 var evaluators = { 
 		foo: {
 		    init: function(args, ctx) { ctx.ret({val:0}); },
-		    apply: function(s1, patch, ctx) { var old = s1.val;
-						      s1.val += patch.amount; 
-						      ctx.ret(s1, old); },
+		    apply: function(s1, patch, unapply, ctx) { var old = s1.val;
+							       s1.val += patch.amount; 
+							       ctx.ret(s1, old); },
 		},
 		bar: { 
-		    apply: function(s1, patch, ctx) {
+		    apply: function(s1, patch, unapply, ctx) {
 			var old = s1.val;
 			s1.val -= patch.amount; // Does the opposite
 			ctx.ret(s1, old); 
@@ -601,7 +613,7 @@ var evaluators = {
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
 		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, _.to('h1', 'res')); },
+		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, false, _.to('h1', 'res')); },
 		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
 		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: -2});
 			      assert.equal(this.res, 0); _();},
@@ -616,7 +628,7 @@ var evaluators = {
 		    init: function(args, ctx) {
 			ctx.ret({val: 0});
 		    },
-		    apply: function(s1, patch, ctx) {
+		    apply: function(s1, patch, unapply, ctx) {
 			s1.val += this.amount;
 			ctx.ret(s1);
 		    },
@@ -626,7 +638,7 @@ var evaluators = {
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
 		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s0, {}, false, _.to('s1')); },
 		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
 		function(_) { assert.equal(this.s1.val, 50); _(); },
 ], done)();
@@ -659,9 +671,9 @@ should apply the patch.
 ```js
 var evaluators = { foo: {
 		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, ctx) { var old = s1.val;
-						  s1.val += patch.amount; 
-						  ctx.ret(s1, old); },
+		apply: function(s1, patch, unapply, ctx) { var old = s1.val;
+							   s1.val += patch.amount; 
+							   ctx.ret(s1, old); },
 }};
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
@@ -679,9 +691,9 @@ should avoid repeating calculations already done.
 var count = 0;
 var evaluators = { foo: {
 		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, ctx) { s1.val += patch.amount;
-						  count++; // Side effect: count the number of calls
-						  ctx.ret(s1); },
+		apply: function(s1, patch, unapply, ctx) { s1.val += patch.amount;
+							   count++; // Side effect: count the number of calls
+							   ctx.ret(s1); },
 }};
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
@@ -705,7 +717,7 @@ should apply query patch q to object with state s, emitting res.
 ```js
 var evaluators = { foo: {
 		init: function(args, ctx) { ctx.ret({val:args.val}); },
-		apply: function(s, query, ctx) { if(query._type == 'get') { ctx.ret(s, s.val); } },
+		apply: function(s, query, unapply, ctx) { if(query._type == 'get') { ctx.ret(s, s.val); } },
 }};
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
@@ -720,9 +732,9 @@ should emit an error if the query changes the state.
 ```js
 var evaluators = { foo: {
 		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, ctx) { var old = s1.val;
-						  s1.val += patch.amount; 
-						  ctx.ret(s1, old); },
+		apply: function(s1, patch, unapply, ctx) { var old = s1.val;
+							   s1.val += patch.amount; 
+							   ctx.ret(s1, old); },
 }};
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
@@ -739,26 +751,27 @@ util.seq([
 })();
 ```
 
-<a name="evalenv-unapplys1-patch-cberr-s2-res-eff-conf"></a>
-## unapply(s1, patch, cb(err, s2, res, eff, conf))
 should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false.
 
 ```js
 var evaluators = { foo: {
 		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, ctx) { var old = s1.val;
-						  s1.val += patch.amount; 
-						  ctx.ret(s1, old); },
-		unapply: function(s1, patch, ctx) { var old = s1.val;
-						    s1.val -= patch.amount;
-						    ctx.ret(s1, old); },
+		apply: function(s1, patch, unapply, ctx) { 
+		    var old = s1.val;
+		    if(!unapply) {
+			s1.val += patch.amount; 
+		    } else {
+			s1.val -= patch.amount;
+		    }
+			ctx.ret(s1, old); 
+		},
 }};
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 var patch = {_type: 'bar', amount: 2};
 util.seq([
 		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.apply(this.h0, patch, _.to('h1')); },
-		function(_) { evalEnv.unapply(this.h1, patch, _.to('h2')); },
+		function(_) { evalEnv.apply(this.h0, patch, false, _.to('h1')); },
+		function(_) { evalEnv.apply(this.h1, patch, true, _.to('h2')); },
 		function(_) { hashDB.hash(this.h2, _.to('h2')); },
 		function(_) { assert.equal(this.h2.$hash$, this.h0.$hash$); _(); },
 ], done)();
@@ -770,24 +783,33 @@ should use the unpatch evaluator if one exists for the patch type.
 var evaluators = { 
 		foo: {
 		    init: function(args, ctx) { ctx.ret({val:0}); },
-		    apply: function(s1, patch, ctx) { var old = s1.val;
-						      s1.val += patch.amount; 
-						      ctx.ret(s1, old); },
-		    unapply: function(s1, patch, ctx) { var old = s1.val;
-						      s1.val -= patch.amount; 
-						      ctx.ret(s1, old); },
+		    apply: function(s1, patch, unapply, ctx) { 
+			var old = s1.val;
+			if(!unapply) {
+			    s1.val += patch.amount; 
+			} else {
+			    s1.val -= patch.amount; 
+			}
+			ctx.ret(s1, old); 
+		    }
 		},
 		bar: {
-		    unapply: function(s1, patch, ctx) { var old = s1.val;
-							s1.val -= patch.amount * 2;
-							ctx.ret(s1, old); },
+		    apply: function(s1, patch, unapply, ctx) { 
+			var old = s1.val;
+			if(!unapply) {
+			    s1.val += patch.amount * 2; 
+			} else {
+			    s1.val -= patch.amount * 2;
+			}
+			ctx.ret(s1, old); 
+		    }
 		},
 };
 var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 var patch = {_type: 'bar', amount: 2};
 util.seq([
 		function(_) { evalEnv.init('foo', {}, _.to('h0')); }, // 0
-		function(_) { evalEnv.unapply(this.h0, patch, _.to('h1')); }, // -4
+		function(_) { evalEnv.apply(this.h0, patch, true, _.to('h1')); }, // -4
 		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
 		function(_) { assert.equal(this.s1.val, -4); _(); },
 ], done)();
@@ -1135,7 +1157,7 @@ should apply the undelying patch.
 ```js
 util.seq([
 		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.unapply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, _.to('s1')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, true, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 2); _(); },
 ], done)();

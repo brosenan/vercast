@@ -13,6 +13,7 @@
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
     composite patch apply weak should not apply conflicting patches: [2K[0G  ․ composite patch apply weak should not apply conflicting patches
     composite patch apply weak should report the conflicting patch in the results: [2K[0G  ․ composite patch apply weak should report the conflicting patch in the results
+    composite patch apply weak should provide the original result (with possible conflict information) in the result's "orig" field: [2K[0G  ․ composite patch apply weak should provide the original result (with possible conflict information) in the result's "orig" field
     composite patch unapply should unapply the given patches in reverse order: [2K[0G  ․ composite patch unapply should unapply the given patches in reverse order
     counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
@@ -34,16 +35,16 @@
     DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
     EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
     EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method
-    EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res: [2K[0G  ․ EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
-    EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
-    EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method
-    EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted: [2K[0G  ․ EvalEnv apply(s1, patch, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted
+    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
+    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
+    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method
+    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted
     EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch
     EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done
     EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res
     EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state
-    EvalEnv unapply(s1, patch, cb(err, s2, res, eff, conf)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false: [2K[0G  ․ EvalEnv unapply(s1, patch, cb(err, s2, res, eff, conf)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false
-    EvalEnv unapply(s1, patch, cb(err, s2, res, eff, conf)) should use the unpatch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv unapply(s1, patch, cb(err, s2, res, eff, conf)) should use the unpatch evaluator if one exists for the patch type
+    EvalEnv query(s, q, cb(err, res)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false
+    EvalEnv query(s, q, cb(err, res)) should use the unpatch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should use the unpatch evaluator if one exists for the patch type
     HashDB should store its own copy of the object: [2K[0G  ․ HashDB should store its own copy of the object
     HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code: [2K[0G  ․ HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code
     HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input: [2K[0G  ․ HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input
@@ -86,5 +87,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  86 passing (98 ms)
+  87 passing (98 ms)
 

@@ -1,7 +1,6 @@
 var defaultEvaluator = require('./defaultEvaluator.js');
 
 exports.apply = defaultEvaluator.apply;
-exports.unapply = defaultEvaluator.unapply;
 
 exports.init= function(args, ctx) { 
     ctx.ret({val: 0}); 
