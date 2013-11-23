@@ -33,6 +33,7 @@
     DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
     DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
     DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants
     EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
     EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method
     EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
@@ -87,5 +88,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  87 passing (98 ms)
+  88 passing (101 ms)
 

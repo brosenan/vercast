@@ -531,6 +531,16 @@ util.seq([
 ], done)();
 ```
 
+should handle the case where there are also common descendants.
+
+```js
+util.seq([
+    function(_) { createGraph(1, 1, 30, _); },
+    function(_) { versionGraph.findCommonAncestor(4, 6, _.to('ancestor', 'p1', 'p2')); },
+    function(_) { assert.equal(this.ancestor, 2); _(); },
+], done)();
+```
+
 <a name="evalenv"></a>
 # EvalEnv
 <a name="evalenv-initevaluator-args-cberr-h0"></a>

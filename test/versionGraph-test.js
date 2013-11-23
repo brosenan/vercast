@@ -5,6 +5,29 @@ module.exports = function(versionGraph) {
     beforeEach(function(done) {
 	versionGraph.clear(done);
     });
+    function isPrime(x) {
+	for(var i = 2; i <= Math.sqrt(x); i++) {
+	    if(x%i == 0) return false;
+	}
+	return true;
+    }
+    function createGraph(a, b, aMax, done) {
+	while(a < aMax) {
+	    while(b < a) {
+		if(a%b == 0 && isPrime(a/b)) {
+		    versionGraph.addEdge(b, a/b, a, function(err) {
+			if(err) done(err);
+			createGraph(a, b+1, aMax, done);
+		    });
+		    return;
+		}
+		b++;
+	    }
+	    b = 1;
+	    a++;
+	}
+	done();
+    }
     describe('as VersionGraph', function(){
 	describe('addEdge', function(){
 	    it('should accept an edge and add it to the graph', function(done){
@@ -36,6 +59,14 @@ module.exports = function(versionGraph) {
 		    function(_) { assert.equal(this.ancestor, 'abraham'); _(); },
 		], done)();
 	    });
+	    it('should handle the case where there are also common descendants', function(done){
+		util.seq([
+		    function(_) { createGraph(1, 1, 30, _); },
+		    function(_) { versionGraph.findCommonAncestor(4, 6, _.to('ancestor', 'p1', 'p2')); },
+		    function(_) { assert.equal(this.ancestor, 2); _(); },
+		], done)();
+	    });
+
 	});
     });
 };

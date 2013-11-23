@@ -22,7 +22,6 @@ module.exports = function(branch) {
 		    function(_) { assert.equal(this.tip, 's1'); _(); },
 		], done)();
 	    });
-
 	    it('should not update the branch state if the first argument does not match the current tip value', function(done){
 		util.seq([
 		    function(_) { branch.checkedUpdate('foo', 's1', _); },

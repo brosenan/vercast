@@ -30,27 +30,48 @@ module.exports = function() {
 	cb(undefined, G[dest].i[label]);
     };
     this.findCommonAncestor = function(node1, node2, cb) {
-	var q = [{n: node1, p: []}];
-	while(q.length > 0 && q[0].n != node2) {
-	    var n = q.shift();
-	    for(var l in G[n.n].o) {
-		q.push({n: G[n.n].o[l], p: n.p.concat([{l:l, d:true}])});
-	    }
-	    for(var l in G[n.n].i) {
-		q.push({n: G[n.n].i[l], p: n.p.concat([{l:l, d:false}])});
-	    }
-	}
-	if(q.length == 0) {
-	    cb(new Error('Common ancestor not found'));
-	} else {
-	    var path = q[0].p;
+	var res = this.bfs(node1, function(node, path) {
+	    var res = {};
 	    var i = 0;
-	    var n = node1;
-	    while(!path[i].d) {
-		n = G[n].i[path[i].l];
+	    while(i < path.length && !path[i].d) i++;
+	    while(i < path.length && path[i].d) i++;
+	    if(i < path.length) res.prune = true;
+	    else if(node == node2) {
+		res.include = true;
+		res.done = true;
+	    }
+	    return res;
+	});
+	if(res.length > 0) {
+	    var node = node1;
+	    var path = res[0].p;
+	    var i = 0;
+	    while(i < path.length && !path[i].d) {
+		node = G[node].i[path[i].l];
 		i++;
 	    }
-	    cb(undefined, n);
+	    cb(undefined, node);
+	} else {
+	    cb(new Error('No path found from ' + node1 + ' to ' + node2));
 	}
+    };
+    this.print = function() { console.log(G); };
+    this.bfs = function(start, eval) {
+	var results = [];
+	var q = [{n: start, p: []}];
+	while(q.length > 0) {
+	    var curr = q.shift();
+	    var res = eval(curr.n, curr.p);
+	    if(res.include) results.push(curr);
+	    if(res.prune) continue;
+	    if(res.done) break;
+	    for(var l in G[curr.n].o) {
+		q.push({n: G[curr.n].o[l], p: curr.p.concat([{l:l, d:true}])});
+	    }
+	    for(var l in G[curr.n].i) {
+		q.push({n: G[curr.n].i[l], p: curr.p.concat([{l:l, d:false}])});
+	    }
+	}
+	return results;
     };
 };
