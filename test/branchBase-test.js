@@ -31,9 +31,44 @@ describe('BranchBase', function(){
 	    util.seq([
 		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('s0')); },
 		function(_) { branchBase.newBranch('foo', this.s0, _);  },
-		function(_) { branchBase.queryTip('foo', {_type: 'get'}, _.to('res')); },
+		function(_) { branchBase.query('foo', {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 	    ], done)();
 	});
     });
+
+    describe('.query(branchName, state, cb(err, res))', function(){
+	
+    });
+    describe('.init(branchName, evaluator, args, cb(err))', function(){
+	it('should create a new branch with the given evaluator and arguments', function(done){
+	    util.seq([
+		function(_) { branchBase.init('foo', 'atom', {val: 'bar'}, _); },
+		function(_) { branchBase.query('foo', {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+	    ], done)();
+
+	});
+
+    });
+
+    describe('.trans(branch, patch, options, cb(err))', function(){
+	it('should apply the given patch on the tip of the given branch', function(done){
+	    var compPatch = {_type: 'comp', patches: [
+		{_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
+		{_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
+		{_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
+		{_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
+	    ]};
+	    util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bat'); _(); },
+	    ], done)();
+
+	});
+
+    });
+
 });

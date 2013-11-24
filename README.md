@@ -9,6 +9,9 @@
      - [get_all](#atom-get_all)
    - [BranchBase](#branchbase)
      - [.newBranch(branchName, s0, cb(err))](#branchbase-newbranchbranchname-s0-cberr)
+     - [.query(branchName, state, cb(err, res))](#branchbase-querybranchname-state-cberr-res)
+     - [.init(branchName, evaluator, args, cb(err))](#branchbase-initbranchname-evaluator-args-cberr)
+     - [.trans(branch, patch, options, cb(err))](#branchbase-transbranch-patch-options-cberr)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
        - [weak](#composite-patch-apply-weak)
@@ -195,8 +198,39 @@ should create a new branch with the given branchName, with the initial state s0.
 util.seq([
 		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('s0')); },
 		function(_) { branchBase.newBranch('foo', this.s0, _);  },
-		function(_) { branchBase.queryTip('foo', {_type: 'get'}, _.to('res')); },
+		function(_) { branchBase.query('foo', {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+<a name="branchbase-initbranchname-evaluator-args-cberr"></a>
+## .init(branchName, evaluator, args, cb(err))
+should create a new branch with the given evaluator and arguments.
+
+```js
+util.seq([
+		function(_) { branchBase.init('foo', 'atom', {val: 'bar'}, _); },
+		function(_) { branchBase.query('foo', {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+<a name="branchbase-transbranch-patch-options-cberr"></a>
+## .trans(branch, patch, options, cb(err))
+should apply the given patch on the tip of the given branch.
+
+```js
+var compPatch = {_type: 'comp', patches: [
+		{_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
+		{_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
+		{_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
+		{_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
+]};
+util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bat'); _(); },
 ], done)();
 ```
 
@@ -245,7 +279,8 @@ util.seq([
     function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
 	{_type: 'set', from: 'foo', to: 'bar'},
 	{_type: 'set', from: 'foo', to: 'baz'},
-    ]}, _.to('s1')); },
+    ]}, _.to('s1', 'res', 'eff', 'conf')); },
+    function(_) { assert(!this.conf, 'A weak patch should not be reported as conflicting'); _(); },
     function(_) { evalEnv.query(this.s1, {_type: 'get_all'}, _.to('res')); },
     // Only the non-conflicting change should be performed
     function(_) { assert.deepEqual(this.res, ['bar']); _(); },
@@ -262,11 +297,11 @@ util.seq([
 	{_type: 'set', from: 'foo', to: 'bar'},
 	confPatch,
     ]}, _.to('s1', 'res')); },
-    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatch, orig: undefined}]); _(); },
+    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatch}]); _(); },
 ], done)();
 ```
 
-should provide the original result (with possible conflict information) in the result's "orig" field.
+should provide $badPatch in nested patches.
 
 ```js
 var confPatch = {_type: 'set', from: 'foo', to: 'baz'};
@@ -277,8 +312,7 @@ util.seq([
 	{_type: 'set', from: 'foo', to: 'bar'},
 	confPatchWrapper,
     ]}, _.to('s1', 'res')); },
-    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatchWrapper, 
-							  orig: [{$badPatch: confPatch, orig: undefined}]}]); _(); },
+    function(_) { assert.deepEqual(this.res, [undefined, [{$badPatch: confPatch}]]); _(); },
 ], done)();
 ```
 

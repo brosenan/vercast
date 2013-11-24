@@ -14,8 +14,8 @@ exports.apply = function(s1, patch, unapply, ctx) {
 	    function(_) { 
 		if(patch.weak && this.conf) {
 		    this.s2 = s1;
-		    this.r1 = {$badPatch: first,
-			       orig: this.r1};
+		    this.r1 = {$badPatch: first};
+		    ctx.conflicting = false;
 		}
 		ctx.trans(this.s2, patch, _.to('s3', 'r2')); },
 	    function(_) { ctx.ret(this.s3, [this.r1].concat(this.r2)); },

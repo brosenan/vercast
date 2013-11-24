@@ -54,7 +54,8 @@ describe('composite patch', function(){
 		    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
 			{_type: 'set', from: 'foo', to: 'bar'},
 			{_type: 'set', from: 'foo', to: 'baz'},
-		    ]}, _.to('s1')); },
+		    ]}, _.to('s1', 'res', 'eff', 'conf')); },
+		    function(_) { assert(!this.conf, 'A weak patch should not be reported as conflicting'); _(); },
 		    function(_) { evalEnv.query(this.s1, {_type: 'get_all'}, _.to('res')); },
 		    // Only the non-conflicting change should be performed
 		    function(_) { assert.deepEqual(this.res, ['bar']); _(); },
@@ -68,10 +69,10 @@ describe('composite patch', function(){
 			{_type: 'set', from: 'foo', to: 'bar'},
 			confPatch,
 		    ]}, _.to('s1', 'res')); },
-		    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatch, orig: undefined}]); _(); },
+		    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatch}]); _(); },
 		], done)();
 	    });
-	    it('should provide the original result (with possible conflict information) in the result\'s "orig" field', function(done){
+	    it('should provide $badPatch in nested patches', function(done){
 		var confPatch = {_type: 'set', from: 'foo', to: 'baz'};
 		var confPatchWrapper = {_type: 'comp', weak: true, patches: [confPatch]};
 		util.seq([
@@ -80,8 +81,7 @@ describe('composite patch', function(){
 			{_type: 'set', from: 'foo', to: 'bar'},
 			confPatchWrapper,
 		    ]}, _.to('s1', 'res')); },
-		    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatchWrapper, 
-									  orig: [{$badPatch: confPatch, orig: undefined}]}]); _(); },
+		    function(_) { assert.deepEqual(this.res, [undefined, [{$badPatch: confPatch}]]); _(); },
 		], done)();
 	    });
 
