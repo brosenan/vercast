@@ -13,6 +13,9 @@
      - [.init(branchName, evaluator, args, cb(err))](#branchbase-initbranchname-evaluator-args-cberr)
      - [.trans(branch, patch, options, cb(err))](#branchbase-transbranch-patch-options-cberr)
      - [.merge(dest, source, options, cb(err))](#branchbase-mergedest-source-options-cberr)
+   - [collection](#collection)
+     - [init](#collection-init)
+     - [add](#collection-add)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
        - [weak](#composite-patch-apply-weak)
@@ -369,6 +372,33 @@ util.seq([
 		function(_) { assert.equal(this.c, 'baz3'); _(); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
 		function(_) { assert.equal(this.b, 'bar3'); _(); }, // The value on the source branch
+], done)();
+```
+
+<a name="collection"></a>
+# collection
+<a name="collection-init"></a>
+## init
+should create an empty collection.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('coll', {}, _.to('s0')); },
+		function(_) { evalEnv.query(this.s0, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.deepEqual(this.res, {}); _(); },
+], done)();
+```
+
+<a name="collection-add"></a>
+## add
+should add a key/value pair to the collection.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('coll', {}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'add', key: 'foo', val: 'bar'}, _.to('state')); },
+		function(_) { evalEnv.query(this.state, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.deepEqual(this.res, {foo: 'bar'}); _(); },
 ], done)();
 ```
 
