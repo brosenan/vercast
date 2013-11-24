@@ -12,7 +12,7 @@
      - [.query(branchName, state, cb(err, res))](#branchbase-querybranchname-state-cberr-res)
      - [.init(branchName, evaluator, args, cb(err))](#branchbase-initbranchname-evaluator-args-cberr)
      - [.trans(branch, patch, options, cb(err))](#branchbase-transbranch-patch-options-cberr)
-     - [.merge(branch, source, options, cb(err))](#branchbase-mergebranch-source-options-cberr)
+     - [.merge(dest, source, options, cb(err))](#branchbase-mergedest-source-options-cberr)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
        - [weak](#composite-patch-apply-weak)
@@ -301,8 +301,8 @@ util.seq([
 ], done)();
 ```
 
-<a name="branchbase-mergebranch-source-options-cberr"></a>
-## .merge(branch, source, options, cb(err))
+<a name="branchbase-mergedest-source-options-cberr"></a>
+## .merge(dest, source, options, cb(err))
 should apply the patches contributing to source to the tip of branch.
 
 ```js
@@ -312,8 +312,7 @@ util.seq([
 		function(_) { branchBase.fork('br1', 'br2', _); },
 		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
 		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _); },
-		function(_) { branchBase.tip('br2', _.to('source')); },
-		function(_) { branchBase.merge('br1', this.source, {}, _); },
+		function(_) { branchBase.merge('br1', 'br2', {}, _); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
 		function(_) { assert.equal(this.c, 'baz2'); _(); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
@@ -330,8 +329,7 @@ util.seq([
 		function(_) { branchBase.fork('br1', 'br2', _); },
 		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
 		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _); },
-		function(_) { branchBase.tip('br2', _.to('source')); },
-		function(_) { branchBase.merge('br1', this.source, {}, _); },
+		function(_) { branchBase.merge('br1', 'br2', {}, _); },
 ], function(err) {
 		assert(err, 'An error must be emitted');
 		done(err.message == 'Conflicting change in transition on branch br1' ? undefined : err);
@@ -348,8 +346,7 @@ util.seq([
 		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
 		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'baz3'}, {}, _); },
 		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _); },
-		function(_) { branchBase.tip('br2', _.to('source')); },
-		function(_) { branchBase.merge('br1', this.source, {weak: true}, _); },
+		function(_) { branchBase.merge('br1', 'br2', {weak: true}, _); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
 		function(_) { assert.equal(this.c, 'baz3'); _(); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
@@ -367,8 +364,7 @@ util.seq([
 		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
 		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _); },
 		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _); },
-		function(_) { branchBase.tip('br2', _.to('source')); },
-		function(_) { branchBase.merge('br1', this.source, {strong: true}, _); },
+		function(_) { branchBase.merge('br1', 'br2', {strong: true}, _); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
 		function(_) { assert.equal(this.c, 'baz3'); _(); },
 		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },

@@ -58,13 +58,13 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 	tipDB.retrieve(branch, cb);
     };
 
-    this.merge = function(branch, source, options, cb) {
+    this.merge = function(dest, source, options, cb) {
 	util.seq([
-	    function(_) { tipDB.retrieve(branch, _.to('dest')); },
-	    function(_) { evalEnv.hash(source, _.to('source')); },
-	    function(_) { evalEnv.hash(this.dest, _.to('dest')); },
+	    function(_) { tipDB.retrieve(dest, _.to('dest')); },
+	    function(_) { tipDB.retrieve(source, _.to('source')); },
+	    function(_) { evalEnv.hash(this.source, _.to('source')); },
 	    function(_) { graphDB.findCommonAncestor(this.source.$hash$, this.dest.$hash$, _.to('ancestor', 'path1', 'path2')); },
-	    function(_) { self.trans(branch, createPathPatch(this.path1, options), options, cb); },
+	    function(_) { self.trans(dest, createPathPatch(this.path1, options), options, cb); },
 	], cb)();
     };
 
