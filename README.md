@@ -18,6 +18,10 @@
      - [create](#directory-create)
      - [delete](#directory-delete)
      - [get_hash](#directory-get_hash)
+   - [DummyAtomicKVS](#dummyatomickvs)
+     - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
+       - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
+       - [.retrieve(key, cb(err, val))](#dummyatomickvs-as-atomickeyvalue-retrievekey-cberr-val)
    - [DummyBranch](#dummybranch)
      - [as Branch](#dummybranch-as-branch)
        - [checkedUpdate](#dummybranch-as-branch-checkedupdate)
@@ -448,6 +452,48 @@ util.seq([
 		function(_) { evalEnv.query(this.child, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 ], done)();
+```
+
+<a name="dummyatomickvs"></a>
+# DummyAtomicKVS
+<a name="dummyatomickvs-as-atomickeyvalue"></a>
+## as AtomicKeyValue
+<a name="dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr"></a>
+### .newKey(key, val, cb(err))
+should store a new key/value pair, given that key does not already exist.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.retrieve('foo', _.to('value')); },
+    function(_) { assert.equal(this.value, 'bar'); _(); },
+], done)();
+```
+
+should emit an error when the key already exists.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+], function(err) {
+    assert(err, 'An error should be emitted');
+    done(err.message == 'Key foo already exists' ? undefined : err);
+})();
+```
+
+<a name="dummyatomickvs-as-atomickeyvalue-retrievekey-cberr-val"></a>
+### .retrieve(key, cb(err, val))
+should emit an error if the value does not exist.
+
+```js
+util.seq([
+    function(_) { atomicKV.retrieve('foo', _.to('value')); },
+    function(_) { assert(false, 'the value is not supposed to be found'); _(); },
+], function(err) {
+    assert(err, 'An error should be emitted');
+    done(err.message == 'Key foo was not found' ? undefined : err);
+})();
 ```
 
 <a name="dummybranch"></a>
