@@ -28,8 +28,11 @@ exports.apply = function(state, patch, unapply, ctx) {
 	patch._at_path = [];
     }
     patch._at_path.push(name);
+    if(unapply) {
+	patch = {_type: 'inv', patch: patch};
+    }
     util.seq([
-	function(_) { ctx.apply(state[name], patch, unapply, _.to('child', 'res')); },
+	function(_) { ctx.trans(state[name], patch, _.to('child', 'res')); },
 	function(_) { ctx.hash(this.child, _.to('child')); },
 	function(_) { state[name] = this.child;
 		      ctx.ret(state, this.res); },

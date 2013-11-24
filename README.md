@@ -435,6 +435,18 @@ util.seq([
 ], done)();
 ```
 
+should propagate unapplied patches as well as applied.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+    function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'baz'}}, _.to('s1')); },
+    function(_) { evalEnv.apply(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, true, _.to('s2')); },
+    function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
+    function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
 <a name="directory-create"></a>
 ## create
 should create a child node using the given evaluator type and arguments.

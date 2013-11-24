@@ -108,6 +108,6 @@ describe('BranchBase', function(){
 		done(err.message == 'Retries exhasted trying to modify state of branch br' ? undefined : err);
 	    })();
 	});
-
+	
     });
 });

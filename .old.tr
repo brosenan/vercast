@@ -24,6 +24,7 @@
     counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
     counter add should be reversible: [2K[0G  ․ counter add should be reversible
     directory should propagate any patches it does not handle itself to child objects: [2K[0G  ․ directory should propagate any patches it does not handle itself to child objects
+    directory should propagate unapplied patches as well as applied: [2K[0G  ․ directory should propagate unapplied patches as well as applied
     directory create should create a child node using the given evaluator type and arguments: [2K[0G  ․ directory create should create a child node using the given evaluator type and arguments
     directory create should delete a child when unapplied: [2K[0G  ․ directory create should delete a child when unapplied
     directory create should report a conflict when unpatched if the child state does not match the construction parameters: [2K[0G  ․ directory create should report a conflict when unpatched if the child state does not match the construction parameters
@@ -98,5 +99,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  98 passing (146 ms)
+  99 passing (151 ms)
 
