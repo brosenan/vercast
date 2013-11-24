@@ -117,7 +117,16 @@ describe('BranchBase', function(){
 		assert(err, 'There should be an error');
 		done(err.message == 'Conflicting change in transition on branch br' ? undefined : err);
 	    })();
-
+	});
+	it('should force the change if the strong option is used', function(done){
+	    util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+	    ], done)();
+	    
 	});
 
     });

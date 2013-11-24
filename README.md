@@ -288,6 +288,18 @@ util.seq([
 })();
 ```
 
+should force the change if the strong option is used.
+
+```js
+util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
 <a name="composite-patch"></a>
 # composite patch
 <a name="composite-patch-apply"></a>

@@ -24,21 +24,21 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 	var retries = options.retries || 3;
 	util.seq([
 	    function(_) { tipDB.retrieve(branchName, _.to('tip')); },
-	    function(_) { tryModifyState(branchName, this.tip, patch, retries, _); },
+	    function(_) { tryModifyState(branchName, this.tip, patch, retries, options, _); },
 	], cb)();
     };
-    function tryModifyState(branchName, tip, patch, retries, cb) {
+    function tryModifyState(branchName, tip, patch, retries, options, cb) {
 	if(retries == 0) {
 	    return cb(new Error('Retries exhasted trying to modify state of branch ' + branchName));
 	}
 	util.seq([
 	    function(_) { evalEnv.hash(patch, _.to('patch')); },
 	    function(_) { evalEnv.trans(tip, this.patch, _.to('desiredTip', 'res', 'eff', 'conf')); },
-	    function(_) { if(this.conf) { cb(new Error('Conflicting change in transition on branch ' + branchName)); }
+	    function(_) { if(this.conf && !options.strong) { cb(new Error('Conflicting change in transition on branch ' + branchName)); }
 			  else { _(); }},
 	    function(_) { tipDB.modify(branchName, tip, this.desiredTip, _.to('newTip')); },
 	    function(_) { if(this.desiredTip == this.newTip) { cb(); }
-			  else { tryModifyState(branchName, this.newTip, this.patch, retries - 1, cb); }
+			  else { tryModifyState(branchName, this.newTip, this.patch, retries - 1, options, cb); }
 			},
 	], cb)();
     };
