@@ -54,8 +54,6 @@ module.exports = function(atomicKV) {
 		    function(_) { assert.equal(this.val, 'bar'); _(); },
 		], done)();
 	    });
-
 	});
-
     });
 };

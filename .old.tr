@@ -9,6 +9,7 @@
     atom set should report a conflict if the "from" value does not match: [2K[0G  ․ atom set should report a conflict if the "from" value does not match
     atom set should invert patches correctly: [2K[0G  ․ atom set should invert patches correctly
     atom get_all should return all possible values: [2K[0G  ․ atom get_all should return all possible values
+    BranchBase .newBranch(branchName, s0, cb(err)) should create a new branch with the given branchName, with the initial state s0: [2K[0G  ․ BranchBase .newBranch(branchName, s0, cb(err)) should create a new branch with the given branchName, with the initial state s0
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
     composite patch apply weak should not apply conflicting patches: [2K[0G  ․ composite patch apply weak should not apply conflicting patches
@@ -93,5 +94,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  93 passing (101 ms)
+  94 passing (102 ms)
 

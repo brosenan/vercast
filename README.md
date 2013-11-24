@@ -7,6 +7,8 @@
      - [get](#atom-get)
      - [set](#atom-set)
      - [get_all](#atom-get_all)
+   - [BranchBase](#branchbase)
+     - [.newBranch(branchName, s0, cb(err))](#branchbase-newbranchbranchname-s0-cberr)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
        - [weak](#composite-patch-apply-weak)
@@ -180,6 +182,21 @@ util.seq([
 		function(_) { evalEnv.trans(this.s1, {_type: 'set', from: 'foo', to: 'baz'}, _.to('s2')); },
 		function(_) { evalEnv.query(this.s2, {_type: 'get_all'}, _.to('res')); },
 		function(_) { assert.deepEqual(this.res, ['baz', 'bar']); _(); },
+], done)();
+```
+
+<a name="branchbase"></a>
+# BranchBase
+<a name="branchbase-newbranchbranchname-s0-cberr"></a>
+## .newBranch(branchName, s0, cb(err))
+should create a new branch with the given branchName, with the initial state s0.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('s0')); },
+		function(_) { branchBase.newBranch('foo', this.s0, _);  },
+		function(_) { branchBase.queryTip('foo', {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
 ], done)();
 ```
 

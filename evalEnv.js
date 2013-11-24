@@ -100,4 +100,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    function(_) { cb(undefined, this.res); },
 	], cb)();
     }
+    this.hash = function(value, cb) {
+	hashDB.hash(value, cb);
+    };
 }
