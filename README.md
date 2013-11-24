@@ -12,6 +12,7 @@
      - [.query(branchName, state, cb(err, res))](#branchbase-querybranchname-state-cberr-res)
      - [.init(branchName, evaluator, args, cb(err))](#branchbase-initbranchname-evaluator-args-cberr)
      - [.trans(branch, patch, options, cb(err))](#branchbase-transbranch-patch-options-cberr)
+     - [.merge(branch, source, options, cb(err))](#branchbase-mergebranch-source-options-cberr)
    - [composite patch](#composite-patch)
      - [apply](#composite-patch-apply)
        - [weak](#composite-patch-apply-weak)
@@ -297,6 +298,26 @@ util.seq([
 		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _); },
 		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+<a name="branchbase-mergebranch-source-options-cberr"></a>
+## .merge(branch, source, options, cb(err))
+should apply the patches contributing to source to the tip of branch.
+
+```js
+util.seq([
+		function(_) { branchBase.init('br1', 'dir', {}, _); },
+		function(_) { branchBase.trans('br1', compPatch, {}, _); },
+		function(_) { branchBase.fork('br1', 'br2', _); },
+		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _); },
+		function(_) { branchBase.tip('br2', _.to('source')); },
+		function(_) { branchBase.merge('br1', this.source, {}, _); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz2'); _(); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); },
 ], done)();
 ```
 
@@ -756,6 +777,18 @@ util.seq([
     function(_) { createGraph(1, 1, 30, _); },
     function(_) { versionGraph.findCommonAncestor(4, 6, _.to('ancestor', 'p1', 'p2')); },
     function(_) { assert.equal(this.ancestor, 2); _(); },
+], done)();
+```
+
+should return the path from the common ancestor to both nodes.
+
+```js
+util.seq([
+    function(_) { createGraph(1, 1, 30, _); },
+    function(_) { versionGraph.findCommonAncestor(8, 10, _.to('ancestor', 'p1', 'p2')); },
+    function(_) { assert.equal(this.ancestor, 2); _(); },
+    function(_) { assert.deepEqual(this.p1, ['2', '2']); _(); },
+    function(_) { assert.deepEqual(this.p2, ['5']); _(); },
 ], done)();
 ```
 

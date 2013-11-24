@@ -46,11 +46,18 @@ module.exports = function() {
 	    var node = node1;
 	    var path = res[0].p;
 	    var i = 0;
+	    var p1 = [];
 	    while(i < path.length && !path[i].d) {
+		p1.unshift(path[i].l);
 		node = G[node].i[path[i].l];
 		i++;
 	    }
-	    cb(undefined, node);
+	    var p2 = [];
+	    while(i < path.length) {
+		p2.push(path[i].l);
+		i++;
+	    }
+	    cb(undefined, node, p1, p2);
 	} else {
 	    cb(new Error('No path found from ' + node1 + ' to ' + node2));
 	}

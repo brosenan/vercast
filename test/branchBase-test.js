@@ -52,6 +52,12 @@ describe('BranchBase', function(){
 
     });
 
+    var compPatch = {_type: 'comp', patches: [
+	{_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
+	{_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
+	{_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
+	{_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
+    ]};
     describe('.trans(branch, patch, options, cb(err))', function(){
 	it('should apply the given patch on the tip of the given branch', function(done){
 	    var compPatch = {_type: 'comp', patches: [
@@ -67,12 +73,6 @@ describe('BranchBase', function(){
 		function(_) { assert.equal(this.res, 'bat'); _(); },
 	    ], done)();
 	});
-	var compPatch = {_type: 'comp', patches: [
-	    {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
-	    {_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
-	    {_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
-	    {_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
-	]};
 	it('should retry and reapply the patch over the new tip if the tip moves during the transition', function(done){
 	    util.seq([
 		function(_) { branchBase.init('br', 'dir', {}, _); },
@@ -125,6 +125,23 @@ describe('BranchBase', function(){
 		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _); },
 		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
+	    ], done)();
+	});
+    });
+    describe('.merge(branch, source, options, cb(err))', function(){
+	it('should apply the patches contributing to source to the tip of branch', function(done){
+	    util.seq([
+		function(_) { branchBase.init('br1', 'dir', {}, _); },
+		function(_) { branchBase.trans('br1', compPatch, {}, _); },
+		function(_) { branchBase.fork('br1', 'br2', _); },
+		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _); },
+		function(_) { branchBase.tip('br2', _.to('source')); },
+		function(_) { branchBase.merge('br1', this.source, {}, _); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz2'); _(); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); },
 	    ], done)();
 	});
     });

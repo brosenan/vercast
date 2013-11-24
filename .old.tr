@@ -16,6 +16,7 @@
     BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times
     BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts
     BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+    BranchBase .merge(branch, source, options, cb(err)) should apply the patches contributing to source to the tip of branch: [2K[0G  ․ BranchBase .merge(branch, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
     composite patch apply should return no result if none of the underlying patches return result: [2K[0G  ․ composite patch apply should return no result if none of the underlying patches return result
@@ -48,6 +49,7 @@
     DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
     DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
     DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants
+    DummyVersionGraph as VersionGraph findCommonAncestor should return the path from the common ancestor to both nodes: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should return the path from the common ancestor to both nodes
     EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
     EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method
     EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
@@ -102,5 +104,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  102 passing (167 ms)
+  104 passing (187 ms)
 

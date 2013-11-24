@@ -66,6 +66,15 @@ module.exports = function(versionGraph) {
 		    function(_) { assert.equal(this.ancestor, 2); _(); },
 		], done)();
 	    });
+	    it('should return the path from the common ancestor to both nodes', function(done){
+		util.seq([
+		    function(_) { createGraph(1, 1, 30, _); },
+		    function(_) { versionGraph.findCommonAncestor(8, 10, _.to('ancestor', 'p1', 'p2')); },
+		    function(_) { assert.equal(this.ancestor, 2); _(); },
+		    function(_) { assert.deepEqual(this.p1, ['2', '2']); _(); },
+		    function(_) { assert.deepEqual(this.p2, ['5']); _(); },
+		], done)();
+	    });
 
 	});
     });
