@@ -22,6 +22,7 @@
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
        - [.retrieve(key, cb(err, val))](#dummyatomickvs-as-atomickeyvalue-retrievekey-cberr-val)
+       - [.modify(key, oldVal, newVal, cb(err, valAfterMod))](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval-cberr-valaftermod)
    - [DummyBranch](#dummybranch)
      - [as Branch](#dummybranch-as-branch)
        - [checkedUpdate](#dummybranch-as-branch-checkedupdate)
@@ -494,6 +495,32 @@ util.seq([
     assert(err, 'An error should be emitted');
     done(err.message == 'Key foo was not found' ? undefined : err);
 })();
+```
+
+<a name="dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval-cberr-valaftermod"></a>
+### .modify(key, oldVal, newVal, cb(err, valAfterMod))
+should change the value under key to newVal, given that the previous value was oldVal.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.modify('foo', 'bar', 'baz', _.to('valAfterMod')); },
+    function(_) { assert.equal(this.valAfterMod, 'baz'); _(); },
+    function(_) { atomicKV.retrieve('foo', _.to('val')); },
+    function(_) { assert.equal(this.val, 'baz'); _(); },
+], done)();
+```
+
+should not change the value under key if the current value does not equal oldVal.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.modify('foo', 'baz', 'bat', _.to('valAfterMod')); },
+    function(_) { assert.equal(this.valAfterMod, 'bar'); _(); }, // The value before the change
+    function(_) { atomicKV.retrieve('foo', _.to('val')); },
+    function(_) { assert.equal(this.val, 'bar'); _(); },
+], done)();
 ```
 
 <a name="dummybranch"></a>

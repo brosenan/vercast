@@ -34,6 +34,26 @@ module.exports = function(atomicKV) {
 		    done(err.message == 'Key foo was not found' ? undefined : err);
 		})();
 	    });
+	});
+	describe('.modify(key, oldVal, newVal, cb(err, valAfterMod))', function(){
+	    it('should change the value under key to newVal, given that the previous value was oldVal', function(done){
+		util.seq([
+		    function(_) { atomicKV.newKey('foo', 'bar', _); },
+		    function(_) { atomicKV.modify('foo', 'bar', 'baz', _.to('valAfterMod')); },
+		    function(_) { assert.equal(this.valAfterMod, 'baz'); _(); },
+		    function(_) { atomicKV.retrieve('foo', _.to('val')); },
+		    function(_) { assert.equal(this.val, 'baz'); _(); },
+		], done)();
+	    });
+	    it('should not change the value under key if the current value does not equal oldVal', function(done){
+		util.seq([
+		    function(_) { atomicKV.newKey('foo', 'bar', _); },
+		    function(_) { atomicKV.modify('foo', 'baz', 'bat', _.to('valAfterMod')); },
+		    function(_) { assert.equal(this.valAfterMod, 'bar'); _(); }, // The value before the change
+		    function(_) { atomicKV.retrieve('foo', _.to('val')); },
+		    function(_) { assert.equal(this.val, 'bar'); _(); },
+		], done)();
+	    });
 
 	});
 

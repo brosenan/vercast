@@ -17,4 +17,11 @@ module.exports = function() {
 	}
 	cb(undefined, data[key]);
     };
+    this.modify = function(key, oldVal, newVal, cb) {
+	if(data[key] != oldVal) {
+	    return cb(undefined, data[key]);
+	}
+	data[key] = newVal;
+	cb(undefined, newVal);
+    };
 };

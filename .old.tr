@@ -30,6 +30,8 @@
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
     DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist
+    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal
+    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal
     DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met: [2K[0G  ․ DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
     DummyBranch as Branch checkedUpdate should return the tip state before modification: [2K[0G  ․ DummyBranch as Branch checkedUpdate should return the tip state before modification
     DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value: [2K[0G  ․ DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
@@ -91,5 +93,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  91 passing (99 ms)
+  93 passing (101 ms)
 
