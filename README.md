@@ -321,6 +321,61 @@ util.seq([
 ], done)();
 ```
 
+should emit an error by default if a merge conflict is found.
+
+```js
+util.seq([
+		function(_) { branchBase.init('br1', 'dir', {}, _); },
+		function(_) { branchBase.trans('br1', compPatch, {}, _); },
+		function(_) { branchBase.fork('br1', 'br2', _); },
+		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _); },
+		function(_) { branchBase.tip('br2', _.to('source')); },
+		function(_) { branchBase.merge('br1', this.source, {}, _); },
+], function(err) {
+		assert(err, 'An error must be emitted');
+		done(err.message == 'Conflicting change in transition on branch br1' ? undefined : err);
+})();
+```
+
+should accept a "weak" option, by which it would apply only non-conflicting changes.
+
+```js
+util.seq([
+		function(_) { branchBase.init('br1', 'dir', {}, _); },
+		function(_) { branchBase.trans('br1', compPatch, {}, _); },
+		function(_) { branchBase.fork('br1', 'br2', _); },
+		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'baz3'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _); },
+		function(_) { branchBase.tip('br2', _.to('source')); },
+		function(_) { branchBase.merge('br1', this.source, {weak: true}, _); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz3'); _(); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); }, // The value on the destination branch
+], done)();
+```
+
+should accept a "strong" option, by which it will force the change in case of a conflict.
+
+```js
+util.seq([
+		function(_) { branchBase.init('br1', 'dir', {}, _); },
+		function(_) { branchBase.trans('br1', compPatch, {}, _); },
+		function(_) { branchBase.fork('br1', 'br2', _); },
+		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _); },
+		function(_) { branchBase.tip('br2', _.to('source')); },
+		function(_) { branchBase.merge('br1', this.source, {strong: true}, _); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz3'); _(); },
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar3'); _(); }, // The value on the source branch
+], done)();
+```
+
 <a name="composite-patch"></a>
 # composite patch
 <a name="composite-patch-apply"></a>

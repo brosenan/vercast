@@ -17,6 +17,9 @@
     BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts
     BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
     BranchBase .merge(branch, source, options, cb(err)) should apply the patches contributing to source to the tip of branch: [2K[0G  ․ BranchBase .merge(branch, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
+    BranchBase .merge(branch, source, options, cb(err)) should emit an error by default if a merge conflict is found: [2K[0G  ․ BranchBase .merge(branch, source, options, cb(err)) should emit an error by default if a merge conflict is found
+    BranchBase .merge(branch, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes: [2K[0G  ․ BranchBase .merge(branch, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
+    BranchBase .merge(branch, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict: [2K[0G  ․ BranchBase .merge(branch, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
     composite patch apply should return no result if none of the underlying patches return result: [2K[0G  ․ composite patch apply should return no result if none of the underlying patches return result
@@ -104,5 +107,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  104 passing (187 ms)
+  107 passing (275 ms)
 

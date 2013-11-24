@@ -64,12 +64,13 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 	    function(_) { evalEnv.hash(source, _.to('source')); },
 	    function(_) { evalEnv.hash(this.dest, _.to('dest')); },
 	    function(_) { graphDB.findCommonAncestor(this.source.$hash$, this.dest.$hash$, _.to('ancestor', 'path1', 'path2')); },
-	    function(_) { self.trans(branch, createPathPatch(this.path1), options, cb); },
+	    function(_) { self.trans(branch, createPathPatch(this.path1, options), options, cb); },
 	], cb)();
     };
 
-    function createPathPatch(path) {
+    function createPathPatch(path, options) {
 	return {_type: 'comp',
+		weak: options.weak,
 		patches: path.map(function(x) {
 		    return {$hash$: x};
 		}),
