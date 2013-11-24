@@ -126,8 +126,6 @@ describe('BranchBase', function(){
 		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 	    ], done)();
-	    
 	});
-
     });
 });

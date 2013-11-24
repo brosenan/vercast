@@ -18,6 +18,7 @@
     BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
+    composite patch apply should return no result if none of the underlying patches return result: [2K[0G  ․ composite patch apply should return no result if none of the underlying patches return result
     composite patch apply weak should not apply conflicting patches: [2K[0G  ․ composite patch apply weak should not apply conflicting patches
     composite patch apply weak should report the conflicting patch in the results: [2K[0G  ․ composite patch apply weak should report the conflicting patch in the results
     composite patch apply weak should provide $badPatch in nested patches: [2K[0G  ․ composite patch apply weak should provide $badPatch in nested patches
@@ -101,5 +102,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  101 passing (176 ms)
+  102 passing (167 ms)
 

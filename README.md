@@ -335,6 +335,22 @@ util.seq([
 ], done)();
 ```
 
+should return no result if none of the underlying patches return result.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
+		    {_type: 'add', amount: 1},
+		    {_type: 'add', amount: 2},
+		    {_type: 'add', amount: 3},
+		    {_type: 'add', amount: 4},
+		    {_type: 'add', amount: 5},
+		]}, false, _.to('s1', 'res')); },
+		function(_) { assert.equal(typeof this.res, 'undefined'); _(); },
+], done)();
+```
+
 <a name="composite-patch-apply-weak"></a>
 ### weak
 should not apply conflicting patches.
