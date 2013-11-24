@@ -13,6 +13,7 @@
     BranchBase .init(branchName, evaluator, args, cb(err)) should create a new branch with the given evaluator and arguments: [2K[0G  ․ BranchBase .init(branchName, evaluator, args, cb(err)) should create a new branch with the given evaluator and arguments
     BranchBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
     BranchBase .trans(branch, patch, options, cb(err)) should retry and reapply the patch over the new tip if the tip moves during the transition: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should retry and reapply the patch over the new tip if the tip moves during the transition
+    BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
     composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
     composite patch apply weak should not apply conflicting patches: [2K[0G  ․ composite patch apply weak should not apply conflicting patches
@@ -97,5 +98,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  97 passing (141 ms)
+  98 passing (146 ms)
 

@@ -89,5 +89,25 @@ describe('BranchBase', function(){
 			      assert.equal(this.c, 'baz2'); _(); },
 	    ], done)();
 	});
+	it('should retry the given number of times', function(done){
+	    util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { tipDB.retrieve('br', _.to('tip')); },
+		function(_) { evalEnv.trans(this.tip, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, _.to('s1')); },
+		function(_) { var p = util.parallel(2, _);
+			      branchBase.trans('br', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {retries: 1}, p);
+			      tipDB.modify('br', this.tip, this.s1, p); // This will be done before the transition on c completes
+			    },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.b, 'bar2'); // Both changes apply
+			      assert.equal(this.c, 'baz2'); _(); },
+	    ], function(err) {
+		assert(err, 'An error needs to be emitted');
+		done(err.message == 'Retries exhasted trying to modify state of branch br' ? undefined : err);
+	    })();
+	});
+
     });
 });
