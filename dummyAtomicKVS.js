@@ -15,7 +15,10 @@ module.exports = function() {
 	if(!(key in data)) {
 	    return cb(new Error('Key ' + key + ' was not found'));
 	}
-	cb(undefined, data[key]);
+	var value = data[key]
+	setTimeout(function() { 
+	    cb(undefined, value);
+	}, 1);
     };
     this.modify = function(key, oldVal, newVal, cb) {
 	if(data[key] != oldVal) {

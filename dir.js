@@ -5,6 +5,14 @@ exports.init = function(args, ctx) {
 };
 
 exports.apply = function(state, patch, unapply, ctx) {
+    if(!patch._path) {
+	throw new Error('Missing path in patch ' + patch._type + 
+			(patch._at_path ? ' at path: ' + patch._at_path.join('/') : ''));
+    }
+    if(patch._path.length == 0) {
+	console.log(state);
+	throw new Error('Empty path in patch ' + patch._type + ' at path: ' + patch._at_path.join('/'));
+    }
     var name = patch._path.shift();
     if(patch._path.length == 0) {
 	var methodName = (unapply ? 'undo_' : 'do_') + patch._type;
@@ -13,8 +21,13 @@ exports.apply = function(state, patch, unapply, ctx) {
 	}
     }
     if(!state[name]) {
-	throw new Error('Invalid path: ' + name);
+	throw new Error('Invalid path: ' + name + 
+			(patch._at_path ? ' at path: ' + patch._at_path.join('/') : ''));
     }
+    if(!patch._at_path) {
+	patch._at_path = [];
+    }
+    patch._at_path.push(name);
     util.seq([
 	function(_) { ctx.apply(state[name], patch, unapply, _.to('child', 'res')); },
 	function(_) { ctx.hash(this.child, _.to('child')); },

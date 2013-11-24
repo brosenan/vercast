@@ -21,11 +21,23 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 	], cb)();
     };
     this.trans = function(branchName, patch, options, cb) {
+	var retries = options.retries || 3;
 	util.seq([
 	    function(_) { tipDB.retrieve(branchName, _.to('tip')); },
-	    function(_) { evalEnv.trans(this.tip, patch, _.to('newTip')); },
-	    function(_) { tipDB.modify(branchName, this.tip, this.newTip, _); },
+	    function(_) { tryModifyState(branchName, this.tip, patch, retries, _); },
 	], cb)();
-
+    };
+    function tryModifyState(branchName, tip, patch, retries, cb) {
+	if(retries == 0) {
+	    return cb(new Error('Retries exhasted trying to modify state of branch ' + branchName));
+	}
+	util.seq([
+	    function(_) { evalEnv.hash(patch, _.to('patch')); },
+	    function(_) { evalEnv.trans(tip, this.patch, _.to('desiredTip')); },
+	    function(_) { tipDB.modify(branchName, tip, this.desiredTip, _.to('newTip')); },
+	    function(_) { if(this.desiredTip == this.newTip) { cb(); }
+			  else { tryModifyState(branchName, this.newTip, this.patch, retries - 1, cb); }
+			},
+	], cb)();
     };
 };

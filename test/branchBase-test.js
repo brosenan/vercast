@@ -66,9 +66,28 @@ describe('BranchBase', function(){
 		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bat'); _(); },
 	    ], done)();
-
 	});
-
+	var compPatch = {_type: 'comp', patches: [
+	    {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
+	    {_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
+	    {_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
+	    {_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
+	]};
+	it('should retry and reapply the patch over the new tip if the tip moves during the transition', function(done){
+	    util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { tipDB.retrieve('br', _.to('tip')); },
+		function(_) { evalEnv.trans(this.tip, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, _.to('s1')); },
+		function(_) { var p = util.parallel(2, _);
+			      branchBase.trans('br', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, p);
+			      tipDB.modify('br', this.tip, this.s1, p); // This will be done before the transition on c completes
+			    },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.b, 'bar2'); // Both changes apply
+			      assert.equal(this.c, 'baz2'); _(); },
+	    ], done)();
+	});
     });
-
 });

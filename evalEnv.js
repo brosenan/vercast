@@ -49,6 +49,9 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    hash: function(obj, cb) {
 		hashDB.hash(obj, cb);
 	    },
+	    unhash: function(hash, cb) {
+		hashDB.unhash(hash, cb);
+	    },
 	};
     }
 
@@ -73,13 +76,14 @@ module.exports = function(hashDB, opCache, evaluators) {
 
     this.trans = function(s1, patch, cb) {
 	util.seq([
+	    function(_) { hashDB.unhash(patch, _.to('patch')); },
 	    function(_) { hashDB.hash(s1, _.to('h1')); },
-	    function(_) { hashDB.hash(patch, _.to('hp')); },
+	    function(_) { hashDB.hash(this.patch, _.to('hp')); },
 	    function(_) { this.key = this.h1.$hash$ + ':' + this.hp.$hash$;
 			  opCache.check(this.key, _.to('cached')); },
 	    function(_) { if(this.cached) { cb(undefined, this.cached.s, undefined, this.cached.eff, false); }
 			  else { _(); } },
-	    function(_) { self.apply(s1, patch, false, _.to('s2', 'res', 'eff', 'conf')); },
+	    function(_) { self.apply(s1, this.patch, false, _.to('s2', 'res', 'eff', 'conf')); },
 	    function(_) { hashDB.hash(this.s2, _.to('h2')); },
 	    function(_) { 
 		if(!this.conf && typeof(this.res) == 'undefined') { 
