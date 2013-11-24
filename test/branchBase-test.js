@@ -108,6 +108,17 @@ describe('BranchBase', function(){
 		done(err.message == 'Retries exhasted trying to modify state of branch br' ? undefined : err);
 	    })();
 	});
-	
+	it('should emit an error by default if the patch conflicts', function(done){
+	    util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {}, _); },
+	    ], function(err) {
+		assert(err, 'There should be an error');
+		done(err.message == 'Conflicting change in transition on branch br' ? undefined : err);
+	    })();
+
+	});
+
     });
 });

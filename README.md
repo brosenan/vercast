@@ -275,6 +275,19 @@ util.seq([
 })();
 ```
 
+should emit an error by default if the patch conflicts.
+
+```js
+util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {}, _); },
+], function(err) {
+		assert(err, 'There should be an error');
+		done(err.message == 'Conflicting change in transition on branch br' ? undefined : err);
+})();
+```
+
 <a name="composite-patch"></a>
 # composite patch
 <a name="composite-patch-apply"></a>
