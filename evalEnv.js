@@ -75,24 +75,28 @@ module.exports = function(hashDB, opCache, evaluators) {
     }
 
     this.trans = function(s1, patch, cb) {
-	util.seq([
-	    function(_) { hashDB.unhash(patch, _.to('patch')); },
-	    function(_) { hashDB.hash(s1, _.to('h1')); },
-	    function(_) { hashDB.hash(this.patch, _.to('hp')); },
-	    function(_) { this.key = this.h1.$hash$ + ':' + this.hp.$hash$;
-			  opCache.check(this.key, _.to('cached')); },
-	    function(_) { if(this.cached) {
-		this.cached = JSON.parse(this.cached);
-		cb(undefined, this.cached.s, undefined, this.cached.eff, false); }
-			  else { _(); } },
-	    function(_) { self.apply(s1, this.patch, false, _.to('s2', 'res', 'eff', 'conf')); },
-	    function(_) { hashDB.hash(this.s2, _.to('h2')); },
-	    function(_) { 
-		if(!this.conf && typeof(this.res) == 'undefined') { 
-		    opCache.store(this.key, JSON.stringify({s: this.h2, eff: this.eff}), _); 
-		    } else { _(); } },
-	    function(_) { cb(undefined, this.h2, this.res, this.eff, this.conf); },
-	], cb)();
+	util.depend([
+	    function(_) { hashDB.unhash(patch, _('patch')); },
+	    function(_) { hashDB.hash(s1, _('h1')); },
+	    function(patch, _) { hashDB.hash(patch, _('hp')); },
+	    function(h1, hp, _) { this.key = h1.$hash$ + ':' + hp.$hash$;
+			  opCache.check(this.key, _('cached')); },
+	    function(cached, _) { if(cached) {
+		var cachedObj = JSON.parse(cached);
+		cb(undefined, cachedObj.s, undefined, cachedObj.eff, false);
+	    } else { 
+		_('notCached')(); 
+	    }},
+	    function(notCached, patch, _) { self.apply(s1, patch, false, _('s2', 'res', 'eff', 'conf')); },
+	    function(s2, _) { hashDB.hash(s2, _('h2')); },
+	    function(conf, res, h2, eff, _) { 
+		if(!conf && typeof(res) == 'undefined') { 
+		    opCache.store(this.key, JSON.stringify({s: h2, eff: eff}), _('stored')); 
+		} else {
+		    _('stored')();
+		} },
+	    function(stored, h2, res, eff, conf, _) { cb(undefined, h2, res, eff, conf);  },
+	], cb);
     };
 
     this.query = function(s, q, cb) {
