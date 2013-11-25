@@ -125,5 +125,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  125 passing (615 ms)
+  125 passing (586 ms)
 

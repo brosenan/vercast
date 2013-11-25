@@ -247,10 +247,12 @@ exports.repeat = function(times, resField, initial, loop, callback) {
 exports.depend = function(funcs, callback) {
     var ctx = {};
     var values = {};
+    var isOK = true;
     evaluateFuncs();
 
     function evaluateFuncs() {
-	if(funcs.length == 0) {
+	if(!isOK) return;
+	if(funcs.length == 0 && isOK) {
 	    return callback();
 	}
 	for(var i = funcs.length - 1; i >=0; i--) {
@@ -274,6 +276,7 @@ exports.depend = function(funcs, callback) {
 	try {
 	    f[0].apply(ctx, vals);
 	} catch(e) {
+	    isOK = false;
 	    return callback(e);
 	}
     }
@@ -282,6 +285,7 @@ exports.depend = function(funcs, callback) {
 	    var argNames = Array.prototype.slice.call(arguments, 0);
 	    return function(err) {
 		if(err) {
+		    isOK = false;
 		    return callback(err);
 		}
 		for(var i = 0; i < argNames.length; i++) {

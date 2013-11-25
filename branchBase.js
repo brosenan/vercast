@@ -35,16 +35,19 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 	if(retries == 0) {
 	    return cb(new Error('Retries exhasted trying to modify state of branch ' + branchName));
 	}
-	util.seq([
-	    function(_) { evalEnv.hash(patch, _.to('patch')); },
-	    function(_) { evalEnv.trans(tip, this.patch, _.to('desiredTip', 'res', 'eff', 'conf')); },
-	    function(_) { if(this.conf && !options.strong) { cb(new Error('Conflicting change in transition on branch ' + branchName)); }
-			  else { _(); }},
-	    function(_) { tipDB.modify(branchName, tip, this.desiredTip, _.to('newTip')); },
-	    function(_) { if(this.desiredTip == this.newTip) { cb(undefined, tip, this.newTip); }
-			  else { tryModifyState(branchName, this.newTip, this.patch, retries - 1, options, cb); }
+	util.depend([
+	    function(_) { evalEnv.hash(patch, _('patchHash')); },
+	    function(patchHash, _) { evalEnv.trans(tip, patchHash, _('desiredTip', 'res', 'eff', 'conf')); },
+	    function(conf, _) { if(conf && !options.strong) { 
+		cb(new Error('Conflicting change in transition on branch ' + branchName)); 
+	    } else {
+		_('noConf')(undefined, true);
+	    } },
+	    function(noConf, desiredTip, _) { tipDB.modify(branchName, tip, desiredTip, _('newTip')); },
+	    function(desiredTip, newTip, patchHash, _) { if(desiredTip == newTip) { cb(undefined, tip, newTip); }
+			  else { tryModifyState(branchName, newTip, patchHash, retries - 1, options, cb); }
 			},
-	], cb)();
+	], cb);
     };
 
     this.fork = function(source, target, cb) {
@@ -59,13 +62,14 @@ module.exports = function(evalEnv, tipDB, graphDB) {
     };
 
     this.merge = function(dest, source, options, cb) {
-	util.seq([
-	    function(_) { tipDB.retrieve(dest, _.to('dest')); },
-	    function(_) { tipDB.retrieve(source, _.to('source')); },
-	    function(_) { evalEnv.hash(this.source, _.to('source')); },
-	    function(_) { graphDB.findCommonAncestor(this.source.$hash$, this.dest.$hash$, _.to('ancestor', 'path1', 'path2')); },
-	    function(_) { self.trans(dest, createPathPatch(this.path1, options), options, cb); },
-	], cb)();
+	util.depend([
+	    function(_) { tipDB.retrieve(dest, _('dest')); },
+	    function(dest, _) { evalEnv.hash(dest, _('destHash')); },
+	    function(_) { tipDB.retrieve(source, _('source')); },
+	    function(source, _) { evalEnv.hash(source, _('sourceHash')); },
+	    function(sourceHash, destHash, _) { graphDB.findCommonAncestor(sourceHash.$hash$, destHash.$hash$, _('ancestor', 'path1', 'path2')); },
+	    function(path1, _) { self.trans(dest, createPathPatch(path1, options), options, cb); },
+	], cb);
     };
 
     function createPathPatch(path, options) {
