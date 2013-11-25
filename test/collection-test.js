@@ -11,6 +11,10 @@ var evaluators = {
     coll: require('../collection.js'),
 };
 
+assert.lessThan = function(less, more) {
+    assert(less < more, less + ' < ' + more);
+}
+
 describe('collection', function(){
     var evalEnv;
     var hashDB;
@@ -37,9 +41,19 @@ describe('collection', function(){
 		function(_) { evalEnv.query(this.state, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.deepEqual(this.res, {foo: 'bar'}); _(); },
 	    ], done)();
-
 	});
-
+/*	it('should perform O(NlogN) write operations when inserting N elements', function(done){
+	    var baseline = process._num_kv_bytes;
+	    var N = 3;
+	    util.seq([
+		function(_) { evalEnv.init('coll', {}, _.to('state')); },
+		function(_) { util.repeat(N, 'state', this.state, function(_, i) { 
+		    evalEnv.trans(this.state, {_type: 'add', key: i, val: i*2}, _.to('state')); }, _); 
+			    },
+		function(_) { assert.lessThan(process._num_kv_bytes - baseline, N * Math.log(N) * 5 + 136); _(); },
+		function(_) { evalEnv.query(this.state, {_type: 'get'}, _.to('res')); },
+		function(_) { assert.equal(this.res[30], 60); _(); },
+	    ], done)();
+	});*/
     });
-
 });

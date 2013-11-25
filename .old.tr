@@ -91,6 +91,22 @@
     HashedApp branchTrans should perform a transition, updating the tip of the branch: [2K[0G  ․ HashedApp branchTrans should perform a transition, updating the tip of the branch
     inverse patch patch should unapply the underlying patch: [2K[0G  ․ inverse patch patch should unapply the underlying patch
     inverse patch unpatch should apply the undelying patch: [2K[0G  ․ inverse patch unpatch should apply the undelying patch
+    util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order: [2K[0G  ․ util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
+    util seq(funcs, done) should handle errors by calling done with the error: [2K[0G  ․ util seq(funcs, done) should handle errors by calling done with the error
+    util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception: [2K[0G  ․ util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
+    util seq(funcs, done) should call done with no error if all is successful: [2K[0G  ․ util seq(funcs, done) should call done with no error if all is successful
+    util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err): [2K[0G  ․ util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err)
+    util timeUid() should return a unique string: [2K[0G  ․ util timeUid() should return a unique string
+    util timeUid() should return a larger value when called over one millisecond later: [2K[0G  ․ util timeUid() should return a larger value when called over one millisecond later
+    util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial: [2K[0G  ․ util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial
+    util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed: [2K[0G  ․ util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed
+    util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode(): [2K[0G  ․ util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode()
+    util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times: [2K[0G  ․ util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times
+    util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback: [2K[0G  ․ util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback
+    util Worker should call a given function iteratively, in given intervals, until stopped: [2K[0G  ․ util Worker should call a given function iteratively, in given intervals, until stopped
+    util Worker should assure that no more than a given number of instances of the function are running at any given time: [2K[0G  ․ util Worker should assure that no more than a given number of instances of the function are running at any given time
+    util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation: [2K[0G  ․ util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
+    util depend should execute the given callback functions in the order of their dependencies: [2K[0G  ․ util depend should execute the given callback functions in the order of their dependencies
     VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method
@@ -109,5 +125,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  109 passing (263 ms)
+  125 passing (615 ms)
 

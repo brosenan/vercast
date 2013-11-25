@@ -22,14 +22,14 @@ module.exports = function(evalEnv, tipDB, graphDB) {
     };
     this.trans = function(branchName, patch, options, cb) {
 	var retries = options.retries || 3;
-	util.seq([
-	    function(_) { tipDB.retrieve(branchName, _.to('tip')); },
-	    function(_) { tryModifyState(branchName, this.tip, patch, retries, options, _.to('origTip', 'newTip')); },
-	    function(_) { evalEnv.hash(this.origTip, _.to('s1')); },
-	    function(_) { evalEnv.hash(this.newTip, _.to('s2')); },
-	    function(_) { evalEnv.hash(patch, _.to('patch')); },
-	    function(_) { graphDB.addEdge(this.s1.$hash$, this.patch.$hash$, this.s2.$hash$, _); },
-	], cb)();
+	util.depend([
+	    function(_) { tipDB.retrieve(branchName, _('tip')); },
+	    function(tip, _) { tryModifyState(branchName, tip, patch, retries, options, _('origTip', 'newTip')); },
+	    function(origTip, _) { evalEnv.hash(origTip, _('s1')); },
+	    function(newTip, _) { evalEnv.hash(newTip, _('s2')); },
+	    function(_) { evalEnv.hash(patch, _('patchHash')); },
+	    function(s1, s2, patchHash, _) { graphDB.addEdge(s1.$hash$, patchHash.$hash$, s2.$hash$, cb); },
+	], cb);
     };
     function tryModifyState(branchName, tip, patch, retries, options, cb) {
 	if(retries == 0) {

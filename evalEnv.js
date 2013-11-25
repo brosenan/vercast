@@ -81,13 +81,15 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    function(_) { hashDB.hash(this.patch, _.to('hp')); },
 	    function(_) { this.key = this.h1.$hash$ + ':' + this.hp.$hash$;
 			  opCache.check(this.key, _.to('cached')); },
-	    function(_) { if(this.cached) { cb(undefined, this.cached.s, undefined, this.cached.eff, false); }
+	    function(_) { if(this.cached) {
+		this.cached = JSON.parse(this.cached);
+		cb(undefined, this.cached.s, undefined, this.cached.eff, false); }
 			  else { _(); } },
 	    function(_) { self.apply(s1, this.patch, false, _.to('s2', 'res', 'eff', 'conf')); },
 	    function(_) { hashDB.hash(this.s2, _.to('h2')); },
 	    function(_) { 
 		if(!this.conf && typeof(this.res) == 'undefined') { 
-		    opCache.store(this.key, {s: this.h2, eff: this.eff}, _); 
+		    opCache.store(this.key, JSON.stringify({s: this.h2, eff: this.eff}), _); 
 		    } else { _(); } },
 	    function(_) { cb(undefined, this.h2, this.res, this.eff, this.conf); },
 	], cb)();

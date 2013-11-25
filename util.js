@@ -229,3 +229,73 @@ exports.TracingDispatcher = function(disp, name) {
 	}));
     };
 };
+
+exports.repeat = function(times, resField, initial, loop, callback) {
+    var seq = [];
+    seq.push(function(_) { this[resField] = initial; _(); });
+    for(var i = 0; i < times; i++) {
+	seq.push(loopFunc(i));
+    }
+    seq.push(function(_) { callback.to(resField)(undefined, this[resField]); });
+    exports.seq(seq, callback)();
+
+    function loopFunc(i) {
+	return function(_) { loop.call(this, _, i); };
+    }
+};
+
+exports.depend = function(funcs, callback) {
+    var ctx = {};
+    var values = {};
+    evaluateFuncs();
+
+    function evaluateFuncs() {
+	if(funcs.length == 0) {
+	    return callback();
+	}
+	for(var i = funcs.length - 1; i >=0; i--) {
+	    if(!funcs[i]) continue;
+	    evaluateFunc(funcs[i], i);
+	}
+    }
+    
+    function evaluateFunc(func, i) {
+	var args = getFuncArgs(func);
+	var vals = [];
+	for(var j = 0; j < args.length; j++) {
+	    if(args[j] == '_') {
+		vals.push(underscoreFunc());
+	    } else {
+		if(!(args[j] in values)) return;
+		vals.push(values[args[j]]);
+	    }
+	}
+	var f = funcs.splice(i, 1);
+	try {
+	    f[0].apply(ctx, vals);
+	} catch(e) {
+	    return callback(e);
+	}
+    }
+    function underscoreFunc() {
+	return function() {
+	    var argNames = Array.prototype.slice.call(arguments, 0);
+	    return function(err) {
+		if(err) {
+		    return callback(err);
+		}
+		for(var i = 0; i < argNames.length; i++) {
+		    //console.log(argNames[i] + ' <- ' + arguments[i+1]);
+		    values[argNames[i]] = arguments[i+1];
+		}
+		evaluateFuncs();
+	    };
+	};
+    }
+
+    function getFuncArgs(func) {
+	var str = func.toString();
+	str = str.match(/^[^(]*[(]([^)]*)[)]/)[1];
+	return str.split(/,[ \t]*/);
+    };
+};

@@ -60,6 +60,18 @@
    - [inverse patch](#inverse-patch)
      - [patch](#inverse-patch-patch)
      - [unpatch](#inverse-patch-unpatch)
+   - [util](#util)
+     - [seq(funcs, done)](#util-seqfuncs-done)
+       - [_.to(names...)](#util-seqfuncs-done-_tonames)
+     - [timeUid()](#util-timeuid)
+     - [Encoder(allowedSpecial)](#util-encoderallowedspecial)
+       - [.encode(str)](#util-encoderallowedspecial-encodestr)
+       - [.decode(enc)](#util-encoderallowedspecial-decodeenc)
+     - [parallel(n, callback)](#util-paralleln-callback)
+     - [Worker](#util-worker)
+     - [GrowingInterval](#util-growinginterval)
+     - [repeat](#util-repeat)
+     - [depend](#util-depend)
    - [VCObj](#vcobj)
      - [createObject(cls, s0, cb(err, h0))](#vcobj-createobjectcls-s0-cberr-h0)
      - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
@@ -1503,6 +1515,212 @@ util.seq([
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 2); _(); },
 ], done)();
+```
+
+<a name="util"></a>
+# util
+<a name="util-seqfuncs-done"></a>
+## seq(funcs, done)
+should return a function that runs asynchronous functions in funcs in order.
+
+```js
+var d;
+var f = util.seq([
+    function(_) {d = done; setTimeout(_, 10);},
+    function(_) {d();}
+], function() {});
+f();
+```
+
+should handle errors by calling done with the error.
+
+```js
+util.seq([
+    function(_) {_(new Error('someError'));},
+    function(_) {assert(0, 'This should not be called'); _()}
+], function(err) { assert.equal(err.message, 'someError'); done(); })();
+```
+
+should handle exceptions thrown by functions by calling done with the exception.
+
+```js
+util.seq([
+    function(_) { throw new Error('someError');},
+    function(_) {assert(0, 'This should not be called'); _()}
+], function(err) { assert.equal(err.message, 'someError'); done(); })();
+```
+
+should call done with no error if all is successful.
+
+```js
+util.seq([
+    function(_) {setTimeout(_, 10);},
+    function(_) {setTimeout(_, 10);},
+    function(_) {setTimeout(_, 10);}
+], done)();
+```
+
+<a name="util-seqfuncs-done-_tonames"></a>
+### _.to(names...)
+should return a function that places the corresponding arguments in "this" (skipping err).
+
+```js
+util.seq([
+    function(_) { _.to('a', 'b', 'c')(undefined, 1, 2, 3); },
+    function(_) { assert.equal(this.a, 1); _(); },
+    function(_) { assert.equal(this.b, 2); _(); },
+    function(_) { assert.equal(this.c, 3); _(); },
+], done)();
+```
+
+<a name="util-timeuid"></a>
+## timeUid()
+should return a unique string.
+
+```js
+var vals = {};
+for(var i = 0; i < 10000; i++) {
+    var tuid = util.timeUid();
+    assert.equal(typeof(tuid), 'string');
+    assert(!(tuid in vals), 'Value not unique');
+    vals[tuid] = 1;
+}
+```
+
+should return a larger value when called over one millisecond later.
+
+```js
+var a, b;
+util.seq([
+    function(_) { a = util.timeUid(); setTimeout(_, 2); },
+    function(_) { b = util.timeUid(); setTimeout(_, 2); },
+    function(_) { assert(b > a, 'Later value is not larger than earlier'); _();},
+], done)();
+```
+
+<a name="util-encoderallowedspecial"></a>
+## Encoder(allowedSpecial)
+<a name="util-encoderallowedspecial-encodestr"></a>
+### .encode(str)
+should encode str in a way that will only include letters, digits or characters from allowedSpecial.
+
+```js
+var specialChars = '!@#$%^&*()_+<>?,./~`\'"[]{}\\|';
+var allowed = '_-+';
+var encoder = new util.Encoder(allowed);
+var enc = encoder.encode('abc' + specialChars + 'XYZ');
+for(var i = 0; i < specialChars.length; i++) {
+    if(allowed.indexOf(specialChars.charAt(i)) != -1) continue; // Ignore allowed characters
+    assert.equal(enc.indexOf(specialChars.charAt(i)), -1);
+}
+```
+
+should throw an exception if less than three special characters are allowed.
+
+```js
+assert.throws(function() {
+    util.encode('foo bar', '_+');
+}, 'at least three special characters must be allowed');
+```
+
+<a name="util-encoderallowedspecial-decodeenc"></a>
+### .decode(enc)
+should decode a string encoded with .encode().
+
+```js
+var encoder = new util.Encoder(allowed);
+var str = 'This is a test' + specialChars + ' woo hoo\n';
+assert.equal(encoder.decode(encoder.encode(str)), str);
+```
+
+<a name="util-paralleln-callback"></a>
+## parallel(n, callback)
+should return a callback function that will call "callback" after it has been called n times.
+
+```js
+var c = util.parallel(100, done);
+for(var i = 0; i < 200; i++) {
+    setTimeout(c, 20);
+}
+```
+
+should call the callback immediately with an error if an error is given to the parallel callback.
+
+```js
+var c = util.parallel(4, function(err) {
+    assert(err, 'This should fail');
+    done();
+});
+c();
+c();
+c(new Error('Some error'));
+c(); // This will not call the callback
+```
+
+<a name="util-worker"></a>
+## Worker
+should call a given function iteratively, in given intervals, until stopped.
+
+```js
+var n = 0;
+function f(callback) {
+    n++;
+    callback();
+}
+var worker = new util.Worker(f, 10 /*ms intervals*/);
+worker.start();
+setTimeout(util.protect(done, function() {
+    worker.stop();
+    assert(n >= 9 && n <= 11, 'n should be 10 +- 1 (' + n + ')');
+    done();
+}), 100);
+```
+
+should assure that no more than a given number of instances of the function are running at any given time.
+
+```js
+var n = 0;
+function f(callback) {
+    n++;
+    setTimeout(callback, 50); // Each run will take 50 ms
+}
+var worker = new util.Worker(f, 10 /*ms intervals*/, 2 /* instances in parallel */);
+worker.start();
+setTimeout(util.protect(done, function() {
+    worker.stop();
+    // Two parallel 50 ms instances over 100 ms gives us 4 instances.
+    assert(n >= 3 && n <= 5, 'n should be 4 +- 1 (' + n + ')');
+    done();
+}), 100);
+```
+
+<a name="util-repeat"></a>
+## repeat
+should repeat the given loop a given number of times, sending the iteration number to each invocation.
+
+```js
+var sum = 0;
+util.seq([
+    function(_) { util.repeat(10, 'foo', 0, function(_, i) { 
+	sum += i; _(); 
+    }, _); },
+    function(_) { assert.equal(sum, 9 * 10 / 2); _(); /*1+2+3...+9*/ },
+], done)();
+```
+
+<a name="util-depend"></a>
+## depend
+should execute the given callback functions in the order of their dependencies.
+
+```js
+util.depend([
+    function(_) { _('a')(undefined, 2); },
+    function(_) { _('b')(undefined, 3); },
+    function(a, b, _) { _('c', 'd')(undefined, a+b, b-a); },
+    function(c, d, _) { assert.equal(c, 5);
+			assert.equal(d, 1);
+			done(); },
+], function(err) { done(err || new Error('This should not have been called')); });
 ```
 
 <a name="vcobj"></a>
