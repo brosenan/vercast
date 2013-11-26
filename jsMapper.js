@@ -9,8 +9,12 @@ exports.apply = function(state, patch, unapply, ctx) {
 	function(_) { ctx.unhash(state, _('mapper')); },
 	function(_) { ctx.unhash(patch, _('patch')); },
 	function(mapper, patch, _) {
-	    var map = eval('(' + mapper.map + ')');
-	    map(patch);
+	    function emit(p) {
+		ctx.effect(p);
+	    }
+	    var methodName = unapply ? 'unmap' : 'map';
+	    var map = eval('(' + mapper[methodName] + ')');
+	    map.call(mapper, patch);
 	    ctx.ret(state);
 	},
     ], ctx.err);

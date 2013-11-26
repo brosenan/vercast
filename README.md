@@ -1616,7 +1616,7 @@ should invoke the map() function defined in the state, with the patch as paramet
 ```js
 process.__foo__ = 'bar';
 var mapper = fun2str({
-		map: function(patch, ctx) {
+		map: function(patch) {
 		    process.__foo__ = patch;
 		},
 });
@@ -1624,6 +1624,57 @@ util.seq([
 		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _); },
 		function(_) { assert.deepEqual(process.__foo__, {_type: 'foo', bar: 'baz'}); _(); },
+], done)();
+```
+
+should pass the state as the map function's "this" argument.
+
+```js
+process.__foo__ = 'bar';
+var mapper = fun2str({
+		map: function(patch) {
+		    process.__foo__ = this.foo;
+		},
+		foo: 'baz',
+});
+util.seq([
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _); },
+		function(_) { assert.equal(process.__foo__, 'baz'); _(); },
+], done)();
+```
+
+should interpret invocations of the "emit" function as effect.
+
+```js
+var mapper = fun2str({
+		map: function(patch) {
+		    emit({_type: 'bar', baz: 'bat'});
+		},
+});
+util.seq([
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _.to('s1', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{_type: 'bar', baz: 'bat'}]); _(); },
+], done)();
+```
+
+should invoke unmap() when unapplied.
+
+```js
+process.__foo__ = 'bar';
+var mapper = fun2str({
+		map: function(patch) {
+		    throw new Error('map() should not be called');
+		},
+		unmap: function(patch) {
+		    emit({foo: 'bar'});
+		},
+});
+util.seq([
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'inv', patch: {_type: 'foo', bar: 'baz'}}, _.to('s1', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{foo: 'bar'}]); _(); },
 ], done)();
 ```
 

@@ -96,6 +96,9 @@
     inverse patch unpatch should apply the undelying patch: [2K[0G  ․ inverse patch unpatch should apply the undelying patch
     jsMapper init should take the args as state: [2K[0G  ․ jsMapper init should take the args as state
     jsMapper map should invoke the map() function defined in the state, with the patch as parameter when applied: [2K[0G  ․ jsMapper map should invoke the map() function defined in the state, with the patch as parameter when applied
+    jsMapper map should pass the state as the map function's "this" argument: [2K[0G  ․ jsMapper map should pass the state as the map function's "this" argument
+    jsMapper map should interpret invocations of the "emit" function as effect: [2K[0G  ․ jsMapper map should interpret invocations of the "emit" function as effect
+    jsMapper map should invoke unmap() when unapplied: [2K[0G  ․ jsMapper map should invoke unmap() when unapplied
     util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order: [2K[0G  ․ util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
     util seq(funcs, done) should handle errors by calling done with the error: [2K[0G  ․ util seq(funcs, done) should handle errors by calling done with the error
     util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception: [2K[0G  ․ util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
@@ -130,5 +133,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  130 passing (670 ms)
+  133 passing (687 ms)
 
