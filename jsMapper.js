@@ -13,6 +13,9 @@ exports.apply = function(state, patch, unapply, ctx) {
 		ctx.effect(p);
 	    }
 	    var methodName = unapply ? 'unmap' : 'map';
+	    if(mapper[methodName + '_' + patch._type]) {
+		methodName = methodName + '_' + patch._type;
+	    }
 	    var map = eval('(' + mapper[methodName] + ')');
 	    map.call(mapper, patch);
 	    ctx.ret(state);

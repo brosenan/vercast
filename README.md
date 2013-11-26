@@ -1662,7 +1662,6 @@ util.seq([
 should invoke unmap() when unapplied.
 
 ```js
-process.__foo__ = 'bar';
 var mapper = fun2str({
 		map: function(patch) {
 		    throw new Error('map() should not be called');
@@ -1675,6 +1674,25 @@ util.seq([
 		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'inv', patch: {_type: 'foo', bar: 'baz'}}, _.to('s1', 'res', 'eff')); },
 		function(_) { assert.deepEqual(this.eff, [{foo: 'bar'}]); _(); },
+], done)();
+```
+
+should call a method named map_foo() for patch where _type="foo", if such a method exists.
+
+```js
+var mapper = fun2str({
+		map: function(patch) {
+		    throw new Error('map() should not be called');
+		},
+		map_foo: function(patch) {
+		    emit({foo: 'bar1'});
+		    emit({foo: 'bar2'});
+		},
+});
+util.seq([
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _.to('s1', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{foo: 'bar1'}, {foo: 'bar2'}]); _(); },
 ], done)();
 ```
 
