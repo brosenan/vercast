@@ -186,6 +186,22 @@ describe('BranchBase', function(){
 		function(_) { assert.equal(this.b, 'bar3'); _(); }, // The value on the source branch
 	    ], done)();
 	});
-
+	it('should apply a back-merge correctly', function(done){
+	    util.seq([
+		function(_) { branchBase.init('br1', 'dir', {}, _); },
+		function(_) { branchBase.trans('br1', compPatch, {}, _); },
+		function(_) { branchBase.fork('br1', 'br2', _); },
+		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
+		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _); },
+		function(_) { branchBase.merge('br1', 'br2', {}, _); },
+		function(_) { branchBase.merge('br2', 'br1', {}, _); }, // merge back
+		// Check that br1 got the data from br2
+		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz2'); _(); },
+		// Check that br2 got the data from br1
+		function(_) { branchBase.query('br2', {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); },
+	    ], done)();
+	});
     });
 });

@@ -20,6 +20,7 @@
     BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found
     BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
     BranchBase .merge(dest, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict
+    BranchBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
     collection init should create an empty collection: [2K[0G  ․ collection init should create an empty collection
     collection add should add a key/value pair to the collection: [2K[0G  ․ collection add should add a key/value pair to the collection
     composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
@@ -125,5 +126,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  125 passing (639 ms)
+  126 passing (684 ms)
 

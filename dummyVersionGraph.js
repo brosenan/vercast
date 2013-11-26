@@ -19,6 +19,7 @@ module.exports = function() {
     }
 
     this.addEdge = function(src, label, dest, cb) { 
+	//console.log(src, '--', label, '->', dest);
 	mapEdge(src, label, dest, true);
 	mapEdge(dest, label, src, false);
 	cb();

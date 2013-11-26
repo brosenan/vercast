@@ -28,7 +28,8 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 	    function(origTip, _) { evalEnv.hash(origTip, _('s1')); },
 	    function(newTip, _) { evalEnv.hash(newTip, _('s2')); },
 	    function(_) { evalEnv.hash(patch, _('patchHash')); },
-	    function(s1, s2, patchHash, _) { graphDB.addEdge(s1.$hash$, patchHash.$hash$, s2.$hash$, cb); },
+	    function(s1, s2, patchHash, _) { graphDB.addEdge(s1.$hash$, patchHash.$hash$, s2.$hash$, _('done')); },
+	    function(newTip, done, _) { cb(undefined, newTip); },
 	], cb);
     };
     function tryModifyState(branchName, tip, patch, retries, options, cb) {
@@ -63,12 +64,22 @@ module.exports = function(evalEnv, tipDB, graphDB) {
 
     this.merge = function(dest, source, options, cb) {
 	util.depend([
-	    function(_) { tipDB.retrieve(dest, _('dest')); },
-	    function(dest, _) { evalEnv.hash(dest, _('destHash')); },
-	    function(_) { tipDB.retrieve(source, _('source')); },
-	    function(source, _) { evalEnv.hash(source, _('sourceHash')); },
-	    function(sourceHash, destHash, _) { graphDB.findCommonAncestor(sourceHash.$hash$, destHash.$hash$, _('ancestor', 'path1', 'path2')); },
-	    function(path1, _) { self.trans(dest, createPathPatch(path1, options), options, cb); },
+	    function(_) 
+	    { tipDB.retrieve(dest, _('dest')); },
+	    function(dest, _) 
+	    { evalEnv.hash(dest, _('destHash')); },
+	    function(_) 
+	    { tipDB.retrieve(source, _('source')); },
+	    function(source, _) 
+	    { evalEnv.hash(source, _('sourceHash')); },
+	    function(sourceHash, destHash, _) 
+	    { graphDB.findCommonAncestor(sourceHash.$hash$, destHash.$hash$, _('ancestor', 'path1', 'path2')); },
+	    function(path1, _) 
+	    { self.trans(dest, createPathPatch(path1, options), options, _('newTip')); },
+	    function(path2, _) 
+	    { evalEnv.hash(createPathPatch(path2, options), _('path2Hashed')); },
+	    function(path2Hashed, newTip, sourceHash, _) 
+	    { graphDB.addEdge(sourceHash.$hash$, path2Hashed.$hash$, newTip.$hash$, cb); },
 	], cb);
     };
 
