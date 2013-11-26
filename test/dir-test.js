@@ -126,6 +126,5 @@ describe('directory', function(){
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 	    ], done)();
 	});
-
     });
 });

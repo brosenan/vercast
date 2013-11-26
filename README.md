@@ -60,6 +60,9 @@
    - [inverse patch](#inverse-patch)
      - [patch](#inverse-patch-patch)
      - [unpatch](#inverse-patch-unpatch)
+   - [jsMapper](#jsmapper)
+     - [init](#jsmapper-init)
+     - [map](#jsmapper-map)
    - [util](#util)
      - [seq(funcs, done)](#util-seqfuncs-done)
        - [_.to(names...)](#util-seqfuncs-done-_tonames)
@@ -1589,6 +1592,38 @@ util.seq([
 		function(_) { evalEnv.apply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, true, _.to('s1')); },
 		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 2); _(); },
+], done)();
+```
+
+<a name="jsmapper"></a>
+# jsMapper
+<a name="jsmapper-init"></a>
+## init
+should take the args as state.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('jsMapper', {foo: 'bar'}, _.to('s0')); },
+		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
+		function(_) { assert.deepEqual(this.s0, {_type: 'jsMapper', foo: 'bar'}); _(); },
+], done)();
+```
+
+<a name="jsmapper-map"></a>
+## map
+should invoke the map() function defined in the state, with the patch as parameter when applied.
+
+```js
+process.__foo__ = 'bar';
+var mapper = fun2str({
+		map: function(patch, ctx) {
+		    process.__foo__ = patch;
+		},
+});
+util.seq([
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
+		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _); },
+		function(_) { assert.deepEqual(process.__foo__, {_type: 'foo', bar: 'baz'}); _(); },
 ], done)();
 ```
 
