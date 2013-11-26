@@ -113,6 +113,5 @@ describe('jsMapper', function(){
 		function(_) { assert.deepEqual(this.eff, [{foo: 'bar1'}, {foo: 'bar2'}]); _(); },
 	    ], done)();
 	});
-
     });
 });

@@ -43,6 +43,7 @@
     directory delete should re-create a child if unapplied: [2K[0G  ․ directory delete should re-create a child if unapplied
     directory delete should conflict when unapplied if the child already exists: [2K[0G  ․ directory delete should conflict when unapplied if the child already exists
     directory get_hash should return the hash of the child at the given path: [2K[0G  ․ directory get_hash should return the hash of the child at the given path
+    directory add_mapping should add a mapping to a child, so that every patch applied to that child is also applied to the mapper: [2K[0G  ․ directory add_mapping should add a mapping to a child, so that every patch applied to that child is also applied to the mapper
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
     DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist
@@ -134,5 +135,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  134 passing (683 ms)
+  135 passing (700 ms)
 

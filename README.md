@@ -27,6 +27,7 @@
      - [create](#directory-create)
      - [delete](#directory-delete)
      - [get_hash](#directory-get_hash)
+     - [add_mapping](#directory-add_mapping)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
@@ -734,6 +735,21 @@ util.seq([
 		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('child')); },
 		function(_) { evalEnv.query(this.child, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+<a name="directory-add_mapping"></a>
+## add_mapping
+should add a mapping to a child, so that every patch applied to that child is also applied to the mapper.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'x'}}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{_type: 'received', patch: {_type: 'set', _path: [], _at_path: ['a'], from: 'x', to: 'y'}}]); _(); },
 ], done)();
 ```
 

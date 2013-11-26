@@ -1,7 +1,7 @@
 var util = require('./util.js');
 
 exports.init = function(args, ctx) {
-    ctx.ret({});
+    ctx.ret({v:{}, m:{}});
 };
 
 exports.apply = function(state, patch, unapply, ctx) {
@@ -20,7 +20,7 @@ exports.apply = function(state, patch, unapply, ctx) {
 	    return this[methodName](name, state, patch, ctx);
 	}
     }
-    if(!state[name]) {
+    if(!state.v[name]) {
 	throw new Error('Invalid path: ' + name + 
 			(patch._at_path ? ' at path: ' + patch._at_path.join('/') : ''));
     }
@@ -31,19 +31,33 @@ exports.apply = function(state, patch, unapply, ctx) {
     if(unapply) {
 	patch = {_type: 'inv', patch: patch};
     }
-    util.seq([
-	function(_) { ctx.trans(state[name], patch, _.to('child', 'res')); },
-	function(_) { ctx.hash(this.child, _.to('child')); },
-	function(_) { state[name] = this.child;
-		      ctx.ret(state, this.res); },
-    ], ctx.err)();
+    util.depend([
+	function(_) { 
+	    ctx.trans(state.v[name], patch, _('child', 'res')); },
+	function(child, _) { 
+	    ctx.hash(child, _('childHash')); },
+	function(_) { applyMappings(state.m[name], patch, ctx, _('doneMapping')); },
+	function(childHash, res, doneMapping, _) { 
+	    state.v[name] = childHash;
+	    ctx.ret(state, res); },
+    ], ctx.err);
 };
+
+function applyMappings(mappings, patch, ctx, cb) {
+    if(!mappings || mappings.length == 0) return cb();
+    util.depend([
+	function(_) { ctx.trans(mappings[0], patch, _('doneFirst')); },
+	function(_) { applyMappings(mappings.slice(1), patch, ctx, _('doneRest')); },
+	function(doneFirst, doneRest, _) { cb(); },
+    ], cb);
+
+}
 
 exports.do_create = function(name, state, patch, ctx) {
     util.seq([
 	function(_) { ctx.init(patch.evalType, patch.args, _.to('child')); },
 	function(_) { ctx.hash(this.child, _.to('child')); },
-	function(_) { state[name] = this.child;
+	function(_) { state.v[name] = this.child;
 		      ctx.ret(state); },
     ], ctx.err)();
 };
@@ -58,17 +72,23 @@ exports.undo_create = function(name, state, patch, ctx) {
 };
 
 exports.do_delete = function(name, state, patch, ctx) {
-    if(!state[name] || state[name].$hash$ != patch.hash.$hash$) ctx.conflict();
-    delete state[name];
+    if(!state.v[name] || state.v[name].$hash$ != patch.hash.$hash$) ctx.conflict();
+    delete state.v[name];
     ctx.ret(state);
 };
 
 exports.undo_delete = function(name, state, patch, ctx) {
-    if(state[name]) ctx.conflict();
-    state[name] = patch.hash;
+    if(state.v[name]) ctx.conflict();
+    state.v[name] = patch.hash;
     ctx.ret(state);
 };
 
 exports.do_get_hash = function(name, state, patch, ctx) {
-    ctx.ret(state, state[name]);
+    ctx.ret(state, state.v[name]);
+};
+
+exports.do_add_mapping = function(name, state, patch, ctx) {
+    if(!state.m[name]) state.m[name] = []
+    state.m[name].push(patch.mapper);
+    ctx.ret(state);
 };

@@ -8,6 +8,7 @@ var evaluators = {
     atom: require('../atom.js'),
     dir: require('../dir.js'),
     inv: require('../inv.js'),
+    jsMapper: require('../jsMapper.js'),
 };
 
 describe('directory', function(){
@@ -124,6 +125,34 @@ describe('directory', function(){
 		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('child')); },
 		function(_) { evalEnv.query(this.child, {_type: 'get'}, _.to('res')); },
 		function(_) { assert.equal(this.res, 'bar'); _(); },
+	    ], done)();
+	});
+    });
+    function fun2str(obj) {
+	var ret = {};
+	for(var key in obj) {
+	    if(typeof obj[key] == 'function') {
+		ret[key] = obj[key].toString();
+	    } else {
+		ret[key] = obj[key];
+	    }
+	}
+	return ret;
+    }
+    describe('add_mapping', function(){
+	var mapper = fun2str({
+	    map: function(patch) {
+		emit({_type: 'received', patch: patch});
+	    },
+	});
+	it('should add a mapping to a child, so that every patch applied to that child is also applied to the mapper', function(done){
+	    util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'x'}}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{_type: 'received', patch: {_type: 'set', _path: [], _at_path: ['a'], from: 'x', to: 'y'}}]); _(); },
 	    ], done)();
 	});
     });
