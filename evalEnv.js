@@ -20,7 +20,7 @@ module.exports = function(hashDB, opCache, evaluators) {
     function createContext(cb) {
 	return {
 	    ret: function(state, res) {
-		cb(undefined, state, res, undefined, this.conflicting);
+		cb(undefined, state, res, this.effects, this.conflicting);
 	    },
 	    err : function(err) {
 		cb(err);
@@ -29,6 +29,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 		var ctx = this;
 		self.trans(s1, patch, function(err, state, res, eff, conf) {
 		    ctx.conflicting = ctx.conflicting || conf;
+		    ctx.effects = ctx.effects.concat(eff);
 		    cb(err, state, res, eff, ctx.conflicting);
 		});
 	    },
@@ -36,6 +37,7 @@ module.exports = function(hashDB, opCache, evaluators) {
 		var ctx = this;
 		self.apply(s1, patch, unapply, function(err, state, res, eff, conf) {
 		    ctx.conflicting = ctx.conflicting || conf;
+		    ctx.effects = ctx.effects.concat(eff);
 		    cb(err, state, res, eff, ctx.conflicting);
 		});
 	    },
@@ -51,6 +53,10 @@ module.exports = function(hashDB, opCache, evaluators) {
 	    },
 	    unhash: function(hash, cb) {
 		hashDB.unhash(hash, cb);
+	    },
+	    effects: [],
+	    effect: function(eff) {
+		this.effects.push(eff);
 	    },
 	};
     }

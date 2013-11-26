@@ -1038,6 +1038,61 @@ util.seq([
 ], done)();
 ```
 
+should collect effect patches from the application of the given patch.
+
+```js
+var evaluators = {
+		foo: {
+		    init: function(args, ctx) {
+			ctx.ret({val: 0});
+		    },
+		    apply: function(s1, patch, unapply, ctx) {
+			s1.val += patch.amount * (unapply ? -1 : 1);
+			ctx.effect({_type: 'bar', val: s1.val});
+			ctx.ret(s1);
+		    },
+		},
+};
+
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'baz', amount: 10}, false, _.to('s1', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{_type: 'bar', val: 10}]); _(); },
+], done)();
+```
+
+should accumulate effects of underlying patches.
+
+```js
+var evaluators = {
+		dir: require('../dir.js'),
+		comp: require('../composite.js'),
+		foo: {
+		    init: function(args, ctx) {
+			ctx.ret({val: 0});
+		    },
+		    apply: function(s1, patch, unapply, ctx) {
+			s1.val += patch.amount * (unapply ? -1 : 1);
+			ctx.effect({_type: 'bar', val: s1.val});
+			ctx.ret(s1);
+		    },
+		},
+};
+
+var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
+		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
+		    {_type: 'create', _path: ['a'], evalType: 'foo', args: {}},
+		    {_type: 'create', _path: ['b'], evalType: 'foo', args: {}},
+		    {_type: 'baz', _path: ['a'], amount: 5},
+		    {_type: 'baz', _path: ['b'], amount: 7},
+		]}, false, _.to('s1', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{_type: 'bar', val: 5}, {_type: 'bar', val: 7}]); _(); },
+], done)();
+```
+
 <a name="evalenv-transh1-patch-cberr-h2-res-eff-conf"></a>
 ## trans(h1, patch, cb(err, h2, res, eff, conf))
 should apply the patch.

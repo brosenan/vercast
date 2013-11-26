@@ -62,6 +62,8 @@
     EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
     EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method
     EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted
+    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should collect effect patches from the application of the given patch: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should collect effect patches from the application of the given patch
+    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should accumulate effects of underlying patches: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should accumulate effects of underlying patches
     EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch
     EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done
     EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res
@@ -126,5 +128,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  126 passing (684 ms)
+  128 passing (686 ms)
 
