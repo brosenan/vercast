@@ -10,7 +10,6 @@ exports.apply = function(state, patch, unapply, ctx) {
 			(patch._at_path ? ' at path: ' + patch._at_path.join('/') : ''));
     }
     if(patch._path.length == 0) {
-	console.log(state);
 	throw new Error('Empty path in patch ' + patch._type + ' at path: ' + patch._at_path.join('/'));
     }
     var name = patch._path.shift();
@@ -90,5 +89,15 @@ exports.do_get_hash = function(name, state, patch, ctx) {
 exports.do_add_mapping = function(name, state, patch, ctx) {
     if(!state.m[name]) state.m[name] = []
     state.m[name].push(patch.mapper);
+    ctx.ret(state);
+};
+
+exports.undo_add_mapping = function(name, state, patch, ctx) {
+    for(var i = 0; i < state.m[name].length; i++) {
+	if(state.m[name][i].$hash$ == patch.mapper.$hash$) {
+	    state.m[name].splice(i, 1);
+	    break;
+	}
+    }
     ctx.ret(state);
 };

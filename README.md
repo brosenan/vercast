@@ -753,6 +753,24 @@ util.seq([
 ], done)();
 ```
 
+should remove a mapping to a child, when unapplied.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'x'}}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, [{_type: 'received', patch: {_type: 'set', _path: [], _at_path: ['a'], from: 'x', to: 'y'}}]); _(); },
+		// Unapply
+		function(_) { evalEnv.trans(this.state, {_type: 'inv', patch: {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}}, _.to('state')); },
+		// Send the patch again
+		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
+		function(_) { assert.deepEqual(this.eff, []); _(); },
+], done)();
+```
+
 <a name="dummyatomickvs"></a>
 # DummyAtomicKVS
 <a name="dummyatomickvs-as-atomickeyvalue"></a>

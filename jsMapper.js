@@ -17,7 +17,6 @@ exports.apply = function(state, patch, unapply, ctx) {
 		methodName = methodName + '_' + patch._type;
 	    }
 	    if(!mapper[methodName]) {
-		console.log(mapper);
 		throw new Error('Undefined method: ' + methodName);
 	    }
 	    var map = eval('(' + mapper[methodName] + ')');
