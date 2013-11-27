@@ -168,6 +168,17 @@ describe('depend', function(){
 				done(); },
 	], function(err) { done(err || new Error('This should not have been called')); });
     });
+    it('should only call the callback once in the face of an exception', function(done){
+	util.depend([
+	    function(_) { setTimeout(_('one', 'two'), 1); },
+	    function(one, _) { throw new Error('foo'); },
+	    function(two, _) { setTimeout(_('three'), 1); },
+	    function(three, _) { done(); },
+	], function(err) {
+	    assert(err, 'An error must be emitted');
+	    done(err.message == 'foo' ? undefined : err);
+	});
+    });
 });
 
 });

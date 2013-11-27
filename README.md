@@ -320,6 +320,28 @@ util.seq([
 ], done)();
 ```
 
+should apply effect patches as part of the transition.
+
+```js
+var mapper = fun2str({
+		map_set: function(patch) {
+		    emit({_type: 'create', 
+			  _path: [patch.to], 
+			  evalType: 'atom', 
+			  args: {val: patch._at_path[0]}});
+		},
+});
+util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
+		function(_) { branchBase.trans('br', {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, {}, _); },
+		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'bat', to: 'bar'}, {}, _); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['bar']}, _.to('a')); },
+		function(_) { assert.equal(this.a, 'a'); _(); },
+], done)();
+```
+
 <a name="branchbase-mergedest-source-options-cberr"></a>
 ## .merge(dest, source, options, cb(err))
 should apply the patches contributing to source to the tip of branch.
@@ -1934,6 +1956,20 @@ util.depend([
 			assert.equal(d, 1);
 			done(); },
 ], function(err) { done(err || new Error('This should not have been called')); });
+```
+
+should only call the callback once in the face of an exception.
+
+```js
+util.depend([
+    function(_) { setTimeout(_('one', 'two'), 1); },
+    function(one, _) { throw new Error('foo'); },
+    function(two, _) { setTimeout(_('three'), 1); },
+    function(three, _) { done(); },
+], function(err) {
+    assert(err, 'An error must be emitted');
+    done(err.message == 'foo' ? undefined : err);
+});
 ```
 
 <a name="vcobj"></a>

@@ -16,6 +16,7 @@ describe('BranchBase', function(){
 	atom: require('../atom.js'),
 	dir: require('../dir.js'),
 	counter: require('../counter.js'),
+	jsMapper: require('../jsMapper.js'),
     };
     var evalEnv = new EvalEnv(new HashDB(new DummyKVS()), new DummyKVS(), evaluators);
     var branchBase = new BranchBase(evalEnv, tipDB, graphDB);
@@ -127,6 +128,25 @@ describe('BranchBase', function(){
 		function(_) { assert.equal(this.res, 'bar'); _(); },
 	    ], done)();
 	});
+	it('should apply effect patches as part of the transition', function(done){
+	    var mapper = fun2str({
+		map_set: function(patch) {
+		    emit({_type: 'create', 
+			  _path: [patch.to], 
+			  evalType: 'atom', 
+			  args: {val: patch._at_path[0]}});
+		},
+	    });
+	    util.seq([
+		function(_) { branchBase.init('br', 'dir', {}, _); },
+		function(_) { branchBase.trans('br', compPatch, {}, _); },
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
+		function(_) { branchBase.trans('br', {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, {}, _); },
+		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'bat', to: 'bar'}, {}, _); },
+		function(_) { branchBase.query('br', {_type: 'get', _path: ['bar']}, _.to('a')); },
+		function(_) { assert.equal(this.a, 'a'); _(); },
+	    ], done)();
+	});
     });
     describe('.merge(dest, source, options, cb(err))', function(){
 	it('should apply the patches contributing to source to the tip of branch', function(done){
@@ -204,4 +224,15 @@ describe('BranchBase', function(){
 	    ], done)();
 	});
     });
+    function fun2str(obj) {
+	var ret = {};
+	for(var key in obj) {
+	    if(typeof obj[key] == 'function') {
+		ret[key] = obj[key].toString();
+	    } else {
+		ret[key] = obj[key];
+	    }
+	}
+	return ret;
+    }
 });

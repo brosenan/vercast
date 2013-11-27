@@ -16,6 +16,7 @@
     BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times
     BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts
     BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+    BranchBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
     BranchBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
     BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found
     BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
@@ -118,6 +119,7 @@
     util Worker should assure that no more than a given number of instances of the function are running at any given time: [2K[0G  ․ util Worker should assure that no more than a given number of instances of the function are running at any given time
     util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation: [2K[0G  ․ util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
     util depend should execute the given callback functions in the order of their dependencies: [2K[0G  ․ util depend should execute the given callback functions in the order of their dependencies
+    util depend should only call the callback once in the face of an exception: [2K[0G  ․ util depend should only call the callback once in the face of an exception
     VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
     VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method
@@ -136,5 +138,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  136 passing (694 ms)
+  138 passing (725 ms)
 
