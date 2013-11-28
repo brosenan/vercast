@@ -277,6 +277,7 @@ exports.depend = function(funcs, callback) {
 	    f[0].apply(ctx, vals);
 	} catch(e) {
 	    isOK = false;
+	    //console.error(e);
 	    return callback(e);
 	}
     }
@@ -286,6 +287,7 @@ exports.depend = function(funcs, callback) {
 	    return function(err) {
 		if(err) {
 		    isOK = false;
+		    //console.error(err);
 		    return callback(err);
 		}
 		for(var i = 0; i < argNames.length; i++) {

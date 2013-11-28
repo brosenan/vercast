@@ -3,6 +3,9 @@
      - [initialState](#application-initialstate)
      - [apply](#application-apply)
      - [inv](#application-inv)
+   - [AppBase](#appbase)
+     - [.trans(branch, patch, options, cb(err))](#appbase-transbranch-patch-options-cberr)
+     - [.merge(dest, source, options, cb(err))](#appbase-mergedest-source-options-cberr)
    - [atom](#atom)
      - [get](#atom-get)
      - [set](#atom-set)
@@ -131,6 +134,150 @@ util.seq([
 		function(_) { assert.equal(this.inv.type, 'add');
 			      assert.equal(this.inv.amount, -2); 
 			      _();},
+], done)();
+```
+
+<a name="appbase"></a>
+# AppBase
+<a name="appbase-transbranch-patch-options-cberr"></a>
+## .trans(branch, patch, options, cb(err))
+should apply the given patch on the tip of the given branch.
+
+```js
+var compPatch = {_type: 'comp', patches: [
+		{_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
+		{_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
+		{_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
+		{_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
+]};
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
+		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bat'); _(); },
+], done)();
+```
+
+should report conflicts.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {}, _.to('state', 'conf')); },
+		function(_) { assert(this.conf, 'Should conflict'); _(); },
+		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); }, // The conflicting value
+], done)();
+```
+
+should force the change if the strong option is used.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _.to('state')); },
+		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['a']}, _.to('res')); },
+		function(_) { assert.equal(this.res, 'bar'); _(); },
+], done)();
+```
+
+should apply effect patches as part of the transition.
+
+```js
+var mapper = fun2str({
+		map_set: function(patch) {
+		    emit({_type: 'create', 
+			  _path: [patch.to], 
+			  evalType: 'atom', 
+			  args: {val: patch._at_path[0]}});
+		},
+});
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
+		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
+		function(_) { appBase.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, {}, _.to('state')); },
+		function(_) { appBase.trans(this.state, {_type: 'set', _path: ['a'], from: 'bat', to: 'bar'}, {}, _.to('state')); },
+		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['bar']}, _.to('a')); },
+		function(_) { assert.equal(this.a, 'a'); _(); },
+], done)();
+```
+
+<a name="appbase-mergedest-source-options-cberr"></a>
+## .merge(dest, source, options, cb(err))
+should apply the patches contributing to source to the tip of branch.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
+		function(_) { this.state2 = this.state1; _(); },
+		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _.to('state2')); },
+		function(_) { appBase.merge(this.state1, this.state2, {}, _.to('state1')); },
+		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz2'); _(); },
+		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); },
+], done)();
+```
+
+should report conflicts if they occur.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
+		function(_) { this.state2 = this.state1; _(); },
+		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _.to('state2')); },
+		function(_) { appBase.merge(this.state1, this.state2, {}, _.to('state1', 'conf')); },
+		function(_) { assert(this.conf, 'A conflict must be reported'); _(); },
+		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar3'); _(); }, // Should take the merged value
+], done)();
+```
+
+should accept a "weak" option, by which it would apply only non-conflicting changes.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
+		function(_) { this.state2 = this.state1; _(); },
+		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
+		// Conflicting change
+		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _.to('state2')); },
+		// Unconflicting change
+		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _.to('state2')); },
+		function(_) { appBase.merge(this.state1, this.state2, {weak: true}, _.to('state1', 'conf')); },
+		function(_) { assert(!this.conf, 'A conflict should not be reported'); _(); },
+		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz3'); _(); },
+		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); }, // The value on the destination branch
+], done)();
+```
+
+should apply a back-merge correctly.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
+		function(_) { this.state2 = this.state1; _(); },
+		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
+		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _.to('state2')); },
+		function(_) { appBase.merge(this.state1, this.state2, {}, _.to('state1')); },
+		function(_) { appBase.merge(this.state2, this.state1, {}, _.to('state2')); }, // merge back
+		// Check that br1 got the data from br2
+		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['c']}, _.to('c')); },
+		function(_) { assert.equal(this.c, 'baz2'); _(); },
+		// Check that br2 got the data from br1
+		function(_) { evalEnv.query(this.state2, {_type: 'get', _path: ['b']}, _.to('b')); },
+		function(_) { assert.equal(this.b, 'bar2'); _(); },
 ], done)();
 ```
 

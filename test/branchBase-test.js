@@ -2,6 +2,7 @@ var assert = require('assert');
 var util = require('../util.js');
 var DummyAtomicKVS = require('../dummyAtomicKVS.js');
 var DummyVersionGraph = require('../dummyVersionGraph.js');
+var AppBase = require('../appBase.js');
 var BranchBase = require('../branchBase.js');
 var EvalEnv = require('../evalEnv.js');
 var HashDB = require('../hashDB.js');
@@ -19,7 +20,8 @@ describe('BranchBase', function(){
 	jsMapper: require('../jsMapper.js'),
     };
     var evalEnv = new EvalEnv(new HashDB(new DummyKVS()), new DummyKVS(), evaluators);
-    var branchBase = new BranchBase(evalEnv, tipDB, graphDB);
+    var appBase = new AppBase(evalEnv, graphDB);
+    var branchBase = new BranchBase(appBase, tipDB);
     beforeEach(function(done) {
 	util.seq([
 	    function(_) { tipDB.clear(_); },

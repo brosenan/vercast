@@ -3,6 +3,14 @@
     application apply should return the query result based on the state: [2K[0G  ․ application apply should return the query result based on the state
     application apply should apply the patch to the state: [2K[0G  ․ application apply should apply the patch to the state
     application inv should invert patches: [2K[0G  ․ application inv should invert patches
+    AppBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
+    AppBase .trans(branch, patch, options, cb(err)) should report conflicts: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should report conflicts
+    AppBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+    AppBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
+    AppBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
+    AppBase .merge(dest, source, options, cb(err)) should report conflicts if they occur: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should report conflicts if they occur
+    AppBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
+    AppBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
     atom get should return the atom's value: [2K[0G  ․ atom get should return the atom's value
     atom get should return the last set value even at the event of a conflict: [2K[0G  ․ atom get should return the last set value even at the event of a conflict
     atom set should change the state to contain the "to" value, given that the "from" value matches the current state: [2K[0G  ․ atom set should change the state to contain the "to" value, given that the "from" value matches the current state
@@ -138,5 +146,5 @@
     VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
     VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  138 passing (725 ms)
+  146 passing (744 ms)
 
