@@ -11,33 +11,24 @@ exports.do_update = function(s, p, ctx) {
 	s.v = p.assert;
 	ctx.ret(s);
     } else {
-	var toIndex = [p.assert];
-	if(s.v) {
-	    toIndex.push(s.v);
-	    delete s.v;
-	}
-	if(!s.c) {
-	    s.c = {};
-	}
-	util.seq([
-	    function(_) { createChildren(s, ctx, toIndex, _.to('children')); },
-	    function(_) { s.c = this.children; ctx.ret(s); },
-	], ctx.err)();
-
+	util.depend([
+	    function(_) { ctx.hash({_type: s._type,
+				    d: s.d + 1,
+				    v: p.assert}, _('first')); },
+	    function(_) { ctx.hash({_type: s._type,
+				    d: s.d + 1,
+				    v: s.v}, _('second')); },
+	    function(first, second, _) { s.c = {};
+					 s.c[indexOf(p.assert[0], s)] = first;
+					 s.c[indexOf(s.v, s)] =  second;
+					 delete s.v;
+					 ctx.ret(s);},
+	], ctx.err);
     }
 }
 
-function createChildren(s, ctx, toIndex, cb) {
-    if(toIndex.length == 0) {
-	return cb(undefined, s.c);
-    }
-    var first = toIndex[0];
-    var child = {_type: 'logicBase', d: s.d + 1, v: first};
-    util.seq([
-	function(_) { ctx.hash(child, _.to('h')); },
-	function(_) { s.c[first[0]] = this.h;
-		      createChildren(s, ctx, toIndex.slice(1), cb); },
-    ], ctx.err)();
+function indexOf(term, s) {
+    return term[0];
 }
 
 exports.do_query = function(s, p, ctx) {
