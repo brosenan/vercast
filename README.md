@@ -71,6 +71,8 @@
      - [query](#logicbase-query)
    - [logicBase Implementation](#logicbase-implementation)
      - [init](#logicbase-implementation-init)
+     - [update](#logicbase-implementation-update)
+       - [assert](#logicbase-implementation-update-assert)
    - [util](#util)
      - [seq(funcs, done)](#util-seqfuncs-done)
        - [_.to(names...)](#util-seqfuncs-done-_tonames)
@@ -1907,18 +1909,6 @@ util.seq([
 # logicBase
 <a name="logicbase-query"></a>
 ## query
-should provide a matching statement, if one exists.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
-		function(_) { evalEnv.query(this.state, {_type: 'query', query: ['a', {v: 0}, {v:1}]}, _.to('res')); },
-		function(_) { assert.deepEqual(this.res, [[1, 2]]); _()},
-], done)();
-```
-
 <a name="logicbase-implementation"></a>
 # logicBase Implementation
 <a name="logicbase-implementation-init"></a>
@@ -1942,6 +1932,37 @@ util.seq([
 		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
 		function(_) { hashDB.unhash(this.state, _.to('content')); },
 		function(_) { assert.equal(this.content.d, 0); _();},
+], done)();
+```
+
+<a name="logicbase-implementation-update"></a>
+## update
+<a name="logicbase-implementation-update-assert"></a>
+### assert
+should add a value to a value-less/child-less node.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+    function(_) { hashDB.unhash(this.state, _.to('content')); },
+    function(_) { assert.deepEqual(this.content, {_type: 'logicBase', d:0, v:['a', 1, 2]}); _(); },
+], done)();
+```
+
+should create a child if a an assertion is made when a value is already given.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
+    function(_) { hashDB.unhash(this.state, _.to('content')); },
+    function(_) { assert.equal(this.content.v, undefined);
+		  hashDB.unhash(this.content.c['a'], _.to('a')); },
+    function(_) { hashDB.unhash(this.content.c['b'], _.to('b')); },
+    function(_) { assert.deepEqual(this.a, {_type: 'logicBase', d:1, v: ['a', 1, 2]});
+		  assert.deepEqual(this.b, {_type: 'logicBase', d:1, v: ['b', 3, 4]}); _(); },
 ], done)();
 ```
 

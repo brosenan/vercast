@@ -17,7 +17,7 @@ describe('logicBase', function(){
 	evalEnv = new EvalEnv(hashDB, kvs, evaluators);
     });
     describe('query', function(){
-	it('should provide a matching statement, if one exists', function(done){
+	it.skip('should provide a matching statement, if one exists', function(done){
 	    util.seq([
 		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
 		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
@@ -53,10 +53,31 @@ describe('logicBase Implementation', function(){
 		function(_) { hashDB.unhash(this.state, _.to('content')); },
 		function(_) { assert.equal(this.content.d, 0); _();},
 	    ], done)();
-	    
 	});
-
     });
-
-
+    describe('update', function(){
+	describe('assert', function(){
+	    it('should add a value to a value-less/child-less node', function(done){
+		util.seq([
+		    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+		    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+		    function(_) { hashDB.unhash(this.state, _.to('content')); },
+		    function(_) { assert.deepEqual(this.content, {_type: 'logicBase', d:0, v:['a', 1, 2]}); _(); },
+		], done)();
+	    });
+	    it('should create a child if a an assertion is made when a value is already given', function(done){
+		util.seq([
+		    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+		    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+		    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
+		    function(_) { hashDB.unhash(this.state, _.to('content')); },
+		    function(_) { assert.equal(this.content.v, undefined);
+				  hashDB.unhash(this.content.c['a'], _.to('a')); },
+		    function(_) { hashDB.unhash(this.content.c['b'], _.to('b')); },
+		    function(_) { assert.deepEqual(this.a, {_type: 'logicBase', d:1, v: ['a', 1, 2]});
+				  assert.deepEqual(this.b, {_type: 'logicBase', d:1, v: ['b', 3, 4]}); _(); },
+		], done)();
+	    });
+	});
+    });
 });
