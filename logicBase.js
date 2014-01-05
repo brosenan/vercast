@@ -10,35 +10,54 @@ exports.do_update = function(s, p, ctx) {
     if(!s.v && !s.c) {
 	s.v = p.assert;
 	ctx.ret(s);
-    } else {
-	util.depend([
-	    function(_) { ctx.hash({_type: s._type,
-				    d: s.d + 1,
-				    v: p.assert}, _('first')); },
-	    function(_) { ctx.hash({_type: s._type,
-				    d: s.d + 1,
-				    v: s.v}, _('second')); },
-	    function(first, second, _) { s.c = {};
-					 s.c[indexOf(p.assert, s)] = first;
-					 s.c[indexOf(s.v, s)] =  second;
-					 delete s.v;
-					 ctx.ret(s);},
-	], ctx.err);
+    } else if(s.v) {
+	s.c = {};
+	var orig = s.v;
+	delete s.v;
+	util.seq([
+	    function(_) { assertTerm(s, ctx, orig, _); },
+	    function(_) { assertTerm(s, ctx, p.assert, _); },
+	    function(_) { ctx.ret(s); },
+	], ctx.err)();
     }
 }
 
 function indexOf(term, s) {
-    return term[0] + '/' + (term.length - 1);
+    if(s.d == 0) {
+	return term[0] + '/' + (term.length - 1);
+    } else {
+	return term[s.d];
+    }
+}
+
+function assertTerm(s, ctx, term, cb) {
+    var index = indexOf(term, s);
+    if(index in s.c) {
+	util.seq([
+	    function(_) { ctx.trans(s.c[index], {_type: 'update', assert: term}, _.to('afterUpdate')); },
+	    function(_) { s.c[index] = this.afterUpdate; cb(); },
+	], cb)();
+    } else {
+	util.seq([
+	    function(_) { ctx.hash({_type: s._type, d: s.d + 1, v: term}, _.to('afterUpdate')); },
+	    function(_) { s.c[index] = this.afterUpdate; cb(); },
+	], cb)();
+    }
 }
 
 exports.do_query = function(s, p, ctx) {
-    var res = [];
     if(s.v) {
 	var bindings = [];
-	if(unify(p.query, s.v, bindings)) {
-	    res.push(bindings);
-	}
-	return ctx.ret(s, res);
+	var res = [];
+	if(unify(p.query, s.v, bindings)) res.push(bindings);
+	ctx.ret(s, res);
+    } else {
+	var index = indexOf(p.query, s);
+	if(!s.c[index]) return ctx.ret(s, []);
+	util.seq([
+	    function(_) { ctx.trans(s.c[index], p, _.to('state', 'result')); },
+	    function(_) { ctx.ret(s, this.result); },
+	], ctx.err)();
     }
 }
 

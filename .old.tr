@@ -223,7 +223,8 @@
 [32m  ․[0m[90m jsMapper map should invoke unmap() when unapplied
 [90m    jsMapper map should call a method named map_foo() for patch where _type="foo", if such a method exists
 [32m  ․[0m[90m jsMapper map should call a method named map_foo() for patch where _type="foo", if such a method exists
-[32m  -[0m[36m logicBase query should provide a matching statement, if one exists[0m
+[90m    logicBase query should provide a matching statement, if one exists
+[32m  ․[0m[90m logicBase query should provide a matching statement, if one exists
 [90m    logicBase Implementation init should create a node of the given depth with no value and no children
 [32m  ․[0m[90m logicBase Implementation init should create a node of the given depth with no value and no children
 [90m    logicBase Implementation init should set depth to zero if not given
@@ -234,6 +235,8 @@
 [32m  ․[0m[90m logicBase Implementation update assert should create a child if a an assertion is made when a value is already given
 [90m    logicBase Implementation update assert should index compound terms in the form name/arity
 [32m  ․[0m[90m logicBase Implementation update assert should index compound terms in the form name/arity
+[90m    logicBase Implementation update assert should place two children under a common child if they share the same top-level
+[32m  ․[0m[90m logicBase Implementation update assert should place two children under a common child if they share the same top-level
 [90m    util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
 [32m  ․[0m[90m util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
 [90m    util seq(funcs, done) should handle errors by calling done with the error
@@ -303,6 +306,5 @@
 [90m    VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 [32m  ․[0m[90m VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-[92m [0m[32m 151 passing[0m[90m (1s)[0m
-[36m [0m[36m 1 pending[0m
+[92m [0m[32m 153 passing[0m[90m (1s)[0m
 

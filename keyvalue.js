@@ -11,13 +11,15 @@ module.exports = function() {
 	_();
     };
     this.retrieve = function(key, _) {
-	var value = map[key];
-	if(typeof value == 'undefined') {
-	    _(new Error('No match for key ' + key));
-	} else {
-	    process._num_kv_reads++;
-	    _(undefined, value);
-	}
+//	setTimeout(function() {
+	    var value = map[key];
+	    if(typeof value == 'undefined') {
+		_(new Error('No match for key ' + key));
+	    } else {
+		process._num_kv_reads++;
+		_(undefined, value);
+	    }
+//	}, 0);
     };
     this.check = function(key, _) {
 	var value = map[key];

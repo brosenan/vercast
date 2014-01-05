@@ -1909,6 +1909,18 @@ util.seq([
 # logicBase
 <a name="logicbase-query"></a>
 ## query
+should provide a matching statement, if one exists.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
+		function(_) { evalEnv.query(this.state, {_type: 'query', query: ['a', {v: 0}, {v:1}]}, _.to('res')); },
+		function(_) { assert.deepEqual(this.res, [[1, 2]]); _()},
+], done)();
+```
+
 <a name="logicbase-implementation"></a>
 # logicBase Implementation
 <a name="logicbase-implementation-init"></a>
@@ -1976,6 +1988,21 @@ util.seq([
     function(_) { hashDB.unhash(this.state, _.to('content')); },
     function(_) { assert('a/2' in this.content.c, 'the node should have a key a/2'); _(); },
     function(_) { assert('b/3' in this.content.c, 'the node should have a key b/3'); _(); },
+], done)();
+```
+
+should place two children under a common child if they share the same top-level.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 3, 4]}, _.to('state')); },
+    function(_) { hashDB.unhash(this.state, _.to('content')); },
+    function(_) { assert('a/2' in this.content.c, 'the node should have a key a/2'); _(); },
+    function(_) { hashDB.unhash(this.content.c['a/2'], _.to('a')); },
+    function(_) { assert(this.a.c['1'], 'There should be an entry for a(1, 2)');
+		  assert(this.a.c['3'], 'There should be an entry for a(3, 4)'); _(); },
 ], done)();
 ```
 
