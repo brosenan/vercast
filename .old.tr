@@ -1,150 +1,302 @@
 
-    application initialState should properly create an initial state: [2K[0G  ․ application initialState should properly create an initial state
-    application apply should return the query result based on the state: [2K[0G  ․ application apply should return the query result based on the state
-    application apply should apply the patch to the state: [2K[0G  ․ application apply should apply the patch to the state
-    application inv should invert patches: [2K[0G  ․ application inv should invert patches
-    AppBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
-    AppBase .trans(branch, patch, options, cb(err)) should report conflicts: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should report conflicts
-    AppBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
-    AppBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition: [2K[0G  ․ AppBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
-    AppBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
-    AppBase .merge(dest, source, options, cb(err)) should report conflicts if they occur: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should report conflicts if they occur
-    AppBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
-    AppBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly: [2K[0G  ․ AppBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
-    atom get should return the atom's value: [2K[0G  ․ atom get should return the atom's value
-    atom get should return the last set value even at the event of a conflict: [2K[0G  ․ atom get should return the last set value even at the event of a conflict
-    atom set should change the state to contain the "to" value, given that the "from" value matches the current state: [2K[0G  ․ atom set should change the state to contain the "to" value, given that the "from" value matches the current state
-    atom set should report a conflict if the "from" value does not match: [2K[0G  ․ atom set should report a conflict if the "from" value does not match
-    atom set should invert patches correctly: [2K[0G  ․ atom set should invert patches correctly
-    atom get_all should return all possible values: [2K[0G  ․ atom get_all should return all possible values
-    BranchBase .newBranch(branchName, s0, cb(err)) should create a new branch with the given branchName, with the initial state s0: [2K[0G  ․ BranchBase .newBranch(branchName, s0, cb(err)) should create a new branch with the given branchName, with the initial state s0
-    BranchBase .init(branchName, evaluator, args, cb(err)) should create a new branch with the given evaluator and arguments: [2K[0G  ․ BranchBase .init(branchName, evaluator, args, cb(err)) should create a new branch with the given evaluator and arguments
-    BranchBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
-    BranchBase .trans(branch, patch, options, cb(err)) should retry and reapply the patch over the new tip if the tip moves during the transition: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should retry and reapply the patch over the new tip if the tip moves during the transition
-    BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times
-    BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts
-    BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
-    BranchBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition: [2K[0G  ․ BranchBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
-    BranchBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
-    BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found
-    BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
-    BranchBase .merge(dest, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict
-    BranchBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly: [2K[0G  ․ BranchBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
-    collection init should create an empty collection: [2K[0G  ․ collection init should create an empty collection
-    collection add should add a key/value pair to the collection: [2K[0G  ․ collection add should add a key/value pair to the collection
-    composite patch apply should apply the given patches one by one: [2K[0G  ․ composite patch apply should apply the given patches one by one
-    composite patch apply should return an array of the underlying results: [2K[0G  ․ composite patch apply should return an array of the underlying results
-    composite patch apply should return no result if none of the underlying patches return result: [2K[0G  ․ composite patch apply should return no result if none of the underlying patches return result
-    composite patch apply weak should not apply conflicting patches: [2K[0G  ․ composite patch apply weak should not apply conflicting patches
-    composite patch apply weak should report the conflicting patch in the results: [2K[0G  ․ composite patch apply weak should report the conflicting patch in the results
-    composite patch apply weak should provide $badPatch in nested patches: [2K[0G  ․ composite patch apply weak should provide $badPatch in nested patches
-    composite patch unapply should unapply the given patches in reverse order: [2K[0G  ․ composite patch unapply should unapply the given patches in reverse order
-    counter get should initially return 0: [2K[0G  ․ counter get should initially return 0
-    counter add should increase the counter value by the given amount: [2K[0G  ․ counter add should increase the counter value by the given amount
-    counter add should be reversible: [2K[0G  ․ counter add should be reversible
-    directory should propagate any patches it does not handle itself to child objects: [2K[0G  ․ directory should propagate any patches it does not handle itself to child objects
-    directory should propagate unapplied patches as well as applied: [2K[0G  ․ directory should propagate unapplied patches as well as applied
-    directory create should create a child node using the given evaluator type and arguments: [2K[0G  ․ directory create should create a child node using the given evaluator type and arguments
-    directory create should delete a child when unapplied: [2K[0G  ․ directory create should delete a child when unapplied
-    directory create should report a conflict when unpatched if the child state does not match the construction parameters: [2K[0G  ․ directory create should report a conflict when unpatched if the child state does not match the construction parameters
-    directory delete should remove the object at the given path from the directory: [2K[0G  ․ directory delete should remove the object at the given path from the directory
-    directory delete should report a conflic if the removed child state does not match the given hash: [2K[0G  ․ directory delete should report a conflic if the removed child state does not match the given hash
-    directory delete should re-create a child if unapplied: [2K[0G  ․ directory delete should re-create a child if unapplied
-    directory delete should conflict when unapplied if the child already exists: [2K[0G  ․ directory delete should conflict when unapplied if the child already exists
-    directory get_hash should return the hash of the child at the given path: [2K[0G  ․ directory get_hash should return the hash of the child at the given path
-    directory add_mapping should add a mapping to a child, so that every patch applied to that child is also applied to the mapper: [2K[0G  ․ directory add_mapping should add a mapping to a child, so that every patch applied to that child is also applied to the mapper
-    directory add_mapping should remove a mapping to a child, when unapplied: [2K[0G  ․ directory add_mapping should remove a mapping to a child, when unapplied
-    DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
-    DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
-    DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist
-    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal
-    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal: [2K[0G  ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal
-    DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met: [2K[0G  ․ DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
-    DummyBranch as Branch checkedUpdate should return the tip state before modification: [2K[0G  ․ DummyBranch as Branch checkedUpdate should return the tip state before modification
-    DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value: [2K[0G  ․ DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
-    DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
-    DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source: [2K[0G  ․ DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
-    DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants
-    DummyVersionGraph as VersionGraph findCommonAncestor should return the path from the common ancestor to both nodes: [2K[0G  ․ DummyVersionGraph as VersionGraph findCommonAncestor should return the path from the common ancestor to both nodes
-    EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
-    EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method
-    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
-    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
-    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method
-    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted
-    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should collect effect patches from the application of the given patch: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should collect effect patches from the application of the given patch
-    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should accumulate effects of underlying patches: [2K[0G  ․ EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should accumulate effects of underlying patches
-    EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch
-    EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done: [2K[0G  ․ EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done
-    EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res
-    EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state
-    EvalEnv query(s, q, cb(err, res)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false
-    EvalEnv query(s, q, cb(err, res)) should use the unpatch evaluator if one exists for the patch type: [2K[0G  ․ EvalEnv query(s, q, cb(err, res)) should use the unpatch evaluator if one exists for the patch type
-    HashDB should store its own copy of the object: [2K[0G  ․ HashDB should store its own copy of the object
-    HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code: [2K[0G  ․ HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code
-    HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input: [2K[0G  ․ HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input
-    HashDB unhash(hash, cb(err, obj)) should reconstruct an object from the hash that is identical to the origianl object: [2K[0G  ․ HashDB unhash(hash, cb(err, obj)) should reconstruct an object from the hash that is identical to the origianl object
-    HashDB unhash(hash, cb(err, obj)) should act as an identity when given a non-hash object as input: [2K[0G  ․ HashDB unhash(hash, cb(err, obj)) should act as an identity when given a non-hash object as input
-    HashedApp initialState should return the initial state's hash: [2K[0G  ․ HashedApp initialState should return the initial state's hash
-    HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch: [2K[0G  ․ HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch
-    HashedApp apply _inv should handle _inv patches: [2K[0G  ․ HashedApp apply _inv should handle _inv patches
-    HashedApp apply _inv should support _inv of _inv patches: [2K[0G  ․ HashedApp apply _inv should support _inv of _inv patches
-    HashedApp apply _comp should handle _comp patches: [2K[0G  ․ HashedApp apply _comp should handle _comp patches
-    HashedApp apply _comp should support _inv of _comp patches: [2K[0G  ․ HashedApp apply _comp should support _inv of _comp patches
-    HashedApp apply _comp should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch: [2K[0G  ․ HashedApp apply _comp should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch
-    HashedApp apply _comp should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches: [2K[0G  ․ HashedApp apply _comp should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches
-    HashedApp apply _hashed should handle _hashed patches: [2K[0G  ․ HashedApp apply _hashed should handle _hashed patches
-    HashedApp apply _hashed should support _inv of _hashed: [2K[0G  ․ HashedApp apply _hashed should support _inv of _hashed
-    HashedApp trans should return the hash of the target state when given a source state and a patch: [2K[0G  ․ HashedApp trans should return the hash of the target state when given a source state and a patch
-    HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered: [2K[0G  ․ HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
-    HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead: [2K[0G  ․ HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead
-    HashedApp query should return the result of applying a patch: [2K[0G  ․ HashedApp query should return the result of applying a patch
-    HashedApp query should fail when given a patch that modifies the state: [2K[0G  ․ HashedApp query should fail when given a patch that modifies the state
-    HashedApp branchQuery should perform a query on the tip of the given branch: [2K[0G  ․ HashedApp branchQuery should perform a query on the tip of the given branch
-    HashedApp branchTrans should perform a transition, updating the tip of the branch: [2K[0G  ․ HashedApp branchTrans should perform a transition, updating the tip of the branch
-    inverse patch patch should unapply the underlying patch: [2K[0G  ․ inverse patch patch should unapply the underlying patch
-    inverse patch unpatch should apply the undelying patch: [2K[0G  ․ inverse patch unpatch should apply the undelying patch
-    jsMapper init should take the args as state: [2K[0G  ․ jsMapper init should take the args as state
-    jsMapper map should invoke the map() function defined in the state, with the patch as parameter when applied: [2K[0G  ․ jsMapper map should invoke the map() function defined in the state, with the patch as parameter when applied
-    jsMapper map should pass the state as the map function's "this" argument: [2K[0G  ․ jsMapper map should pass the state as the map function's "this" argument
-    jsMapper map should interpret invocations of the "emit" function as effect: [2K[0G  ․ jsMapper map should interpret invocations of the "emit" function as effect
-    jsMapper map should invoke unmap() when unapplied: [2K[0G  ․ jsMapper map should invoke unmap() when unapplied
-    jsMapper map should call a method named map_foo() for patch where _type="foo", if such a method exists: [2K[0G  ․ jsMapper map should call a method named map_foo() for patch where _type="foo", if such a method exists
-    util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order: [2K[0G  ․ util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
-    util seq(funcs, done) should handle errors by calling done with the error: [2K[0G  ․ util seq(funcs, done) should handle errors by calling done with the error
-    util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception: [2K[0G  ․ util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
-    util seq(funcs, done) should call done with no error if all is successful: [2K[0G  ․ util seq(funcs, done) should call done with no error if all is successful
-    util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err): [2K[0G  ․ util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err)
-    util timeUid() should return a unique string: [2K[0G  ․ util timeUid() should return a unique string
-    util timeUid() should return a larger value when called over one millisecond later: [2K[0G  ․ util timeUid() should return a larger value when called over one millisecond later
-    util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial: [2K[0G  ․ util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial
-    util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed: [2K[0G  ․ util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed
-    util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode(): [2K[0G  ․ util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode()
-    util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times: [2K[0G  ․ util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times
-    util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback: [2K[0G  ․ util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback
-    util Worker should call a given function iteratively, in given intervals, until stopped: [2K[0G  ․ util Worker should call a given function iteratively, in given intervals, until stopped
-    util Worker should assure that no more than a given number of instances of the function are running at any given time: [2K[0G  ․ util Worker should assure that no more than a given number of instances of the function are running at any given time
-    util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation: [2K[0G  ․ util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
-    util depend should execute the given callback functions in the order of their dependencies: [2K[0G  ․ util depend should execute the given callback functions in the order of their dependencies
-    util depend should only call the callback once in the face of an exception: [2K[0G  ․ util depend should only call the callback once in the face of an exception
-    VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state: [2K[0G  ․ VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should pass the invoked method the state as its this parameter: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should pass the invoked method the state as its this parameter
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects: [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects
-    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should accept patches that have a "code" field instead of "type": [2K[0G  ․ VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should accept patches that have a "code" field instead of "type"
-    VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic
-    VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist: [2K[0G  ․ VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist
-    VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one: [2K[0G  ․ VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one
-    VCObj createChainPatch(patches, cb(err, patch)) should support correct inversion of the resulting patch: [2K[0G  ․ VCObj createChainPatch(patches, cb(err, patch)) should support correct inversion of the resulting patch
-    VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2
-    VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation: [2K[0G  ․ VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation
-    VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
-    VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state: [2K[0G  ․ VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
+[90m    application initialState should properly create an initial state
+[32m  ․[0m[90m application initialState should properly create an initial state
+[90m    application apply should return the query result based on the state
+[32m  ․[0m[90m application apply should return the query result based on the state
+[90m    application apply should apply the patch to the state
+[32m  ․[0m[90m application apply should apply the patch to the state
+[90m    application inv should invert patches
+[32m  ․[0m[90m application inv should invert patches
+[90m    AppBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
+[32m  ․[0m[90m AppBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
+[90m    AppBase .trans(branch, patch, options, cb(err)) should report conflicts
+[32m  ․[0m[90m AppBase .trans(branch, patch, options, cb(err)) should report conflicts
+[90m    AppBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+[32m  ․[0m[90m AppBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+[90m    AppBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
+[32m  ․[0m[90m AppBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
+[90m    AppBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
+[32m  ․[0m[90m AppBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
+[90m    AppBase .merge(dest, source, options, cb(err)) should report conflicts if they occur
+[32m  ․[0m[90m AppBase .merge(dest, source, options, cb(err)) should report conflicts if they occur
+[90m    AppBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
+[32m  ․[0m[90m AppBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
+[90m    AppBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
+[32m  ․[0m[90m AppBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
+[90m    atom get should return the atom's value
+[32m  ․[0m[90m atom get should return the atom's value
+[90m    atom get should return the last set value even at the event of a conflict
+[32m  ․[0m[90m atom get should return the last set value even at the event of a conflict
+[90m    atom set should change the state to contain the "to" value, given that the "from" value matches the current state
+[32m  ․[0m[90m atom set should change the state to contain the "to" value, given that the "from" value matches the current state
+[90m    atom set should report a conflict if the "from" value does not match
+[32m  ․[0m[90m atom set should report a conflict if the "from" value does not match
+[90m    atom set should invert patches correctly
+[32m  ․[0m[90m atom set should invert patches correctly
+[90m    atom get_all should return all possible values
+[32m  ․[0m[90m atom get_all should return all possible values
+[90m    BranchBase .newBranch(branchName, s0, cb(err)) should create a new branch with the given branchName, with the initial state s0
+[32m  ․[0m[90m BranchBase .newBranch(branchName, s0, cb(err)) should create a new branch with the given branchName, with the initial state s0
+[90m    BranchBase .init(branchName, evaluator, args, cb(err)) should create a new branch with the given evaluator and arguments
+[32m  ․[0m[90m BranchBase .init(branchName, evaluator, args, cb(err)) should create a new branch with the given evaluator and arguments
+[90m    BranchBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
+[32m  ․[0m[90m BranchBase .trans(branch, patch, options, cb(err)) should apply the given patch on the tip of the given branch
+[90m    BranchBase .trans(branch, patch, options, cb(err)) should retry and reapply the patch over the new tip if the tip moves during the transition
+[32m  ․[0m[90m BranchBase .trans(branch, patch, options, cb(err)) should retry and reapply the patch over the new tip if the tip moves during the transition
+[90m    BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times
+[32m  ․[0m[90m BranchBase .trans(branch, patch, options, cb(err)) should retry the given number of times
+[90m    BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts
+[32m  ․[0m[90m BranchBase .trans(branch, patch, options, cb(err)) should emit an error by default if the patch conflicts
+[90m    BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+[32m  ․[0m[90m BranchBase .trans(branch, patch, options, cb(err)) should force the change if the strong option is used
+[90m    BranchBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
+[32m  ․[0m[90m BranchBase .trans(branch, patch, options, cb(err)) should apply effect patches as part of the transition
+[90m    BranchBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
+[32m  ․[0m[90m BranchBase .merge(dest, source, options, cb(err)) should apply the patches contributing to source to the tip of branch
+[90m    BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found
+[32m  ․[0m[90m BranchBase .merge(dest, source, options, cb(err)) should emit an error by default if a merge conflict is found
+[90m    BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
+[32m  ․[0m[90m BranchBase .merge(dest, source, options, cb(err)) should accept a "weak" option, by which it would apply only non-conflicting changes
+[90m    BranchBase .merge(dest, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict
+[32m  ․[0m[90m BranchBase .merge(dest, source, options, cb(err)) should accept a "strong" option, by which it will force the change in case of a conflict
+[90m    BranchBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
+[32m  ․[0m[90m BranchBase .merge(dest, source, options, cb(err)) should apply a back-merge correctly
+[90m    collection init should create an empty collection
+[32m  ․[0m[90m collection init should create an empty collection
+[90m    collection add should add a key/value pair to the collection
+[32m  ․[0m[90m collection add should add a key/value pair to the collection
+[90m    composite patch apply should apply the given patches one by one
+[32m  ․[0m[90m composite patch apply should apply the given patches one by one
+[90m    composite patch apply should return an array of the underlying results
+[32m  ․[0m[90m composite patch apply should return an array of the underlying results
+[90m    composite patch apply should return no result if none of the underlying patches return result
+[32m  ․[0m[90m composite patch apply should return no result if none of the underlying patches return result
+[90m    composite patch apply weak should not apply conflicting patches
+[32m  ․[0m[90m composite patch apply weak should not apply conflicting patches
+[90m    composite patch apply weak should report the conflicting patch in the results
+[32m  ․[0m[90m composite patch apply weak should report the conflicting patch in the results
+[90m    composite patch apply weak should provide $badPatch in nested patches
+[32m  ․[0m[90m composite patch apply weak should provide $badPatch in nested patches
+[90m    composite patch unapply should unapply the given patches in reverse order
+[32m  ․[0m[90m composite patch unapply should unapply the given patches in reverse order
+[90m    counter get should initially return 0
+[32m  ․[0m[90m counter get should initially return 0
+[90m    counter add should increase the counter value by the given amount
+[32m  ․[0m[90m counter add should increase the counter value by the given amount
+[90m    counter add should be reversible
+[32m  ․[0m[90m counter add should be reversible
+[90m    directory should propagate any patches it does not handle itself to child objects
+[32m  ․[0m[90m directory should propagate any patches it does not handle itself to child objects
+[90m    directory should propagate unapplied patches as well as applied
+[32m  ․[0m[90m directory should propagate unapplied patches as well as applied
+[90m    directory create should create a child node using the given evaluator type and arguments
+[32m  ․[0m[90m directory create should create a child node using the given evaluator type and arguments
+[90m    directory create should delete a child when unapplied
+[32m  ․[0m[90m directory create should delete a child when unapplied
+[90m    directory create should report a conflict when unpatched if the child state does not match the construction parameters
+[32m  ․[0m[90m directory create should report a conflict when unpatched if the child state does not match the construction parameters
+[90m    directory delete should remove the object at the given path from the directory
+[32m  ․[0m[90m directory delete should remove the object at the given path from the directory
+[90m    directory delete should report a conflic if the removed child state does not match the given hash
+[32m  ․[0m[90m directory delete should report a conflic if the removed child state does not match the given hash
+[90m    directory delete should re-create a child if unapplied
+[32m  ․[0m[90m directory delete should re-create a child if unapplied
+[90m    directory delete should conflict when unapplied if the child already exists
+[32m  ․[0m[90m directory delete should conflict when unapplied if the child already exists
+[90m    directory get_hash should return the hash of the child at the given path
+[32m  ․[0m[90m directory get_hash should return the hash of the child at the given path
+[90m    directory add_mapping should add a mapping to a child, so that every patch applied to that child is also applied to the mapper
+[32m  ․[0m[90m directory add_mapping should add a mapping to a child, so that every patch applied to that child is also applied to the mapper
+[90m    directory add_mapping should remove a mapping to a child, when unapplied
+[32m  ․[0m[90m directory add_mapping should remove a mapping to a child, when unapplied
+[90m    DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
+[32m  ․[0m[90m DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
+[90m    DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
+[32m  ․[0m[90m DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
+[90m    DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist
+[32m  ․[0m[90m DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist
+[90m    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal
+[32m  ․[0m[90m DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal
+[90m    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal
+[32m  ․[0m[90m DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal
+[90m    DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
+[32m  ․[0m[90m DummyBranch as Branch checkedUpdate should update the branch state if given that the state condition is met
+[90m    DummyBranch as Branch checkedUpdate should return the tip state before modification
+[32m  ․[0m[90m DummyBranch as Branch checkedUpdate should return the tip state before modification
+[90m    DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
+[32m  ․[0m[90m DummyBranch as Branch checkedUpdate should not update the branch state if the first argument does not match the current tip value
+[90m    DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
+[32m  ․[0m[90m DummyVersionGraph as VersionGraph addEdge should accept an edge and add it to the graph
+[90m    DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
+[32m  ․[0m[90m DummyVersionGraph as VersionGraph addEdge should create a dual mapping, mapping also the destination to the source
+[90m    DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+[32m  ․[0m[90m DummyVersionGraph as VersionGraph findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+[90m    DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants
+[32m  ․[0m[90m DummyVersionGraph as VersionGraph findCommonAncestor should handle the case where there are also common descendants
+[90m    DummyVersionGraph as VersionGraph findCommonAncestor should return the path from the common ancestor to both nodes
+[32m  ․[0m[90m DummyVersionGraph as VersionGraph findCommonAncestor should return the path from the common ancestor to both nodes
+[90m    EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
+[32m  ․[0m[90m EvalEnv init(evaluator, args, cb(err, h0)) should return a hash to an object constructed by the evaluator's init() method
+[90m    EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method
+[32m  ․[0m[90m EvalEnv init(evaluator, args, cb(err, h0)) should pass the evaluator as the "this" of the called method
+[90m    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
+[32m  ․[0m[90m EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res
+[90m    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
+[32m  ․[0m[90m EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should use the patch evaluator if one exists for the patch type
+[90m    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method
+[32m  ․[0m[90m EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should pass the evaluator as the "this" of the called method
+[90m    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted
+[32m  ․[0m[90m EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should report a conflict if a propagated patch conflicted
+[90m    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should collect effect patches from the application of the given patch
+[32m  ․[0m[90m EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should collect effect patches from the application of the given patch
+[90m    EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should accumulate effects of underlying patches
+[32m  ․[0m[90m EvalEnv apply(s1, patch, unapply, cb(err, s2, res, eff, conf)) should accumulate effects of underlying patches
+[90m    EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch
+[32m  ․[0m[90m EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should apply the patch
+[90m    EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done
+[32m  ․[0m[90m EvalEnv trans(h1, patch, cb(err, h2, res, eff, conf)) should avoid repeating calculations already done
+[90m    EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res
+[32m  ․[0m[90m EvalEnv query(s, q, cb(err, res)) should apply query patch q to object with state s, emitting res
+[90m    EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state
+[32m  ․[0m[90m EvalEnv query(s, q, cb(err, res)) should emit an error if the query changes the state
+[90m    EvalEnv query(s, q, cb(err, res)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false
+[32m  ․[0m[90m EvalEnv query(s, q, cb(err, res)) should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false
+[90m    EvalEnv query(s, q, cb(err, res)) should use the unpatch evaluator if one exists for the patch type
+[32m  ․[0m[90m EvalEnv query(s, q, cb(err, res)) should use the unpatch evaluator if one exists for the patch type
+[90m    HashDB should store its own copy of the object
+[32m  ․[0m[90m HashDB should store its own copy of the object
+[90m    HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code
+[32m  ․[0m[90m HashDB hash(obj, cb(err, hash)) should give any two different JSONable objects a different hash code
+[90m    HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input
+[32m  ․[0m[90m HashDB hash(obj, cb(err, hash)) should act as an identity function when given a hash as input
+[90m    HashDB unhash(hash, cb(err, obj)) should reconstruct an object from the hash that is identical to the origianl object
+[32m  ․[0m[90m HashDB unhash(hash, cb(err, obj)) should reconstruct an object from the hash that is identical to the origianl object
+[90m    HashDB unhash(hash, cb(err, obj)) should act as an identity when given a non-hash object as input
+[32m  ․[0m[90m HashDB unhash(hash, cb(err, obj)) should act as an identity when given a non-hash object as input
+[90m    HashedApp initialState should return the initial state's hash
+[32m  ․[0m[90m HashedApp initialState should return the initial state's hash
+[90m    HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch
+[32m  ․[0m[90m HashedApp apply should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch
+[90m    HashedApp apply _inv should handle _inv patches
+[32m  ․[0m[90m HashedApp apply _inv should handle _inv patches
+[90m    HashedApp apply _inv should support _inv of _inv patches
+[32m  ․[0m[90m HashedApp apply _inv should support _inv of _inv patches
+[90m    HashedApp apply _comp should handle _comp patches
+[32m  ․[0m[90m HashedApp apply _comp should handle _comp patches
+[90m    HashedApp apply _comp should support _inv of _comp patches
+[32m  ․[0m[90m HashedApp apply _comp should support _inv of _comp patches
+[90m    HashedApp apply _comp should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch
+[32m  ․[0m[90m HashedApp apply _comp should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch
+[90m    HashedApp apply _comp should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches
+[32m  ․[0m[90m HashedApp apply _comp should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches
+[90m    HashedApp apply _hashed should handle _hashed patches
+[32m  ․[0m[90m HashedApp apply _hashed should handle _hashed patches
+[90m    HashedApp apply _hashed should support _inv of _hashed
+[32m  ․[0m[90m HashedApp apply _hashed should support _inv of _hashed
+[90m    HashedApp trans should return the hash of the target state when given a source state and a patch
+[32m  ․[0m[90m HashedApp trans should return the hash of the target state when given a source state and a patch
+[90m    HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
+[32m  ․[0m[90m HashedApp trans should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered
+[90m    HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead
+[32m  ․[0m[90m HashedApp trans should avoid hashing _hashed patches, and should used the undelying hash instead
+[90m    HashedApp query should return the result of applying a patch
+[32m  ․[0m[90m HashedApp query should return the result of applying a patch
+[90m    HashedApp query should fail when given a patch that modifies the state
+[32m  ․[0m[90m HashedApp query should fail when given a patch that modifies the state
+[90m    HashedApp branchQuery should perform a query on the tip of the given branch
+[32m  ․[0m[90m HashedApp branchQuery should perform a query on the tip of the given branch
+[90m    HashedApp branchTrans should perform a transition, updating the tip of the branch
+[32m  ․[0m[90m HashedApp branchTrans should perform a transition, updating the tip of the branch
+[90m    inverse patch patch should unapply the underlying patch
+[32m  ․[0m[90m inverse patch patch should unapply the underlying patch
+[90m    inverse patch unpatch should apply the undelying patch
+[32m  ․[0m[90m inverse patch unpatch should apply the undelying patch
+[90m    jsMapper init should take the args as state
+[32m  ․[0m[90m jsMapper init should take the args as state
+[90m    jsMapper map should invoke the map() function defined in the state, with the patch as parameter when applied
+[32m  ․[0m[90m jsMapper map should invoke the map() function defined in the state, with the patch as parameter when applied
+[90m    jsMapper map should pass the state as the map function's "this" argument
+[32m  ․[0m[90m jsMapper map should pass the state as the map function's "this" argument
+[90m    jsMapper map should interpret invocations of the "emit" function as effect
+[32m  ․[0m[90m jsMapper map should interpret invocations of the "emit" function as effect
+[90m    jsMapper map should invoke unmap() when unapplied
+[32m  ․[0m[90m jsMapper map should invoke unmap() when unapplied
+[90m    jsMapper map should call a method named map_foo() for patch where _type="foo", if such a method exists
+[32m  ․[0m[90m jsMapper map should call a method named map_foo() for patch where _type="foo", if such a method exists
+[90m    logicBase query should provide a matching statement, if one exists
+[32m  ․[0m[90m logicBase query should provide a matching statement, if one exists
+[90m    logicBase Implementation init should create a node of the given depth with no value and no children
+[32m  ․[0m[90m logicBase Implementation init should create a node of the given depth with no value and no children
+[90m    logicBase Implementation init should set depth to zero if not given
+[32m  ․[0m[90m logicBase Implementation init should set depth to zero if not given
+[90m    util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
+[32m  ․[0m[90m util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
+[90m    util seq(funcs, done) should handle errors by calling done with the error
+[32m  ․[0m[90m util seq(funcs, done) should handle errors by calling done with the error
+[90m    util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
+[32m  ․[0m[90m util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
+[90m    util seq(funcs, done) should call done with no error if all is successful
+[32m  ․[0m[90m util seq(funcs, done) should call done with no error if all is successful
+[90m    util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err)
+[32m  ․[0m[90m util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err)
+[90m    util timeUid() should return a unique string
+[32m  ․[0m[90m util timeUid() should return a unique string
+[90m    util timeUid() should return a larger value when called over one millisecond later
+[32m  ․[0m[90m util timeUid() should return a larger value when called over one millisecond later
+[90m    util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial
+[32m  ․[0m[90m util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial
+[90m    util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed
+[32m  ․[0m[90m util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed
+[90m    util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode()
+[32m  ․[0m[90m util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode()
+[90m    util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times
+[32m  ․[0m[90m util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times
+[90m    util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback
+[32m  ․[0m[90m util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback
+[90m    util Worker should call a given function iteratively, in given intervals, until stopped
+[32m  ․[0m[90m util Worker should call a given function iteratively, in given intervals, until stopped
+[90m    util Worker should assure that no more than a given number of instances of the function are running at any given time
+[32m  ․[0m[90m util Worker should assure that no more than a given number of instances of the function are running at any given time
+[90m    util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
+[32m  ․[0m[90m util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
+[90m    util depend should execute the given callback functions in the order of their dependencies
+[32m  ․[0m[90m util depend should execute the given callback functions in the order of their dependencies
+[90m    util depend should only call the callback once in the face of an exception
+[32m  ․[0m[90m util depend should only call the callback once in the face of an exception
+[90m    VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
+[32m  ․[0m[90m VCObj createObject(cls, s0, cb(err, h0)) should create an object state hash for the given class and initial state
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should apply a patch to the given state, activating a class method
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state hash, and the result emitted by the invoked method
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should pass the invoked method the state as its this parameter
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should pass the invoked method the state as its this parameter
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should emit the new state based on the content of "this" when the method returns
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should allow objects to further call other objects by sending them patches
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should report conflict if the context conflict() method was called
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should propagate conflicts reported in child objects
+[90m    VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should accept patches that have a "code" field instead of "type"
+[32m  ․[0m[90m VCObj apply(h1, patch, cb(err, h2, res, effect, conflict)) should accept patches that have a "code" field instead of "type"
+[90m    VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic
+[32m  ․[0m[90m VCObj invert(patch, cb(err, invPatch)) should invert any patch that has an inv field specifying its inversion logic
+[90m    VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist
+[32m  ․[0m[90m VCObj invert(patch, cb(err, invPatch)) should return the patch unchanged in case an inv field does not exist
+[90m    VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one
+[32m  ․[0m[90m VCObj createChainPatch(patches, cb(err, patch)) should create a patch that applies all given patches one by one
+[90m    VCObj createChainPatch(patches, cb(err, patch)) should support correct inversion of the resulting patch
+[32m  ․[0m[90m VCObj createChainPatch(patches, cb(err, patch)) should support correct inversion of the resulting patch
+[90m    VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2
+[32m  ․[0m[90m VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should apply the given patch on h1 to receive h2
+[90m    VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation
+[32m  ․[0m[90m VCObj trans(h1, patch, cb(h2, res, effect, conflict)) should cache previous state/patch pairs and avoid re-calculation
+[90m    VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
+[32m  ․[0m[90m VCObj query(h1, patch, cb(err, ret)) should return the result of applying the patch on an object with the given state
+[90m    VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
+[32m  ․[0m[90m VCObj query(h1, patch, cb(err, ret)) should fail if the patch modifies the state
 
-  146 passing (744 ms)
+[92m [0m[32m 149 passing[0m[90m (1s)[0m
 

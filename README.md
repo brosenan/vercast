@@ -67,6 +67,10 @@
    - [jsMapper](#jsmapper)
      - [init](#jsmapper-init)
      - [map](#jsmapper-map)
+   - [logicBase](#logicbase)
+     - [query](#logicbase-query)
+   - [logicBase Implementation](#logicbase-implementation)
+     - [init](#logicbase-implementation-init)
    - [util](#util)
      - [seq(funcs, done)](#util-seqfuncs-done)
        - [_.to(names...)](#util-seqfuncs-done-_tonames)
@@ -1896,6 +1900,48 @@ util.seq([
 		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
 		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _.to('s1', 'res', 'eff')); },
 		function(_) { assert.deepEqual(this.eff, [{foo: 'bar1'}, {foo: 'bar2'}]); _(); },
+], done)();
+```
+
+<a name="logicbase"></a>
+# logicBase
+<a name="logicbase-query"></a>
+## query
+should provide a matching statement, if one exists.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
+		function(_) { evalEnv.query(this.state, {_type: 'query', query: ['a', {v: 0}, {v:1}]}, _.to('res')); },
+		function(_) { assert.deepEqual(this.res, [[1, 2]]); _()},
+], done)();
+```
+
+<a name="logicbase-implementation"></a>
+# logicBase Implementation
+<a name="logicbase-implementation-init"></a>
+## init
+should create a node of the given depth with no value and no children.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('logicBase', {depth: 7}, _.to('state')); },
+		function(_) { hashDB.unhash(this.state, _.to('content')); },
+		function(_) { assert.equal(this.content.d, 7);
+			      assert(!this.content.v, 'Node should not have a value');
+			      assert(!this.content.c, 'Node should not have children'); _();},
+], done)();
+```
+
+should set depth to zero if not given.
+
+```js
+util.seq([
+		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+		function(_) { hashDB.unhash(this.state, _.to('content')); },
+		function(_) { assert.equal(this.content.d, 0); _();},
 ], done)();
 ```
 
