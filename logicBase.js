@@ -19,7 +19,7 @@ exports.do_update = function(s, p, ctx) {
 				    d: s.d + 1,
 				    v: s.v}, _('second')); },
 	    function(first, second, _) { s.c = {};
-					 s.c[indexOf(p.assert[0], s)] = first;
+					 s.c[indexOf(p.assert, s)] = first;
 					 s.c[indexOf(s.v, s)] =  second;
 					 delete s.v;
 					 ctx.ret(s);},
@@ -28,7 +28,7 @@ exports.do_update = function(s, p, ctx) {
 }
 
 function indexOf(term, s) {
-    return term[0];
+    return term[0] + '/' + (term.length - 1);
 }
 
 exports.do_query = function(s, p, ctx) {

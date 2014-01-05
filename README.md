@@ -1959,10 +1959,23 @@ util.seq([
     function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
     function(_) { hashDB.unhash(this.state, _.to('content')); },
     function(_) { assert.equal(this.content.v, undefined);
-		  hashDB.unhash(this.content.c['a'], _.to('a')); },
-    function(_) { hashDB.unhash(this.content.c['b'], _.to('b')); },
+		  hashDB.unhash(this.content.c['a/2'], _.to('a')); },
+    function(_) { hashDB.unhash(this.content.c['b/2'], _.to('b')); },
     function(_) { assert.deepEqual(this.a, {_type: 'logicBase', d:1, v: ['a', 1, 2]});
 		  assert.deepEqual(this.b, {_type: 'logicBase', d:1, v: ['b', 3, 4]}); _(); },
+], done)();
+```
+
+should index compound terms in the form name/arity.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4, 5]}, _.to('state')); },
+    function(_) { hashDB.unhash(this.state, _.to('content')); },
+    function(_) { assert('a/2' in this.content.c, 'the node should have a key a/2'); _(); },
+    function(_) { assert('b/3' in this.content.c, 'the node should have a key b/3'); _(); },
 ], done)();
 ```
 
