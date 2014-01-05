@@ -2006,6 +2006,24 @@ util.seq([
 ], done)();
 ```
 
+should allow any number (not limited to 2) of children to a node.
+
+```js
+util.seq([
+    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
+    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['c', 5, 6]}, _.to('state')); },
+    function(_) { hashDB.unhash(this.state, _.to('content')); },
+    function(_) { hashDB.unhash(this.content.c['a/2'], _.to('a')); },
+    function(_) { hashDB.unhash(this.content.c['b/2'], _.to('b')); },
+    function(_) { hashDB.unhash(this.content.c['c/2'], _.to('c')); },
+    function(_) { assert.deepEqual(this.a, {_type: 'logicBase', d:1, v: ['a', 1, 2]});
+		  assert.deepEqual(this.b, {_type: 'logicBase', d:1, v: ['b', 3, 4]});
+		  assert.deepEqual(this.c, {_type: 'logicBase', d:1, v: ['c', 5, 6]}); _(); },
+], done)();
+```
+
 <a name="util"></a>
 # util
 <a name="util-seqfuncs-done"></a>
