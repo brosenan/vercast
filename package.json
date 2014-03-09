@@ -1,0 +1,22 @@
+{
+  "name": "vercast",
+  "version": "0.0.0",
+  "description": "VERsion Controlled Application STate",
+  "main": "app.js",
+  "directories": {
+    "test": "test"
+  },
+  "scripts": {
+    "test": "mocha"
+  },
+  "repository": {
+    "type": "git",
+    "url": "git://github.com/brosenan/vercast.git"
+  },
+  "author": "Boaz Rosenan",
+  "license": "BSD-2-Clause",
+  "bugs": {
+    "url": "https://github.com/brosenan/vercast/issues"
+  },
+  "homepage": "https://github.com/brosenan/vercast"
+}

@@ -24,7 +24,6 @@ exports.do_update = function(s, p, ctx) {
 	    function(_) { assertTerm(s, ctx, p.assert, _); },
 	    function(_) { ctx.ret(s); },
 	], ctx.err)();
-
     }
 }
 
