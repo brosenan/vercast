@@ -1,8 +1,8 @@
 import random
 import graphs
 
-friend_avg = 10
-num_actors = 1000
+friend_avg = 5
+num_actors = 100
 
 def choose_friends(num):
     friends = []
@@ -73,6 +73,7 @@ def stats():
 
 def first_k(seq, k):
     for i in seq:
+        print k
         if k == 0:
             raise StopIteration()
         yield i
@@ -80,6 +81,6 @@ def first_k(seq, k):
         
 
 if __name__ == '__main__':
-    pop = list(first_k(stats(), 100000))
+    pop = list(first_k(stats(), 10000))
     print max(pop), min(pop), sum(pop)/len(pop)
 
