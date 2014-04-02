@@ -7,9 +7,14 @@
   ․ counter add should subtract the given amount when unapplied
     counter get should return the counter value
   ․ counter get should return the counter value
+    DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with ctx and args as parameters
+  ․ DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with ctx and args as parameters
+    DummyObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
+  ․ DummyObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
+
   ․ ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
     ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function
   ․ ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function
@@ -28,5 +33,5 @@
     ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
 
-  14 passing (32ms)
+  16 passing (34ms)
 

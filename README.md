@@ -1,8 +1,12 @@
+MyClass
 # TOC
    - [counter](#counter)
      - [init](#counter-init)
      - [add](#counter-add)
      - [get](#counter-get)
+   - [DummyObjectStore](#dummyobjectstore)
+     - [.init(ctx, className, args)](#dummyobjectstore-initctx-classname-args)
+     - [.trans(ctx, v, p)](#dummyobjectstore-transctx-v-p)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
@@ -49,6 +53,37 @@ var c = disp.init({}, 'counter', {});
 c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
 res = disp.apply({}, c, {_type: 'get'})[1];
 assert.equal(res, 2);
+done();
+```
+
+<a name="dummyobjectstore"></a>
+# DummyObjectStore
+<a name="dummyobjectstore-initctx-classname-args"></a>
+## .init(ctx, className, args)
+should call the init() method of the relevant class with ctx and args as parameters.
+
+```js
+var called = false;
+var disp = new ObjectDisp({
+		MyClass: {
+		    init: function(ctx, args) {
+			assert.equal(args.foo, 2);
+			assert.equal(ctx, 'bar');
+			called = true;
+		    }
+		}
+});
+var ostore = new DummyObjectStore(disp);
+ostore.init('bar', 'MyClass', {foo: 2});
+assert(called, 'MyClass.init() should have been called');
+done();
+```
+
+should return an ID (an object with a "$" attribute containing a string) of the newly created object.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+assert.equal(typeof id.$, 'string');
 done();
 ```
 
