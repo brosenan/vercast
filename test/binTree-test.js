@@ -1,12 +1,14 @@
 assert = require('assert');
 ObjectDisp = require('../objectDisp.js');
 DummyObjectStore = require('../dummyObjectStore.js');
+CheckerObjectStore = require('./checkerObjectStore.js');
 
 var disp = new ObjectDisp({
     Counter: require('../counter.js'),
     BinTree: require('../binTree.js'),
+    ':inv': require('../inv.js'),
 });
-var ostore = new DummyObjectStore(disp);
+var ostore = new CheckerObjectStore(new DummyObjectStore(disp));
 
 describe('BinTree', function(){
     describe('init', function(){

@@ -51,6 +51,8 @@
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should pass the context, the patch and the unapply flag as parameters to the patch function
     ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
+    ObjectDisp .apply(ctx, obj, patch, unapply) should use patch handlers if defined (prfixed with ":"), and should prefer them over class methods
+  ․ ObjectDisp .apply(ctx, obj, patch, unapply) should use patch handlers if defined (prfixed with ":"), and should prefer them over class methods
 
-  26 passing (54ms)
+  27 passing (62ms)
 

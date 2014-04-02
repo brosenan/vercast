@@ -146,5 +146,41 @@ describe('ObjectDisp', function(){
 	    assert.equal(res[1], 'foo');
 	    done();
 	});
+	it('should use patch handlers if defined (prfixed with ":"), and should prefer them over class methods', function(done){
+	    var called = false;
+	    disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function (ctx, patch) {
+			assert(false, 'Class method should not run');
+		    },
+		    get: function(ctx, patch) {
+			return this.name;
+		    },
+		},
+		':patch1': function(ctx, obj, patch) {
+		    called = true;
+		    // We get the patch from the caller
+		    assert.equal(patch.name, 'bar');
+		    // and the object
+		    assert.equal(obj.name, 'foo');
+		    // "this" is the object dispatcher
+		    var pair = this.apply(ctx, obj, {_type: 'get'});
+		    assert(pair[1], 'foo');
+		    
+		    obj.name = 'bazz';
+		    return 2;
+		},
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ctx = {};
+	    var obj = objDisp.init(ctx, 'MyClass', {});
+	    res = objDisp.apply(ctx, obj, {_type: 'patch1', name: 'bar'});
+	    assert(called, 'patch function should have been called');
+	    assert.equal(res[0].name, 'bazz');
+	    assert.equal(res[1], 2);
+	    done();
+	});
+
     });
 });

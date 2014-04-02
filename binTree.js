@@ -8,22 +8,19 @@ exports.init = function(ctx, args) {
 exports.fetch = function(ctx, p, u) {
     if(p.key == this.key) {
 	return this.value;
-    } else if(p.key < this.key) {
-	if(this.left) {
-	    return ctx.query(this.left, p);
-	} else {
-	    return;
-	}
-    } else {
-	if(this.right) {
-	    return ctx.query(this.right, p);
-	} else {
-	    return;
-	}
+    } else if(p.key < this.key && this.left) {
+	return ctx.query(this.left, p);
+    } else if(this.right) {
+	return ctx.query(this.right, p);
     }
 };
 
 exports.add = function(ctx, p, u) {
+    if(u) {
+	p._type = 'remove';
+	return exports.remove.call(this, ctx, p, !u);
+    }
+
     if(p.key == this.key) {
 	ctx.conflict();
     } else if(p.key < this.key) {
@@ -47,6 +44,10 @@ exports.getMin = function(ctx, p, u) {
 }
 
 exports.remove = function(ctx, p, u) {
+    if(u) {
+	p._type = 'add';
+	return exports.add.call(this, ctx, p, !u);
+    }
     if(p.key == this.key) {
 	// Remove this node
 	if(!this.left) this._replaceWith = this.right;

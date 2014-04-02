@@ -8,7 +8,7 @@ module.exports = function(disp) {
     this.trans = function(ctx, v1, p) {
 	if(!v1.$) throw new Error('Bad ID: ' + v1.$);
 	var pair = disp.apply(createContext(ctx), JSON.parse(v1.$), p);
-	if(pair[0]._replaceWith) {
+	if('_replaceWith' in pair[0]) {
 	    pair[0] = pair[0]._replaceWith;
 	} else {
 	    pair[0] = {$: JSON.stringify(pair[0])};
