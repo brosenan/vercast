@@ -3,6 +3,9 @@ module.exports = function(disp) {
 	if(!(className in disp)) {
 	    throw new Error("Class " + className + " not defined");
 	}
-	return disp[className].init(ctx, args);
+	var obj = {};
+	disp[className].init.call(obj, ctx, args);
+	obj._type = className;
+	return obj;
     };
 };

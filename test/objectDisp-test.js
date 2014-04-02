@@ -37,14 +37,28 @@ describe('ObjectDisp', function(){
 	    assert(called, 'Function should have been called');
 	    done();
 	});
-	it('should return the value returned by the class\'s init() function', function(done){
+	it('should return the value of the "this" object in the context of the class\'s init() function', function(done){
 	    disp = {
-		'MyClass': {init: function(ctx, args) { return 'foobar'; }}
+		'MyClass': {init: function(ctx, args) { this.name = "foobar" }}
 	    }
 	    objDisp = new ObjectDisp(disp);
 	    var ret = objDisp.init({}, 'MyClass', {});
-	    assert.equal(ret, 'foobar');
+	    assert.equal(ret.name, 'foobar');
 	    done();
 	});
+	it('should add a _type field to the returned object, containing the class name', function(done){
+	    disp = {
+		'MyClass': {init: function(ctx, args) { this.name = 'foobar'; }}
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ret = objDisp.init({}, 'MyClass', {});
+	    assert.equal(ret._type, 'MyClass');
+	    done();
+	});
+
     });
+    describe('.apply(ctx, obj, patch, unapply)', function(){
+	
+    });
+
 });
