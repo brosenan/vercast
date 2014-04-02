@@ -1,17 +1,68 @@
-MyClass
 # TOC
+   - [BinTree](#bintree)
+     - [init](#bintree-init)
+     - [fetch](#bintree-fetch)
+     - [add](#bintree-add)
    - [counter](#counter)
      - [init](#counter-init)
      - [add](#counter-add)
      - [get](#counter-get)
    - [DummyObjectStore](#dummyobjectstore)
      - [.init(ctx, className, args)](#dummyobjectstore-initctx-classname-args)
-     - [.trans(ctx, v, p)](#dummyobjectstore-transctx-v-p)
+     - [.trans(ctx, v1, p)](#dummyobjectstore-transctx-v1-p)
+     - [context](#dummyobjectstore-context)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
 <a name=""></a>
  
+<a name="bintree"></a>
+# BinTree
+<a name="bintree-init"></a>
+## init
+should initialize a binary tree with a single element.
+
+```js
+var tree = disp.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+assert.equal(tree.key, 'foo');
+assert.equal(tree.value, 'bar');
+assert.equal(tree.left, null);
+assert.equal(tree.right, null);
+done();
+```
+
+<a name="bintree-fetch"></a>
+## fetch
+should return the value associated with a key if the key is the same as the root.
+
+```js
+var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+var pair = ostore.trans({}, v, {_type: 'fetch', key: 'foo'});
+assert.equal(pair[1], 'bar');
+done();
+```
+
+should return undefined if the key is not in the tree.
+
+```js
+var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+var pair = ostore.trans({}, v, {_type: 'fetch', key: 'FOO'});
+assert.equal(typeof pair[1], 'undefined');
+done();
+```
+
+<a name="bintree-add"></a>
+## add
+should add a leaf to the tree, based on key comparison.
+
+```js
+var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+v = ostore.trans({}, v, {_type: 'add', key: 'bar', value: 'baz'})[0];
+assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'foo'})[1], 'bar');
+assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'bar'})[1], 'baz');
+done();
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
@@ -60,7 +111,7 @@ done();
 # DummyObjectStore
 <a name="dummyobjectstore-initctx-classname-args"></a>
 ## .init(ctx, className, args)
-should call the init() method of the relevant class with ctx and args as parameters.
+should call the init() method of the relevant class with args as a parameter.
 
 ```js
 var called = false;
@@ -68,7 +119,6 @@ var disp = new ObjectDisp({
 		MyClass: {
 		    init: function(ctx, args) {
 			assert.equal(args.foo, 2);
-			assert.equal(ctx, 'bar');
 			called = true;
 		    }
 		}
@@ -84,6 +134,46 @@ should return an ID (an object with a "$" attribute containing a string) of the 
 ```js
 var id = ostore.init({}, 'Counter', {});
 assert.equal(typeof id.$, 'string');
+done();
+```
+
+<a name="dummyobjectstore-transctx-v1-p"></a>
+## .trans(ctx, v1, p)
+should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result.
+
+```js
+var v0 = ostore.init({}, 'Counter', {});
+var pair = ostore.trans({}, v0, {_type: 'add', amount: 10});
+var v1 = pair[0];
+pair = ostore.trans({}, v1, {_type: 'get'});
+var res = pair[1];
+assert.equal(res, 10);
+done();
+```
+
+<a name="dummyobjectstore-context"></a>
+## context
+should allow underlying initializations and transitions to perform initializations and transitions.
+
+```js
+var disp = new ObjectDisp({
+		MyClass: {
+		    init: function(ctx, args) {
+			this.counter = ctx.init('Counter', {});
+		    },
+		    patchCounter: function(ctx, p) {
+			var pair = ctx.trans(this.counter, p.p)
+			this.counter = pair[0];
+			return pair[1];
+		    },
+		},
+		Counter: require('../counter.js'),
+});
+var ostore = new DummyObjectStore(disp);
+var v = ostore.init({}, 'MyClass', {});
+v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 5}})[0];
+r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
+assert.equal(r, 5);
 done();
 ```
 

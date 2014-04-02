@@ -1,7 +1,6 @@
 module.exports = function(disp) {
     this.init = function(ctx, className, args) {
 	if(!(className in disp)) {
-	    console.log(className);
 	    throw new Error("Class " + className + " not defined");
 	}
 	var obj = {};

@@ -1,4 +1,12 @@
 
+    BinTree init should initialize a binary tree with a single element
+  ․ BinTree init should initialize a binary tree with a single element
+    BinTree fetch should return the value associated with a key if the key is the same as the root
+  ․ BinTree fetch should return the value associated with a key if the key is the same as the root
+    BinTree fetch should return undefined if the key is not in the tree
+  ․ BinTree fetch should return undefined if the key is not in the tree
+    BinTree add should add a leaf to the tree, based on key comparison
+  ․ BinTree add should add a leaf to the tree, based on key comparison
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -7,14 +15,17 @@
   ․ counter add should subtract the given amount when unapplied
     counter get should return the counter value
   ․ counter get should return the counter value
-    DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with ctx and args as parameters
-  ․ DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with ctx and args as parameters
+    DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
+  ․ DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     DummyObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
   ․ DummyObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
+    DummyObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
+  ․ DummyObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
+    DummyObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
+  ․ DummyObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
-
   ․ ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
     ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function
   ․ ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function
@@ -33,5 +44,5 @@
     ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
 
-  16 passing (34ms)
+  22 passing (45ms)
 
