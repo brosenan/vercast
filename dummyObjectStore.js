@@ -18,7 +18,20 @@ module.exports = function(disp) {
 		return self.init(ctx, className, args);
 	    },
 	    trans: function(v1, p) {
+		var pair = self.trans(ctx, v1, p);
+		if(pair[1]) throw new Error('Transition returned unexpected value: ' + pair[1]);
+		return pair[0];
+	    },
+	    query: function(v1, p) {
+		var pair = self.trans(ctx, v1, p);
+		if(pair[0].$ != v1.$) throw new Error('Query patch ' + p._type + ' unexpectedly modified object value');
+		return pair[1];
+	    },
+	    transQuery: function(v1, p) {
 		return self.trans(ctx, v1, p);
+	    },
+	    conflict: function() {
+		return ctx.conflict();
 	    },
 	};
     }

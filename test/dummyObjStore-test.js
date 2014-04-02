@@ -51,7 +51,7 @@ describe('DummyObjectStore', function(){
 			this.counter = ctx.init('Counter', {});
 		    },
 		    patchCounter: function(ctx, p) {
-			var pair = ctx.trans(this.counter, p.p)
+			var pair = ctx.transQuery(this.counter, p.p)
 			this.counter = pair[0];
 			return pair[1];
 		    },

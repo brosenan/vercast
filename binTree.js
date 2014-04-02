@@ -10,15 +10,13 @@ exports.fetch = function(ctx, p, u) {
 	return this.value;
     } else if(p.key < this.key) {
 	if(this.left) {
-	    var pair = ctx.trans(this.left, p);
-	    return pair[1];
+	    return ctx.query(this.left, p);
 	} else {
 	    return;
 	}
     } else {
 	if(this.right) {
-	    var pair = ctx.trans(this.right, p);
-	    return pair[1];
+	    return ctx.query(this.right, p);
 	} else {
 	    return;
 	}
@@ -26,19 +24,17 @@ exports.fetch = function(ctx, p, u) {
 };
 
 exports.add = function(ctx, p, u) {
-    if(p.key < this.key) {
+    if(p.key == this.key) {
+	ctx.conflict();
+    } else if(p.key < this.key) {
 	if(this.left) {
-	    var pair = ctx.trans(this.left, p);
-	    this.left = pair[0];
-	    return pair[1];
+	    this.left = ctx.trans(this.left, p);
 	} else {
 	    this.left = ctx.init('BinTree', p);
 	}
     } else {
 	if(this.right) {
-	    var pair = ctx.trans(this.right, p);
-	    this.right = pair[0];
-	    return pair[1];
+	    this.right = ctx.trans(this.right, p);
 	} else {
 	    this.right = ctx.init('BinTree', p);
 	}

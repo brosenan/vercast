@@ -33,7 +33,7 @@ done();
 
 <a name="bintree-fetch"></a>
 ## fetch
-should return the value associated with a key if the key is the same as the root.
+should return the value associated with a key.
 
 ```js
 var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
@@ -58,8 +58,24 @@ should add a leaf to the tree, based on key comparison.
 ```js
 var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
 v = ostore.trans({}, v, {_type: 'add', key: 'bar', value: 'baz'})[0];
+v = ostore.trans({}, v, {_type: 'add', key: 'kar', value: 'fuzz'})[0];
 assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'foo'})[1], 'bar');
 assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'bar'})[1], 'baz');
+assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'kar'})[1], 'fuzz');
+done();
+```
+
+should report a conflict and not change the state if the the key already exists.
+
+```js
+var conflicting = false;
+var ctx = {
+		conflict: function() { conflicting = true; }
+};
+var v0 = ostore.init(ctx, 'BinTree', {key: 'foo', value: 'bar'});
+var v1 = ostore.trans(ctx, v0, {_type: 'add', key: 'foo', value: 'baz'})[0];
+assert(conflicting, 'Should be conflicting');
+assert.equal(v0.$, v1.$);
 done();
 ```
 
@@ -162,7 +178,7 @@ var disp = new ObjectDisp({
 			this.counter = ctx.init('Counter', {});
 		    },
 		    patchCounter: function(ctx, p) {
-			var pair = ctx.trans(this.counter, p.p)
+			var pair = ctx.transQuery(this.counter, p.p)
 			this.counter = pair[0];
 			return pair[1];
 		    },

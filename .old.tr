@@ -1,12 +1,14 @@
 
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
-    BinTree fetch should return the value associated with a key if the key is the same as the root
-  ․ BinTree fetch should return the value associated with a key if the key is the same as the root
+    BinTree fetch should return the value associated with a key
+  ․ BinTree fetch should return the value associated with a key
     BinTree fetch should return undefined if the key is not in the tree
   ․ BinTree fetch should return undefined if the key is not in the tree
     BinTree add should add a leaf to the tree, based on key comparison
   ․ BinTree add should add a leaf to the tree, based on key comparison
+    BinTree add should report a conflict and not change the state if the the key already exists
+  ․ BinTree add should report a conflict and not change the state if the the key already exists
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -44,5 +46,5 @@
     ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
 
-  22 passing (45ms)
+  23 passing (45ms)
 
