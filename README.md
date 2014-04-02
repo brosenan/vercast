@@ -1,9 +1,57 @@
 # TOC
+   - [counter](#counter)
+     - [init](#counter-init)
+     - [add](#counter-add)
+     - [get](#counter-get)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
 <a name=""></a>
  
+<a name="counter"></a>
+# counter
+<a name="counter-init"></a>
+## init
+should create a counter with value = 0.
+
+```js
+var initial = disp.init({}, 'counter', {});
+assert.equal(initial.value, 0);
+done();
+```
+
+<a name="counter-add"></a>
+## add
+should add the given ammount to the counter value.
+
+```js
+var c = disp.init({}, 'counter', {});
+c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
+assert.equal(c.value, 2);
+done();
+```
+
+should subtract the given amount when unapplied.
+
+```js
+var c = disp.init({}, 'counter', {});
+c = disp.apply({}, c, {_type: 'add', amount: 2}, -1)[0];
+assert.equal(c.value, -2);
+done();
+```
+
+<a name="counter-get"></a>
+## get
+should return the counter value.
+
+```js
+var c = disp.init({}, 'counter', {});
+c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
+res = disp.apply({}, c, {_type: 'get'})[1];
+assert.equal(res, 2);
+done();
+```
+
 <a name="objectdisp"></a>
 # ObjectDisp
 <a name="objectdisp-initctx-classname-args"></a>

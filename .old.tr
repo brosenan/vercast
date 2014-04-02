@@ -1,4 +1,12 @@
 
+    counter init should create a counter with value = 0
+  ․ counter init should create a counter with value = 0
+    counter add should add the given ammount to the counter value
+  ․ counter add should add the given ammount to the counter value
+    counter add should subtract the given amount when unapplied
+  ․ counter add should subtract the given amount when unapplied
+    counter get should return the counter value
+  ․ counter get should return the counter value
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
@@ -20,5 +28,5 @@
     ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should return a pair [obj, res], containing the patch function's "this" object, and its return value
 
-  10 passing (27ms)
+  14 passing (32ms)
 
