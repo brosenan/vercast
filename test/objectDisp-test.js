@@ -127,7 +127,24 @@ describe('ObjectDisp', function(){
 	    objDisp.apply(ctx, obj, {_type: 'patch1', bar: 'baz'}, true);
 	    done();
 	});
-
+	it('should return a pair [obj, res], containing the patch function\'s "this" object, and its return value', function(done){
+	    disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function (ctx, patch) {
+			var old = this.name;
+			this.name = patch.name;
+			return old;
+		    },
+		}
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ctx = {};
+	    var obj = objDisp.init(ctx, 'MyClass', {});
+	    res = objDisp.apply(ctx, obj, {_type: 'patch1', name: 'bar'});
+	    assert.equal(res[0].name, 'bar');
+	    assert.equal(res[1], 'foo');
+	    done();
+	});
     });
-
 });
