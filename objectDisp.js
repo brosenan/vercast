@@ -3,6 +3,6 @@ module.exports = function(disp) {
 	if(!(className in disp)) {
 	    throw new Error("Class " + className + " not defined");
 	}
-	disp[className].init();
+	return disp[className].init(ctx, args);
     };
 };

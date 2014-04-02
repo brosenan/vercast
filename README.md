@@ -33,3 +33,32 @@ try {
 done();
 ```
 
+should pass the given context and args to the class's init() function.
+
+```js
+var called = false;
+disp = {
+		'MyClass': {init: function(ctx, args) {
+		    assert.equal(ctx, 'foo');
+		    assert.equal(args, 'bar');
+		    called = true; 
+		}}
+}
+objDisp = new ObjectDisp(disp);
+objDisp.init('foo', 'MyClass', 'bar');
+assert(called, 'Function should have been called');
+done();
+```
+
+should return the value returned by the class's init() function.
+
+```js
+disp = {
+		'MyClass': {init: function(ctx, args) { return 'foobar'; }}
+}
+objDisp = new ObjectDisp(disp);
+var ret = objDisp.init({}, 'MyClass', {});
+assert.equal(ret, 'foobar');
+done();
+```
+
