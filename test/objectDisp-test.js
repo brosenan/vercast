@@ -92,6 +92,41 @@ describe('ObjectDisp', function(){
 	    }
 	    done();
 	});
+	it('should pass the object as the "this" parameter to the patch function', function(done){
+	    var called = false;
+	    disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function () {
+			assert.equal(this.name, 'foo');
+			called = true;
+		    },
+		}
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ctx = {};
+	    var obj = objDisp.init(ctx, 'MyClass', {});
+	    objDisp.apply(ctx, obj, {_type: 'patch1'});
+	    assert(called, 'Function should have been called');
+	    done();
+	});
+	it('should pass the context, the patch and the unapply flag as parameters to the patch function', function(done){
+	    disp = {
+		'MyClass': {
+		    init: function() { },
+		    patch1: function (ctx, patch, unapply) {
+			assert.equal(ctx.foo, 'bar');
+			assert.equal(patch.bar, 'baz');
+			assert(unapply, 'The unapply flag should have been set');
+		    },
+		}
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ctx = {foo: 'bar'};
+	    var obj = objDisp.init(ctx, 'MyClass', {});
+	    objDisp.apply(ctx, obj, {_type: 'patch1', bar: 'baz'}, true);
+	    done();
+	});
 
     });
 

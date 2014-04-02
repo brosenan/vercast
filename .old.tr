@@ -13,6 +13,10 @@
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should call the function with name matches the _type field of the patch, in the class associated with the object.
     ObjectDisp .apply(ctx, obj, patch, unapply) should throw an exception if the patch function is not defined
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should throw an exception if the patch function is not defined
+    ObjectDisp .apply(ctx, obj, patch, unapply) should pass the object as the "this" parameter to the patch function
+  ․ ObjectDisp .apply(ctx, obj, patch, unapply) should pass the object as the "this" parameter to the patch function
+    ObjectDisp .apply(ctx, obj, patch, unapply) should pass the context, the patch and the unapply flag as parameters to the patch function
+  ․ ObjectDisp .apply(ctx, obj, patch, unapply) should pass the context, the patch and the unapply flag as parameters to the patch function
 
-  7 passing (24ms)
+  9 passing (26ms)
 

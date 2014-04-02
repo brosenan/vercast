@@ -12,6 +12,6 @@ module.exports = function(disp) {
 	if(!(patch._type in disp[obj._type])) {
 	    throw new Error('Patch method ' + patch._type + ' is not defined in class ' + obj._type);
 	}
-	(disp[obj._type][patch._type])();
+	disp[obj._type][patch._type].call(obj, ctx, patch, unapply);
     }
 };
