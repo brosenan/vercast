@@ -9,6 +9,10 @@
 [32m  ․[0m[90m ObjectDisp .init(ctx, className, args) should return the value of the "this" object in the context of the class's init() function
 [90m    ObjectDisp .init(ctx, className, args) should add a _type field to the returned object, containing the class name
 [32m  ․[0m[90m ObjectDisp .init(ctx, className, args) should add a _type field to the returned object, containing the class name
+[90m    ObjectDisp .apply(ctx, obj, patch, unapply) should call the function with name matches the _type field of the patch, in the class associated with the object.
+[32m  ․[0m[90m ObjectDisp .apply(ctx, obj, patch, unapply) should call the function with name matches the _type field of the patch, in the class associated with the object.
+[90m    ObjectDisp .apply(ctx, obj, patch, unapply) should throw an exception if the patch function is not defined
+[32m  ․[0m[90m ObjectDisp .apply(ctx, obj, patch, unapply) should throw an exception if the patch function is not defined
 
-[92m [0m[32m 5 passing[0m[90m (23ms)[0m
+[92m [0m[32m 7 passing[0m[90m (9ms)[0m
 

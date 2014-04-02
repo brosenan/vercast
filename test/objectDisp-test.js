@@ -58,7 +58,41 @@ describe('ObjectDisp', function(){
 
     });
     describe('.apply(ctx, obj, patch, unapply)', function(){
-	
+	it('should call the function with name matches the _type field of the patch, in the class associated with the object.', function(done){
+	    var called = false;
+	    disp = {
+		'MyClass': {
+		    init: function() {},
+		    patch1: function () { called = true; },
+		}
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ctx = {};
+	    var obj = objDisp.init(ctx, 'MyClass', {});
+	    objDisp.apply(ctx, obj, {_type: 'patch1'});
+	    assert(called, 'Function should have been called');
+	    done();
+	});
+	it('should throw an exception if the patch function is not defined', function(done){
+	    var called = false;
+	    disp = {
+		'MyClass': {
+		    init: function() {},
+		    patch1: function () { called = true; },
+		}
+	    }
+	    objDisp = new ObjectDisp(disp);
+	    var ctx = {};
+	    var obj = objDisp.init(ctx, 'MyClass', {});
+	    try {
+		objDisp.apply(ctx, obj, {_type: 'patch2'});
+		assert(false, 'Exception should have been raised');
+	    } catch(e) {
+		assert.equal(e.message, 'Patch method patch2 is not defined in class MyClass');
+	    }
+	    done();
+	});
+
     });
 
 });
