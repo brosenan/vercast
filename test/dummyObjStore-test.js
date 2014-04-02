@@ -3,6 +3,12 @@ ObjectDisp = require('../objectDisp.js');
 DummyObjectStore = require('../dummyObjectStore.js');
 
 var disp = new ObjectDisp({
+    MyClass: {
+	init: function() { this.name = 'foo'; },
+	patch1: function (ctx, patch) {
+	    this._replaceWith = patch.rep;
+	},
+    },
     Counter: require('../counter.js')
 });
 var ostore = new DummyObjectStore(disp);
@@ -40,6 +46,16 @@ describe('DummyObjectStore', function(){
 	    pair = ostore.trans({}, v1, {_type: 'get'});
 	    var res = pair[1];
 	    assert.equal(res, 10);
+	    done();
+	});
+	it('should replace the object if a _replaceWith field is added to the object', function(done){
+	    var ctx = {};
+	    var v = ostore.init(ctx, 'MyClass', {});
+	    var rep = ostore.init(ctx, 'Counter', {});
+	    v = ostore.trans(ctx, v, {_type: 'patch1', rep: rep})[0];
+	    v = ostore.trans(ctx, v, {_type: 'add', amount: 5})[0];
+	    var r = ostore.trans(ctx, v, {_type: 'get'})[1];
+	    assert.equal(r, 5);
 	    done();
 	});
     });

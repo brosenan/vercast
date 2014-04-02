@@ -3,6 +3,8 @@
      - [init](#bintree-init)
      - [fetch](#bintree-fetch)
      - [add](#bintree-add)
+     - [getMin](#bintree-getmin)
+     - [remove](#bintree-remove)
    - [counter](#counter)
      - [init](#counter-init)
      - [add](#counter-add)
@@ -76,6 +78,51 @@ var v0 = ostore.init(ctx, 'BinTree', {key: 'foo', value: 'bar'});
 var v1 = ostore.trans(ctx, v0, {_type: 'add', key: 'foo', value: 'baz'})[0];
 assert(conflicting, 'Should be conflicting');
 assert.equal(v0.$, v1.$);
+done();
+```
+
+<a name="bintree-getmin"></a>
+## getMin
+should retrieve the the minimum key, with its associated value.
+
+```js
+function createTree(list) {
+		var v = ostore.init({}, 'BinTree', {key: list[0][0], value: list[0][1]});
+		for(var i = 1; i < list.length; i++) {
+		    v = ostore.trans({}, v, {_type: 'add', key: list[i][0], value: list[i][1]})[0];
+		}
+		return v;
+}
+
+var v = createTree([[4, 8], [2, 4], [5, 10], [3, 6]]);
+var r = ostore.trans({}, v, {_type: 'getMin'})[1];
+assert.equal(r.key, 2);
+assert.equal(r.value, 4);
+done();
+```
+
+<a name="bintree-remove"></a>
+## remove
+should remove the element with the given key and value.
+
+```js
+function allInTree(v, list) {
+		for(var i = 0; i < list.length; i++) {
+		    if(!ostore.trans({}, v, {_type: 'fetch', key: list[i]})[1]) return false;
+		}
+		return true;
+}
+// Remove a node that has one child
+var v = createTree([[4, 8], [2, 4], [5, 10], [3, 6]]);
+var removed2 = ostore.trans({}, v, {_type: 'remove', key: 2, value: 4})[0];
+var r = ostore.trans({}, removed2, {_type: 'fetch', key: 2})[1];
+assert(!r, 'key 2 should be removed');
+assert(allInTree(removed2, [4, 5, 3]), '4, 5, and 3 should remain in the tree');
+// Remove a node with two children
+var removed4 = ostore.trans({}, v, {_type: 'remove', key: 4, value: 8})[0];
+var r = ostore.trans({}, removed4, {_type: 'fetch', key: 4})[1];
+assert(!r, 'key 4 should be removed');
+assert(allInTree(removed4, [2, 5, 3]), '2, 5, and 3 should remain in the tree');
 done();
 ```
 
@@ -164,6 +211,19 @@ var v1 = pair[0];
 pair = ostore.trans({}, v1, {_type: 'get'});
 var res = pair[1];
 assert.equal(res, 10);
+done();
+```
+
+should replace the object if a _replaceWith field is added to the object.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'MyClass', {});
+var rep = ostore.init(ctx, 'Counter', {});
+v = ostore.trans(ctx, v, {_type: 'patch1', rep: rep})[0];
+v = ostore.trans(ctx, v, {_type: 'add', amount: 5})[0];
+var r = ostore.trans(ctx, v, {_type: 'get'})[1];
+assert.equal(r, 5);
 done();
 ```
 

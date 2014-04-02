@@ -40,3 +40,27 @@ exports.add = function(ctx, p, u) {
 	}
     }	    
 };
+
+exports.getMin = function(ctx, p, u) {
+    if(this.left) return ctx.query(this.left, p);
+    else return this;
+}
+
+exports.remove = function(ctx, p, u) {
+    if(p.key == this.key) {
+	// Remove this node
+	if(!this.left) this._replaceWith = this.right;
+	else if(!this.right) this._replaceWith = this.left;
+	else {
+	    // Replace this node with its right-side min
+	    var min = ctx.query(this.right, {_type: 'getMin'});
+	    this.right  = ctx.trans(this.right, {_type: 'remove', key: min.key, value: min.value});
+	    this.key = min.key;
+	    this.value = min.value;
+	}
+    } else if(p.key < this.key) {
+	this.left = ctx.trans(this.left, p);
+    } else {
+	this.right = ctx.trans(this.right, p);
+    }
+}
