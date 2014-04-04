@@ -9,17 +9,17 @@ module.exports = function(disp) {
 	return obj;
     };
     this.apply = function(ctx, obj, patch, unapply) {
-	var func = disp[':' + patch._type];
+	func = disp[obj._type][patch._type];
 	if(func) {
-	    res = func.call(this, ctx, obj, patch, unapply);
+	    res = func.call(obj, ctx, patch, unapply);
 	} else {
 
-	    func = disp[obj._type][patch._type];
-	    if(!func) {
+	    var func = disp[':' + patch._type];
+	    if(func) {
+		res = func.call(this, ctx, obj, patch, unapply);
+	    } else {
 		throw new Error('Patch method ' + patch._type + ' is not defined in class ' + obj._type);
 	    }
-
-	    res = func.call(obj, ctx, patch, unapply);
 	}
 	return [obj, res];
     }

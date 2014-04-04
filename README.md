@@ -429,16 +429,13 @@ assert.equal(res[1], 'foo');
 done();
 ```
 
-should use patch handlers if defined (prfixed with ":"), and should prefer them over class methods.
+should use patch handlers if defined (prfixed with ":").
 
 ```js
 var called = false;
 disp = {
 		'MyClass': {
 		    init: function() { this.name = 'foo'; },
-		    patch1: function (ctx, patch) {
-			assert(false, 'Class method should not run');
-		    },
 		    get: function(ctx, patch) {
 			return this.name;
 		    },
@@ -464,6 +461,32 @@ res = objDisp.apply(ctx, obj, {_type: 'patch1', name: 'bar'});
 assert(called, 'patch function should have been called');
 assert.equal(res[0].name, 'bazz');
 assert.equal(res[1], 2);
+done();
+```
+
+should prefer a method defined in a class over a generic patch function if both are defined.
+
+```js
+var called = false;
+disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function() {
+			called = true;
+		    },
+		    get: function(ctx, patch) {
+			return this.name;
+		    },
+		},
+		':patch1': function(ctx, obj, patch) {
+		    assert(false, 'Patch function should not have been called');
+		},
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+res = objDisp.apply(ctx, obj, {_type: 'patch1'});
+assert(called, 'patch function should have been called');
 done();
 ```
 

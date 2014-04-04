@@ -65,3 +65,11 @@ exports.remove = function(ctx, p, u) {
 	this.right = ctx.trans(this.right, p);
     }
 }
+
+exports.digest = function(ctx, p, u) {
+    var str = '';
+    if(this.left) str += ctx.query(this.left, p);
+    str += JSON.stringify([this.key, this.value]);
+    if(this.right) str += ctx.query(this.right, p);
+    return str;
+};

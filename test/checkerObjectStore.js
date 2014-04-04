@@ -20,7 +20,7 @@ module.exports = function(ostore) {
 	this.transHooks.push(func);
     }
 
-//    this.onTrans(checkInvertibility);
+    this.onTrans(checkInvertibility);
 
     this.ostore = ostore;
     
@@ -41,13 +41,7 @@ function checkInvertibility(v1, p, v2, r, c) {
     
     var ctx = createContext({});
     var pair = this.ostore.trans(ctx, v2, {_type: 'inv', patch: p});
-    if(pair[0].$ != v1.$) {
-	console.error('Non-invertible patch:', p);
-	console.error('From state:', v2);
-	console.error('Moved to:', pair[0]);
-	console.error('Instead of:', v1);
-	throw new Error('Patch ' + p._type + ' is not invertible');
-    }
+
     if(JSON.stringify(pair[1]) != JSON.stringify(r)) {
 	console.error('Result on forward pass:', r);
 	console.error('Result on backwrads pass:', pair[1]);
@@ -56,4 +50,17 @@ function checkInvertibility(v1, p, v2, r, c) {
 	console.error('v2:', v2);
 	throw new Error('Inconsistent result when inverting patch ' + p._type);
     }
+
+    v1Prime = pair[0];
+    if(v1Prime.$ == v1.$) return;
+    var v1Digest = this.ostore.trans(ctx, v1, {_type: 'digest'})[1];
+    var v1PrimeDigest = this.ostore.trans(ctx, v1Prime, {_type: 'digest'})[1];
+    if(v1Digest == v1PrimeDigest) return;
+
+    console.error('Non-invertible patch:', p);
+    console.error('From state:', v2);
+    console.error('Moved to:', pair[0]);
+    console.error('Instead of:', v1);
+    throw new Error('Patch ' + p._type + ' is not invertible');
+
 }

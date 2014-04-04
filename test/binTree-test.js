@@ -7,6 +7,7 @@ var disp = new ObjectDisp({
     Counter: require('../counter.js'),
     BinTree: require('../binTree.js'),
     ':inv': require('../inv.js'),
+    ':digest': require('../defaultDigest.js'),
 });
 var ostore = new CheckerObjectStore(new DummyObjectStore(disp));
 
