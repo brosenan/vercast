@@ -16,6 +16,12 @@
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
+   - [SimpleCache](#simplecache)
+     - [.store(id, obj[, json])](#simplecache-storeid-obj-json)
+     - [.fetch(id)](#simplecache-fetchid)
+     - [.abolish()](#simplecache-abolish)
+   - [vercast](#vercast)
+     - [.hash(obj)](#vercast-hashobj)
 <a name=""></a>
  
 <a name="bintree"></a>
@@ -487,6 +493,88 @@ var ctx = {};
 var obj = objDisp.init(ctx, 'MyClass', {});
 res = objDisp.apply(ctx, obj, {_type: 'patch1'});
 assert(called, 'patch function should have been called');
+done();
+```
+
+<a name="simplecache"></a>
+# SimpleCache
+<a name="simplecache-storeid-obj-json"></a>
+## .store(id, obj[, json])
+should store an object in the cache under the given ID.
+
+```js
+var cache = new SimpleCache();
+cache.store('one', {value: 1});
+cache.store('two', {value: 2});
+cache.store('three', {value: 3});
+assert.equal(cache.fetch('one').value, 1);
+assert.equal(cache.fetch('two').value, 2);
+assert.equal(cache.fetch('three').value, 3);
+done();
+```
+
+should retrieve the same instance on a first fetch.
+
+```js
+var cache = new SimpleCache();
+var one = {value: 1};
+cache.store('one', one);
+one.value = 2;
+assert.equal(cache.fetch('one').value, 2);
+done();
+```
+
+should retrieve the same object once and again, even if it was modified on the outside.
+
+```js
+var cache = new SimpleCache();
+cache.store('one', {value: 1});
+var one = cache.fetch('one');
+one.value = 2;
+assert.equal(cache.fetch('one').value, 1);
+done();
+```
+
+should use the json argument, if supplied, as the JSON representation of the object to be used when the instance is no longer available.
+
+```js
+var cache = new SimpleCache();
+cache.store('one', {value: 1}, JSON.stringify({value: 2}));
+assert.equal(cache.fetch('one').value, 1); // first time
+assert.equal(cache.fetch('one').value, 2); // second time
+assert.equal(cache.fetch('one').value, 2); // third time
+done();
+```
+
+<a name="simplecache-abolish"></a>
+## .abolish()
+should remove all elements from the cache.
+
+```js
+var cache = new SimpleCache();
+cache.store('one', {value: 1});
+cache.store('two', {value: 2});
+cache.store('three', {value: 3});
+cache.abolish();
+assert.equal(typeof cache.fetch('one'), 'undefined');
+assert.equal(typeof cache.fetch('two'), 'undefined');
+assert.equal(typeof cache.fetch('three'), 'undefined');
+done();
+```
+
+<a name="vercast"></a>
+# vercast
+<a name="vercast-hashobj"></a>
+## .hash(obj)
+should return a SHA-256 digest of the object's content.
+
+```js
+var obj = {foo: 'bar', key: 'tree', value: 12.3};
+var objHash = vercast.hash(obj);
+
+var hash = crypto.createHash('sha256');
+hash.update(JSON.stringify(obj));
+assert.equal(objHash, hash.digest('base64'));
 done();
 ```
 

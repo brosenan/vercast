@@ -55,6 +55,18 @@
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should use patch handlers if defined (prfixed with ":")
     ObjectDisp .apply(ctx, obj, patch, unapply) should prefer a method defined in a class over a generic patch function if both are defined
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should prefer a method defined in a class over a generic patch function if both are defined
+    SimpleCache .store(id, obj[, json]) should store an object in the cache under the given ID
+  ․ SimpleCache .store(id, obj[, json]) should store an object in the cache under the given ID
+    SimpleCache .store(id, obj[, json]) should retrieve the same instance on a first fetch
+  ․ SimpleCache .store(id, obj[, json]) should retrieve the same instance on a first fetch
+    SimpleCache .store(id, obj[, json]) should retrieve the same object once and again, even if it was modified on the outside
+  ․ SimpleCache .store(id, obj[, json]) should retrieve the same object once and again, even if it was modified on the outside
+    SimpleCache .store(id, obj[, json]) should use the json argument, if supplied, as the JSON representation of the object to be used when the instance is no longer available
+  ․ SimpleCache .store(id, obj[, json]) should use the json argument, if supplied, as the JSON representation of the object to be used when the instance is no longer available
+    SimpleCache .abolish() should remove all elements from the cache
+  ․ SimpleCache .abolish() should remove all elements from the cache
+    vercast .hash(obj) should return a SHA-256 digest of the object's content
+  ․ vercast .hash(obj) should return a SHA-256 digest of the object's content
 
-  28 passing (64ms)
+  34 passing (22ms)
 
