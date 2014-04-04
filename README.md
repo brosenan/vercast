@@ -9,6 +9,7 @@
      - [init](#counter-init)
      - [add](#counter-add)
      - [get](#counter-get)
+   - [DummyBucketStore](#dummybucketstore)
    - [DummyObjectStore](#dummyobjectstore)
      - [.init(ctx, className, args)](#dummyobjectstore-initctx-classname-args)
      - [.trans(ctx, v1, p)](#dummyobjectstore-transctx-v1-p)
@@ -174,6 +175,41 @@ c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
 res = disp.apply({}, c, {_type: 'get'})[1];
 assert.equal(res, 2);
 done();
+```
+
+<a name="dummybucketstore"></a>
+# DummyBucketStore
+should accumulate all added items and replay them when fetched.
+
+```js
+var values = {one: 1, two: 2, three: 3};
+for(var key in values) {
+    bucketStore.add('myBucket', {key: key, value: values[key]});
+}
+bucketStore.fetch('myBucket', function(err, bucket) {
+    for(var i = 0; i < bucket.length; i++) {
+	assert(bucket[i].key in values, 'the  bucket should only contain the added keys');
+	delete values[bucket[i].key];
+    }
+    for(var k in values) assert(false, 'all values should have been removed');
+    done();
+});
+```
+
+should store each bucket individually.
+
+```js
+var values = {one: 1, two: 2, three: 3};
+for(var key in values) {
+    bucketStore.add('myBucket', {key: key, value: values[key]});
+    bucketStore.add('myOtherBucket', {key: 'other_' + key, value: values[key] + 2});
+}
+bucketStore.fetch('myBucket', function(err, bucket) {
+    for(var i = 0; i < bucket.length; i++) {
+	assert(bucket[i].key in values, 'item ' + JSON.stringify(bucket[i]) + ' should not be in bucket');
+    }
+    done();
+});
 ```
 
 <a name="dummyobjectstore"></a>

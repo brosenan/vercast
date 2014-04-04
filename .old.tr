@@ -21,6 +21,10 @@
   ․ counter add should subtract the given amount when unapplied
     counter get should return the counter value
   ․ counter get should return the counter value
+    DummyBucketStore should accumulate all added items and replay them when fetched
+  ․ DummyBucketStore should accumulate all added items and replay them when fetched
+    DummyBucketStore should store each bucket individually
+  ․ DummyBucketStore should store each bucket individually
     DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
   ․ DummyObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     DummyObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
@@ -68,5 +72,5 @@
     vercast .hash(obj) should return a SHA-256 digest of the object's content
   ․ vercast .hash(obj) should return a SHA-256 digest of the object's content
 
-  34 passing (22ms)
+  36 passing (69ms)
 
