@@ -5,18 +5,25 @@
      - [add](#bintree-add)
      - [getMin](#bintree-getmin)
      - [remove](#bintree-remove)
+   - [BucketObjectStore](#bucketobjectstore)
+     - [as ObjectStore](#bucketobjectstore-as-objectstore)
+       - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
+       - [.trans(ctx, v1, p)](#bucketobjectstore-as-objectstore-transctx-v1-p)
+       - [context](#bucketobjectstore-as-objectstore-context)
    - [counter](#counter)
      - [init](#counter-init)
      - [add](#counter-add)
      - [get](#counter-get)
    - [DummyBucketStore](#dummybucketstore)
    - [DummyObjectStore](#dummyobjectstore)
-     - [.init(ctx, className, args)](#dummyobjectstore-initctx-classname-args)
-     - [.trans(ctx, v1, p)](#dummyobjectstore-transctx-v1-p)
-     - [context](#dummyobjectstore-context)
+     - [as ObjectStore](#dummyobjectstore-as-objectstore)
+       - [.init(ctx, className, args)](#dummyobjectstore-as-objectstore-initctx-classname-args)
+       - [.trans(ctx, v1, p)](#dummyobjectstore-as-objectstore-transctx-v1-p)
+       - [context](#dummyobjectstore-as-objectstore-context)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
+   - [Scheduler](#scheduler)
    - [SimpleCache](#simplecache)
      - [.store(id, obj[, json])](#simplecache-storeid-obj-json)
      - [.fetch(id)](#simplecache-fetchid)
@@ -133,6 +140,16 @@ assert(allInTree(removed4, [2, 5, 3]), '2, 5, and 3 should remain in the tree');
 done();
 ```
 
+<a name="bucketobjectstore"></a>
+# BucketObjectStore
+<a name="bucketobjectstore-as-objectstore"></a>
+## as ObjectStore
+<a name="bucketobjectstore-as-objectstore-initctx-classname-args"></a>
+### .init(ctx, className, args)
+<a name="bucketobjectstore-as-objectstore-transctx-v1-p"></a>
+### .trans(ctx, v1, p)
+<a name="bucketobjectstore-as-objectstore-context"></a>
+### context
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
@@ -214,19 +231,21 @@ bucketStore.fetch('myBucket', function(err, bucket) {
 
 <a name="dummyobjectstore"></a>
 # DummyObjectStore
-<a name="dummyobjectstore-initctx-classname-args"></a>
-## .init(ctx, className, args)
+<a name="dummyobjectstore-as-objectstore"></a>
+## as ObjectStore
+<a name="dummyobjectstore-as-objectstore-initctx-classname-args"></a>
+### .init(ctx, className, args)
 should call the init() method of the relevant class with args as a parameter.
 
 ```js
 var called = false;
 var disp = new ObjectDisp({
-		MyClass: {
-		    init: function(ctx, args) {
-			assert.equal(args.foo, 2);
-			called = true;
-		    }
-		}
+    MyClass: {
+	init: function(ctx, args) {
+	    assert.equal(args.foo, 2);
+	    called = true;
+	}
+    }
 });
 var ostore = new DummyObjectStore(disp);
 ostore.init('bar', 'MyClass', {foo: 2});
@@ -242,8 +261,8 @@ assert.equal(typeof id.$, 'string');
 done();
 ```
 
-<a name="dummyobjectstore-transctx-v1-p"></a>
-## .trans(ctx, v1, p)
+<a name="dummyobjectstore-as-objectstore-transctx-v1-p"></a>
+### .trans(ctx, v1, p)
 should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result.
 
 ```js
@@ -269,23 +288,23 @@ assert.equal(r, 5);
 done();
 ```
 
-<a name="dummyobjectstore-context"></a>
-## context
+<a name="dummyobjectstore-as-objectstore-context"></a>
+### context
 should allow underlying initializations and transitions to perform initializations and transitions.
 
 ```js
 var disp = new ObjectDisp({
-		MyClass: {
-		    init: function(ctx, args) {
-			this.counter = ctx.init('Counter', {});
-		    },
-		    patchCounter: function(ctx, p) {
-			var pair = ctx.transQuery(this.counter, p.p)
-			this.counter = pair[0];
-			return pair[1];
-		    },
-		},
-		Counter: require('../counter.js'),
+    MyClass: {
+	init: function(ctx, args) {
+	    this.counter = ctx.init('Counter', {});
+	},
+	patchCounter: function(ctx, p) {
+	    var pair = ctx.transQuery(this.counter, p.p)
+	    this.counter = pair[0];
+	    return pair[1];
+	},
+    },
+    Counter: require('../counter.js'),
 });
 var ostore = new DummyObjectStore(disp);
 var v = ostore.init({}, 'MyClass', {});
@@ -532,6 +551,95 @@ assert(called, 'patch function should have been called');
 done();
 ```
 
+<a name="scheduler"></a>
+# Scheduler
+allows users to register a callback to a condition. Once the condition is met, the callback is called.
+
+```js
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo'], function() {
+    called = true;
+});
+assert(!called, 'Callback should not have been called yet');
+sched.notify('foo');
+assert(called, 'Callback should have been called');
+done();
+```
+
+should not call a callback unless the has been met.
+
+```js
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo'], function() {
+    called = true;
+});
+assert(!called, 'Callback should not have been called yet');
+sched.notify('bar');
+assert(!called, 'Callback should not have been called');
+done();
+```
+
+should allow multiple registrations on the same condition.
+
+```js
+var sched = new Scheduler();
+var called1 = false;
+sched.register(['foo'], function() {
+    called1 = true;
+});
+var called2 = false;
+sched.register(['foo'], function() {
+    called2 = true;
+});
+var called3 = false;
+sched.register(['foo'], function() {
+    called3 = true;
+});
+assert(!called1, 'Callback 1 should not have been called yet');
+assert(!called2, 'Callback 2 should not have been called yet');
+assert(!called3, 'Callback 3 should not have been called yet');
+sched.notify('foo');
+assert(called1, 'Callback 1 should have been called');
+assert(called2, 'Callback 1 should have been called');
+assert(called3, 'Callback 1 should have been called');
+done();
+```
+
+should call each callback only once even if notified multiple times.
+
+```js
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo'], function() {
+    assert(!called, 'Callback should have been called only once');
+    called = true;
+});
+sched.notify('foo');
+sched.notify('foo');
+sched.notify('foo');
+sched.notify('foo');
+done();
+```
+
+should call a callback only when all conditions are met.
+
+```js
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo', 'bar', 'baz', 'bat'], function() {
+    called = true;
+});
+sched.notify('bar');
+sched.notify('foo');
+sched.notify('bat');
+assert(!called, 'Callback should not have been called yet');
+sched.notify('baz');
+assert(called, 'Callback should have been called');
+done();
+```
+
 <a name="simplecache"></a>
 # SimpleCache
 <a name="simplecache-storeid-obj-json"></a>
@@ -602,15 +710,15 @@ done();
 # vercast
 <a name="vercast-hashobj"></a>
 ## .hash(obj)
-should return a SHA-256 digest of the object's content.
+should return a SHA-256 digest of the given string.
 
 ```js
-var obj = {foo: 'bar', key: 'tree', value: 12.3};
-var objHash = vercast.hash(obj);
+var str = 'hello, there';
+var strHash = vercast.hash(str);
 
 var hash = crypto.createHash('sha256');
-hash.update(JSON.stringify(obj));
-assert.equal(objHash, hash.digest('base64'));
+hash.update(str);
+assert.equal(strHash, hash.digest('base64'));
 done();
 ```
 

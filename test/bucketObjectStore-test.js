@@ -1,6 +1,9 @@
 assert = require('assert');
 ObjectDisp = require('../objectDisp.js');
-DummyObjectStore = require('../dummyObjectStore.js');
+BucketObjectStore = require('../bucketObjectStore.js');
+DummyBucketStore = require('../dummyBucketStore.js');
+SimpleCache = require('../simpleCache.js');
+
 var descObjectStore = require('./descObjectStore.js');
 
 var disp = new ObjectDisp({
@@ -12,7 +15,9 @@ var disp = new ObjectDisp({
     },
     Counter: require('../counter.js')
 });
-var ostore = new DummyObjectStore(disp);
-describe('DummyObjectStore', function(){
+var cache = new SimpleCache();
+var bucketStore = new DummyBucketStore();
+var ostore = new BucketObjectStore(disp, cache, bucketStore);
+describe.skip('BucketObjectStore', function(){
     descObjectStore(ostore);
 });
