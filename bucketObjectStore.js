@@ -24,13 +24,13 @@ module.exports = function(disp, cache, bucketStore) {
     };
 
     this.init = function(ctx, clazz, args) {
-	var obj = disp.init(ctx, clazz, args);
+	var obj = disp.init(createContext(ctx), clazz, args);
 	return this.hash(ctx.bucket, obj);
     };
     this.trans = function (ctx, v1, p) {
 	var obj = this.unhash(v1);
 	if(obj) {
-	    var pair = disp.apply(ctx, obj, p);
+	    var pair = disp.apply(createContext(ctx), obj, p);
 	    if(pair[0]._replaceWith) {
 		pair[0] = pair[0]._replaceWith;
 	    } else {
@@ -48,6 +48,20 @@ module.exports = function(disp, cache, bucketStore) {
 	} else {
 	    ctx.waitFor = [key];
 	}
+    }
+
+    function createContext(ctx) {
+	return {
+	    init: function(className, args) {
+		return self.init(ctx, className, args);
+	    },
+	    trans: function(v1, p) {
+		return self.trans(ctx, v1, p)[0];
+	    },
+	    query: function(v, q) {
+		return self.trans(ctx, v, q)[1];
+	    },
+	};
     }
 }
 

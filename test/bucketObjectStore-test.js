@@ -13,7 +13,8 @@ var disp = new ObjectDisp({
 	    this._replaceWith = patch.rep;
 	},
     },
-    Counter: require('../counter.js')
+    Counter: require('../counter.js'),
+    BinTree: require('../binTree.js'),
 });
 var cache = new SimpleCache();
 var bucketStore = new DummyBucketStore();
@@ -75,5 +76,15 @@ describe('BucketObjectStore', function(){
 		done();
 	    });
 	});
+	it('should support recursive transitions', function(done){
+	    var ctx = {};
+	    var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
+	    v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
+	    v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+	    var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'b'})[1];
+	    assert.equal(r, 2);
+	    done();
+	});
+
     });
 });

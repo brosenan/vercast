@@ -37,6 +37,8 @@
   ․ BucketObjectStore .trans(ctx, v1, p) should return v2=undefined if v1 is not in cache
     BucketObjectStore .trans(ctx, v1, p) should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value
   ․ BucketObjectStore .trans(ctx, v1, p) should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value
+    BucketObjectStore .trans(ctx, v1, p) should support recursive transitions
+  ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -110,5 +112,5 @@
     vercast .hash(obj) should return a SHA-256 digest of the given string
   ․ vercast .hash(obj) should return a SHA-256 digest of the given string
 
-  55 passing (86ms)
+  56 passing (96ms)
 

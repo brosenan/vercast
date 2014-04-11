@@ -306,6 +306,18 @@ cache.waitFor(ctx.waitFor, function() {
 });
 ```
 
+should support recursive transitions.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
+v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
+v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'b'})[1];
+assert.equal(r, 2);
+done();
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
