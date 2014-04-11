@@ -54,4 +54,33 @@ describe('SimpleCache', function(){
 	    done();
 	});
     });
+    describe('.waitFor(keys, callback)', function(){
+	it('should call the given callback once all keys are in the cache', function(done){
+	    var cache = new SimpleCache();
+	    var called = false;
+	    cache.waitFor(['foo', 'bar'], function() {
+		called = true;
+	    });
+	    cache.store('foo', 12);
+	    assert(!called, 'Callback should not have been called yet');
+	    cache.store('bar', 21);
+	    assert(called, 'Callback should have been called');
+	    done();
+	});
+	it('should throw an exception if one of the keys is already in the cache', function(done){
+	    var cache = new SimpleCache();
+	    cache.store('foo', 12);
+	    try {
+		cache.waitFor(['foo', 'bar'], function() {
+		    assert(false, 'Callback should not have been called');
+		});
+		assert(false, 'An exception should have been thrown');
+	    } catch(e) {
+		assert.equal(e.message, 'Key foo already in cache');
+	    }
+	    done();
+	});
+
+    });
+
 });

@@ -13,7 +13,7 @@ describe('Scheduler', function(){
 	assert(called, 'Callback should have been called');
 	done();
     });
-    it('should not call a callback unless the has been met', function(done){
+    it('should not call a callback unless the condition has been met', function(done){
 	var sched = new Scheduler();
 	var called = false;
 	sched.register(['foo'], function() {

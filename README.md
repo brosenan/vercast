@@ -28,6 +28,7 @@
      - [.store(id, obj[, json])](#simplecache-storeid-obj-json)
      - [.fetch(id)](#simplecache-fetchid)
      - [.abolish()](#simplecache-abolish)
+     - [.waitFor(keys, callback)](#simplecache-waitforkeys-callback)
    - [vercast](#vercast)
      - [.hash(obj)](#vercast-hashobj)
 <a name=""></a>
@@ -567,7 +568,7 @@ assert(called, 'Callback should have been called');
 done();
 ```
 
-should not call a callback unless the has been met.
+should not call a callback unless the condition has been met.
 
 ```js
 var sched = new Scheduler();
@@ -703,6 +704,39 @@ cache.abolish();
 assert.equal(typeof cache.fetch('one'), 'undefined');
 assert.equal(typeof cache.fetch('two'), 'undefined');
 assert.equal(typeof cache.fetch('three'), 'undefined');
+done();
+```
+
+<a name="simplecache-waitforkeys-callback"></a>
+## .waitFor(keys, callback)
+should call the given callback once all keys are in the cache.
+
+```js
+var cache = new SimpleCache();
+var called = false;
+cache.waitFor(['foo', 'bar'], function() {
+		called = true;
+});
+cache.store('foo', 12);
+assert(!called, 'Callback should not have been called yet');
+cache.store('bar', 21);
+assert(called, 'Callback should have been called');
+done();
+```
+
+should throw an exception if one of the keys is already in the cache.
+
+```js
+var cache = new SimpleCache();
+cache.store('foo', 12);
+try {
+		cache.waitFor(['foo', 'bar'], function() {
+		    assert(false, 'Callback should not have been called');
+		});
+		assert(false, 'An exception should have been thrown');
+} catch(e) {
+		assert.equal(e.message, 'Key foo already in cache');
+}
 done();
 ```
 
