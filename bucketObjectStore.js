@@ -1,20 +1,53 @@
 var vercast = require('./vercast.js');
 
 module.exports = function(disp, cache, bucketStore) {
+    var self = this;
+
     this.hash = function(bucket, obj) {
 	var json = JSON.stringify(obj);
 	var objID = vercast.hash(json);
 	var id = bucket + '-' + objID;
 	cache.store(id, obj, json);
+	bucketStore.add(id, JSON.parse(json))
 	return {$:id};
     };
 
     this.unhash = function(id) {
 	var obj = cache.fetch(id.$);
-	if(obj) return obj;
-	
+	if(obj) {
+	    return obj;
+	} else {
+	    bucketStore.fetch(id.$, function(err, bucket) {
+		cache.store(id.$, bucket[0]);
+	    });
+	}
     };
 
-    this.init = function() { return {$: 'foo'}; };
-    this.trans = function () { return [10, 10]; };
+    this.init = function(ctx, clazz, args) {
+	var obj = disp.init(ctx, clazz, args);
+	return this.hash(ctx.bucket, obj);
+    };
+    this.trans = function (ctx, v1, p) {
+	var obj = this.unhash(v1);
+	if(obj) {
+	    var pair = disp.apply(ctx, obj, p);
+	    if(pair[0]._replaceWith) {
+		pair[0] = pair[0]._replaceWith;
+	    } else {
+		pair[0] = this.hash(ctx.bucket, pair[0]);
+	    }
+	    return pair;
+	} else {
+	    addWaitToCtx(ctx, v1.$);
+	    return [undefined, undefined];
+	}
+    };
+    function addWaitToCtx(ctx, key) {
+	if(ctx.waitFor) {
+	    ctx.waitFor.push(key);
+	} else {
+	    ctx.waitFor = [key];
+	}
+    }
 }
+

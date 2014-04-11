@@ -18,6 +18,62 @@ var disp = new ObjectDisp({
 var cache = new SimpleCache();
 var bucketStore = new DummyBucketStore();
 var ostore = new BucketObjectStore(disp, cache, bucketStore);
-describe.skip('BucketObjectStore', function(){
+describe('BucketObjectStore', function(){
     descObjectStore(ostore);
+    describe('.hash(bucket, obj)', function(){
+	it('should return a unique ID for each given object and bucket ID', function(done){
+	    var id1 = ostore.hash('foo', {bar: 1});
+	    var id2 = ostore.hash('foo', {bar: 2});
+	    var id3 = ostore.hash('food', {bar: 1});
+	    assert(id1.$ != id2.$, 'Object should matter');
+	    assert(id1.$ != id3.$, 'Bucket should matter');
+	    done();
+	});
+	it('should cache the object under its ID', function(done){
+	    var id2 = ostore.hash('foo', {bar: 2});
+	    assert.equal(cache.fetch(id2.$).bar, 2);
+	    done();
+	});
+    });
+    describe('.unhash(id)', function(){
+	it('should return the object corresponding to id, if in the cache', function(done){
+	    var id = ostore.hash('foo', {bar: 2});
+	    assert.equal(ostore.unhash(id).bar, 2);
+	    done();
+	});
+	it('should return the contents of an object given its ID, if in the cache', function(done){
+	    var id = ostore.init({}, 'Counter', {});
+	    assert.equal(ostore.unhash(id).value, 0);
+	    done();
+	});
+	it('should put things in motion to retrieve the value of the ID, if not in the cache', function(done){
+	    var id = ostore.init({}, 'Counter', {});
+	    cache.abolish();
+	    var id2 = ostore.unhash(id);
+	    assert.equal(typeof id2, 'undefined');
+	    cache.waitFor([id.$], done);
+	});
+    });
+    describe('.trans(ctx, v1, p)', function(){
+	it('should return v2=undefined if v1 is not in cache', function(done){
+	    var ctx = {};
+	    var v1 = ostore.init(ctx, 'Counter', {});
+	    cache.abolish();
+	    var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+	    assert.equal(typeof pair[0], 'undefined');
+	    done();
+	});
+	it('should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value', function(done){
+	    var ctx = {};
+	    var v1 = ostore.init(ctx, 'Counter', {});
+	    cache.abolish();
+	    var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+	    assert.equal(typeof pair[0], 'undefined');
+	    cache.waitFor(ctx.waitFor, function() {
+		var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+		assert(pair[0], 'Should return value');
+		done();
+	    });
+	});
+    });
 });

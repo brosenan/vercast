@@ -13,11 +13,30 @@
   ․ BinTree getMin should retrieve the the minimum key, with its associated value
     BinTree remove should remove the element with the given key and value
   ․ BinTree remove should remove the element with the given key and value
-  - BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
-  - BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
-  - BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
-  - BucketObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
-  - BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
+    BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
+  ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
+    BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
+  ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
+    BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
+  ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
+    BucketObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
+  ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
+    BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
+  ․ BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
+    BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
+  ․ BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
+    BucketObjectStore .hash(bucket, obj) should cache the object under its ID
+  ․ BucketObjectStore .hash(bucket, obj) should cache the object under its ID
+    BucketObjectStore .unhash(id) should return the object corresponding to id, if in the cache
+  ․ BucketObjectStore .unhash(id) should return the object corresponding to id, if in the cache
+    BucketObjectStore .unhash(id) should return the contents of an object given its ID, if in the cache
+  ․ BucketObjectStore .unhash(id) should return the contents of an object given its ID, if in the cache
+    BucketObjectStore .unhash(id) should put things in motion to retrieve the value of the ID, if not in the cache
+  ․ BucketObjectStore .unhash(id) should put things in motion to retrieve the value of the ID, if not in the cache
+    BucketObjectStore .trans(ctx, v1, p) should return v2=undefined if v1 is not in cache
+  ․ BucketObjectStore .trans(ctx, v1, p) should return v2=undefined if v1 is not in cache
+    BucketObjectStore .trans(ctx, v1, p) should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value
+  ․ BucketObjectStore .trans(ctx, v1, p) should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -91,6 +110,5 @@
     vercast .hash(obj) should return a SHA-256 digest of the given string
   ․ vercast .hash(obj) should return a SHA-256 digest of the given string
 
-  43 passing (76ms)
-  5 pending
+  55 passing (86ms)
 

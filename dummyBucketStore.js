@@ -8,6 +8,9 @@ module.exports = function() {
 	}
     };
     this.fetch = function(id, callback) {
-	callback(undefined, this.buckets[id]);
+	var self = this;
+	setTimeout(function () {
+	    callback(undefined, self.buckets[id]);
+	}, 1);
     };
 }

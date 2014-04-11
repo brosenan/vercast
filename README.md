@@ -10,6 +10,9 @@
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
        - [.trans(ctx, v1, p)](#bucketobjectstore-as-objectstore-transctx-v1-p)
        - [context](#bucketobjectstore-as-objectstore-context)
+     - [.hash(bucket, obj)](#bucketobjectstore-hashbucket-obj)
+     - [.unhash(id)](#bucketobjectstore-unhashid)
+     - [.trans(ctx, v1, p)](#bucketobjectstore-transctx-v1-p)
    - [counter](#counter)
      - [init](#counter-init)
      - [add](#counter-add)
@@ -147,10 +150,162 @@ done();
 ## as ObjectStore
 <a name="bucketobjectstore-as-objectstore-initctx-classname-args"></a>
 ### .init(ctx, className, args)
+should call the init() method of the relevant class with args as a parameter.
+
+```js
+var called = false;
+var disp = new ObjectDisp({
+    MyClass: {
+	init: function(ctx, args) {
+	    assert.equal(args.foo, 2);
+	    called = true;
+	}
+    }
+});
+var ostore = new DummyObjectStore(disp);
+ostore.init('bar', 'MyClass', {foo: 2});
+assert(called, 'MyClass.init() should have been called');
+done();
+```
+
+should return an ID (an object with a "$" attribute containing a string) of the newly created object.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+assert.equal(typeof id.$, 'string');
+done();
+```
+
 <a name="bucketobjectstore-as-objectstore-transctx-v1-p"></a>
 ### .trans(ctx, v1, p)
+should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result.
+
+```js
+var v0 = ostore.init({}, 'Counter', {});
+var pair = ostore.trans({}, v0, {_type: 'add', amount: 10});
+var v1 = pair[0];
+pair = ostore.trans({}, v1, {_type: 'get'});
+var res = pair[1];
+assert.equal(res, 10);
+done();
+```
+
+should replace the object if a _replaceWith field is added to the object.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'MyClass', {});
+var rep = ostore.init(ctx, 'Counter', {});
+v = ostore.trans(ctx, v, {_type: 'patch1', rep: rep})[0];
+v = ostore.trans(ctx, v, {_type: 'add', amount: 5})[0];
+var r = ostore.trans(ctx, v, {_type: 'get'})[1];
+assert.equal(r, 5);
+done();
+```
+
 <a name="bucketobjectstore-as-objectstore-context"></a>
 ### context
+should allow underlying initializations and transitions to perform initializations and transitions.
+
+```js
+var disp = new ObjectDisp({
+    MyClass: {
+	init: function(ctx, args) {
+	    this.counter = ctx.init('Counter', {});
+	},
+	patchCounter: function(ctx, p) {
+	    var pair = ctx.transQuery(this.counter, p.p)
+	    this.counter = pair[0];
+	    return pair[1];
+	},
+    },
+    Counter: require('../counter.js'),
+});
+var ostore = new DummyObjectStore(disp);
+var v = ostore.init({}, 'MyClass', {});
+v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 5}})[0];
+r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
+assert.equal(r, 5);
+done();
+```
+
+<a name="bucketobjectstore-hashbucket-obj"></a>
+## .hash(bucket, obj)
+should return a unique ID for each given object and bucket ID.
+
+```js
+var id1 = ostore.hash('foo', {bar: 1});
+var id2 = ostore.hash('foo', {bar: 2});
+var id3 = ostore.hash('food', {bar: 1});
+assert(id1.$ != id2.$, 'Object should matter');
+assert(id1.$ != id3.$, 'Bucket should matter');
+done();
+```
+
+should cache the object under its ID.
+
+```js
+var id2 = ostore.hash('foo', {bar: 2});
+assert.equal(cache.fetch(id2.$).bar, 2);
+done();
+```
+
+<a name="bucketobjectstore-unhashid"></a>
+## .unhash(id)
+should return the object corresponding to id, if in the cache.
+
+```js
+var id = ostore.hash('foo', {bar: 2});
+assert.equal(ostore.unhash(id).bar, 2);
+done();
+```
+
+should return the contents of an object given its ID, if in the cache.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+assert.equal(ostore.unhash(id).value, 0);
+done();
+```
+
+should put things in motion to retrieve the value of the ID, if not in the cache.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+cache.abolish();
+var id2 = ostore.unhash(id);
+assert.equal(typeof id2, 'undefined');
+cache.waitFor([id.$], done);
+```
+
+<a name="bucketobjectstore-transctx-v1-p"></a>
+## .trans(ctx, v1, p)
+should return v2=undefined if v1 is not in cache.
+
+```js
+var ctx = {};
+var v1 = ostore.init(ctx, 'Counter', {});
+cache.abolish();
+var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+assert.equal(typeof pair[0], 'undefined');
+done();
+```
+
+should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value.
+
+```js
+var ctx = {};
+var v1 = ostore.init(ctx, 'Counter', {});
+cache.abolish();
+var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+assert.equal(typeof pair[0], 'undefined');
+cache.waitFor(ctx.waitFor, function() {
+		var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+		assert(pair[0], 'Should return value');
+		done();
+});
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
