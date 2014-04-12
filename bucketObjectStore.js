@@ -1,5 +1,8 @@
 var vercast = require('./vercast.js');
 
+var __ID__ = 0;
+function unique() { return __ID__++; }
+
 module.exports = function(disp, cache, bucketStore) {
     var self = this;
 
@@ -27,8 +30,8 @@ module.exports = function(disp, cache, bucketStore) {
 	var obj = disp.init(createContext(ctx), clazz, args);
 	return this.hash(ctx.bucket, obj);
     };
-    this.trans = function (ctx, v1, p) {
-	initCtx(ctx);
+    this.trans = function (origCtx, v1, p) {
+	var ctx = {waitFor: [], bucket: origCtx.bucket, dbg: unique()};
 	var pHash = this.hash(ctx.bucket, p);
 	var key = v1.$ + ':' + pHash.$;
 	var res = cache.fetch(key);
@@ -36,33 +39,35 @@ module.exports = function(disp, cache, bucketStore) {
 	    return [res.v2, res.res];
 	}
 	var obj = this.unhash(v1);
-	if(obj) {
-	    var baseline = ctx.waitFor.length;
-	    var pair = disp.apply(createContext(ctx), obj, p);
-	    if(ctx.waitFor.length == baseline) {
-		if(pair[0]._replaceWith) {
-		    pair[0] = pair[0]._replaceWith;
-		} else {
-		    pair[0] = this.hash(ctx.bucket, pair[0]);
-		}
-		cache.store(key, {v2: pair[0], res: pair[1]});
-		return pair;
-	    } else {
-		cache.waitFor(ctx.waitFor.slice(baseline), function() {
-		    self.trans({}, v1, p);
-		});
-		return [undefined, undefined];
-	    }
-	} else {
-	    addWaitToCtx(ctx, key);
+	if(!obj) {
+	    addWaitToCtx(origCtx, key);
 	    cache.waitFor([v1.$], function() {
 		self.trans({}, v1, p);
 	    });
 	    return [undefined, undefined];
 	}
+	var pair = disp.apply(createContext(ctx), obj, p);
+	if(ctx.waitFor.length > 0) {
+	    //addWaitToCtx(origCtx, key);
+	    cache.waitFor(ctx.waitFor, function() {
+		self.trans({}, v1, p);
+	    });
+	    return [undefined, undefined];
+	}
+	if(pair[0]._replaceWith) {
+	    pair[0] = pair[0]._replaceWith;
+	} else {
+	    pair[0] = this.hash(ctx.bucket, pair[0]);
+	}
+	cache.store(key, {v2: pair[0], res: pair[1]});
+	return pair;
     };
     function addWaitToCtx(ctx, key) {
-	ctx.waitFor.push(key);
+	if(ctx.waitFor) {
+	    ctx.waitFor.push(key);
+	} else {
+	    ctx.waitFor = [key];
+	}
     }
     function initCtx(ctx) {
 	if(!ctx.waitFor) {
