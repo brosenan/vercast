@@ -28,28 +28,47 @@ module.exports = function(disp, cache, bucketStore) {
 	return this.hash(ctx.bucket, obj);
     };
     this.trans = function (ctx, v1, p) {
+	initCtx(ctx);
+	var pHash = this.hash(ctx.bucket, p);
+	var key = v1.$ + ':' + pHash.$;
+	var res = cache.fetch(key);
+	if(res) {
+	    return [res.v2, res.res];
+	}
 	var obj = this.unhash(v1);
 	if(obj) {
+	    var baseline = ctx.waitFor.length;
 	    var pair = disp.apply(createContext(ctx), obj, p);
-	    if(pair[0]._replaceWith) {
-		pair[0] = pair[0]._replaceWith;
+	    if(ctx.waitFor.length == baseline) {
+		if(pair[0]._replaceWith) {
+		    pair[0] = pair[0]._replaceWith;
+		} else {
+		    pair[0] = this.hash(ctx.bucket, pair[0]);
+		}
+		cache.store(key, {v2: pair[0], res: pair[1]});
+		return pair;
 	    } else {
-		pair[0] = this.hash(ctx.bucket, pair[0]);
+		cache.waitFor(ctx.waitFor.slice(baseline), function() {
+		    self.trans({}, v1, p);
+		});
+		return [undefined, undefined];
 	    }
-	    return pair;
 	} else {
-	    addWaitToCtx(ctx, v1.$);
+	    addWaitToCtx(ctx, key);
+	    cache.waitFor([v1.$], function() {
+		self.trans({}, v1, p);
+	    });
 	    return [undefined, undefined];
 	}
     };
     function addWaitToCtx(ctx, key) {
-	if(ctx.waitFor) {
-	    ctx.waitFor.push(key);
-	} else {
-	    ctx.waitFor = [key];
+	ctx.waitFor.push(key);
+    }
+    function initCtx(ctx) {
+	if(!ctx.waitFor) {
+	    ctx.waitFor = [];
 	}
     }
-
     function createContext(ctx) {
 	return {
 	    init: function(className, args) {
