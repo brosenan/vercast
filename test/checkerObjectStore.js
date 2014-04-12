@@ -8,10 +8,9 @@ module.exports = function(ostore) {
     }
 
     this.trans = function(ctx, v1, p) {
-	ctx = createContext(ctx);
 	var pair = ostore.trans(ctx, v1, p);
 	for(var i = 0; i < this.transHooks.length; i++) {
-	    this.transHooks[i].call(this, v1, p, pair[0], pair[1], ctx.isConflicting());
+	    this.transHooks[i].call(this, v1, p, pair[0], pair[1], ctx.conf);
 	}
 	return pair;
     }
@@ -27,19 +26,12 @@ module.exports = function(ostore) {
 
 }
 
-function createContext(ctx) {
-    return {
-	conf: false,
-	conflict: function() { this.conf = true; if(ctx.conflict) ctx.conflict(); },
-	isConflicting: function() { return this.conf; },
-    };
-}
 
 function checkInvertibility(v1, p, v2, r, c) {
     // A conflicting transition is not expected to be invertible.
     if(c) return;
     
-    var ctx = createContext({});
+    var ctx = {};
     var pair = this.ostore.trans(ctx, v2, {_type: 'inv', patch: p});
 
     if(JSON.stringify(pair[1]) != JSON.stringify(r)) {

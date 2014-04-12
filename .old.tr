@@ -23,6 +23,10 @@
   ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
     BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
   ․ BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
+    BucketObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
+  ․ BucketObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
+    BucketObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
+  ․ BucketObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
     BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
   ․ BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
     BucketObjectStore .hash(bucket, obj) should cache the object under its ID
@@ -63,6 +67,10 @@
   ․ DummyObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
     DummyObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
   ․ DummyObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
+    DummyObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
+  ․ DummyObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
+    DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
+  ․ DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
@@ -114,5 +122,5 @@
     vercast .hash(obj) should return a SHA-256 digest of the given string
   ․ vercast .hash(obj) should return a SHA-256 digest of the given string
 
-  57 passing (99ms)
+  61 passing (106ms)
 

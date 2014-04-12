@@ -35,7 +35,7 @@ module.exports = function(disp) {
 		return self.trans(ctx, v1, p);
 	    },
 	    conflict: function() {
-		return ctx.conflict();
+		ctx.conf = true;
 	    },
 	};
     }

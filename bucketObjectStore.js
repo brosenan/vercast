@@ -1,8 +1,5 @@
 var vercast = require('./vercast.js');
 
-var __ID__ = 0;
-function unique() { return __ID__++; }
-
 module.exports = function(disp, cache, bucketStore) {
     var self = this;
 
@@ -31,15 +28,16 @@ module.exports = function(disp, cache, bucketStore) {
 	return this.hash(ctx.bucket, obj);
     };
     this.trans = function (origCtx, v1, p) {
-	var ctx = {waitFor: [], bucket: origCtx.bucket, dbg: unique()};
+	var ctx = {waitFor: [], bucket: origCtx.bucket};
 	var pHash = this.hash(ctx.bucket, p);
 	var key = v1.$ + ':' + pHash.$;
 	var res = cache.fetch(key);
 	if(res) {
+	    origCtx.conf = origCtx.conf || res.conf;
 	    return [res.v2, res.res];
 	}
 	var obj = this.unhash(v1);
-	if(!obj) {
+	if(!obj) { // v1 is not in the cache
 	    addWaitToCtx(origCtx, key);
 	    cache.waitFor([v1.$], function() {
 		self.trans({}, v1, p);
@@ -47,8 +45,8 @@ module.exports = function(disp, cache, bucketStore) {
 	    return [undefined, undefined];
 	}
 	var pair = disp.apply(createContext(ctx), obj, p);
-	if(ctx.waitFor.length > 0) {
-	    //addWaitToCtx(origCtx, key);
+	origCtx.conf = origCtx.conf || ctx.conf;
+	if(ctx.waitFor.length > 0) { // The underlying transition is not complete
 	    cache.waitFor(ctx.waitFor, function() {
 		self.trans({}, v1, p);
 	    });
@@ -59,7 +57,7 @@ module.exports = function(disp, cache, bucketStore) {
 	} else {
 	    pair[0] = this.hash(ctx.bucket, pair[0]);
 	}
-	cache.store(key, {v2: pair[0], res: pair[1]});
+	cache.store(key, {v2: pair[0], res: pair[1], conf: ctx.conf});
 	return pair;
     };
     function addWaitToCtx(ctx, key) {
@@ -80,10 +78,17 @@ module.exports = function(disp, cache, bucketStore) {
 		return self.init(ctx, className, args);
 	    },
 	    trans: function(v1, p) {
-		return self.trans(ctx, v1, p)[0];
+		var v2 = self.trans(ctx, v1, p)[0];
+		return v2;
 	    },
 	    query: function(v, q) {
 		return self.trans(ctx, v, q)[1];
+	    },
+	    transQuery: function(v1, p) {
+		return self.trans(ctx, v1, p);
+	    },
+	    conflict: function() {
+		ctx.conf = true;
 	    },
 	};
     }

@@ -48,13 +48,10 @@ describe('BinTree', function(){
 	    done();
 	});
 	it('should report a conflict and not change the state if the the key already exists', function(done){
-	    var conflicting = false;
-	    var ctx = {
-		conflict: function() { conflicting = true; }
-	    };
-	    var v0 = ostore.init(ctx, 'BinTree', {key: 'foo', value: 'bar'});
+	    var v0 = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+	    var ctx = {foo: 123};
 	    var v1 = ostore.trans(ctx, v0, {_type: 'add', key: 'foo', value: 'baz'})[0];
-	    assert(conflicting, 'Should be conflicting');
+	    assert(ctx.conf, 'Should be conflicting');
 	    assert.equal(v0.$, v1.$);
 	    done();
 	});

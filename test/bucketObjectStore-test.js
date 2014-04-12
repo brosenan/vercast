@@ -6,21 +6,10 @@ SimpleCache = require('../simpleCache.js');
 
 var descObjectStore = require('./descObjectStore.js');
 
-var disp = new ObjectDisp({
-    MyClass: {
-	init: function() { this.name = 'foo'; },
-	patch1: function (ctx, patch) {
-	    this._replaceWith = patch.rep;
-	},
-    },
-    Counter: require('../counter.js'),
-    BinTree: require('../binTree.js'),
-});
 var cache = new SimpleCache();
 var bucketStore = new DummyBucketStore();
-var ostore = new BucketObjectStore(disp, cache, bucketStore);
 describe('BucketObjectStore', function(){
-    descObjectStore(ostore);
+    var ostore = descObjectStore(function(disp) { return new BucketObjectStore(disp, cache, bucketStore); });
     describe('.hash(bucket, obj)', function(){
 	it('should return a unique ID for each given object and bucket ID', function(done){
 	    var id1 = ostore.hash('foo', {bar: 1});
@@ -89,12 +78,12 @@ describe('BucketObjectStore', function(){
 	    var ctx = {};
 	    var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
 	    v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
-	    v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
 	    cache.abolish();
 	    ctx = {};
-	    var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
-	    assert.equal(typeof r, "undefined");
+	    var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+	    assert.equal(typeof v1, "undefined");
 	    cache.waitFor(ctx.waitFor, function() {
+		v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
 		var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
 		assert.equal(r, 3);
 		done();

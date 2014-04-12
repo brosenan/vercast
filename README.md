@@ -10,6 +10,7 @@
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
        - [.trans(ctx, v1, p)](#bucketobjectstore-as-objectstore-transctx-v1-p)
        - [context](#bucketobjectstore-as-objectstore-context)
+         - [.conflict()](#bucketobjectstore-as-objectstore-context-conflict)
      - [.hash(bucket, obj)](#bucketobjectstore-hashbucket-obj)
      - [.unhash(id)](#bucketobjectstore-unhashid)
      - [.trans(ctx, v1, p)](#bucketobjectstore-transctx-v1-p)
@@ -23,6 +24,7 @@
        - [.init(ctx, className, args)](#dummyobjectstore-as-objectstore-initctx-classname-args)
        - [.trans(ctx, v1, p)](#dummyobjectstore-as-objectstore-transctx-v1-p)
        - [context](#dummyobjectstore-as-objectstore-context)
+         - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
@@ -88,13 +90,10 @@ done();
 should report a conflict and not change the state if the the key already exists.
 
 ```js
-var conflicting = false;
-var ctx = {
-		conflict: function() { conflicting = true; }
-};
-var v0 = ostore.init(ctx, 'BinTree', {key: 'foo', value: 'bar'});
+var v0 = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+var ctx = {foo: 123};
 var v1 = ostore.trans(ctx, v0, {_type: 'add', key: 'foo', value: 'baz'})[0];
-assert(conflicting, 'Should be conflicting');
+assert(ctx.conf, 'Should be conflicting');
 assert.equal(v0.$, v1.$);
 done();
 ```
@@ -162,7 +161,7 @@ var disp = new ObjectDisp({
 	}
     }
 });
-var ostore = new DummyObjectStore(disp);
+var ostore = new createOstore(disp);
 ostore.init('bar', 'MyClass', {foo: 2});
 assert(called, 'MyClass.init() should have been called');
 done();
@@ -221,11 +220,66 @@ var disp = new ObjectDisp({
     },
     Counter: require('../counter.js'),
 });
-var ostore = new DummyObjectStore(disp);
+var ostore = new createOstore(disp);
 var v = ostore.init({}, 'MyClass', {});
 v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 5}})[0];
 r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
 assert.equal(r, 5);
+done();
+```
+
+<a name="bucketobjectstore-as-objectstore-context-conflict"></a>
+#### .conflict()
+should set the context's confclit flag to true.
+
+```js
+var disp = new ObjectDisp({
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class2', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'raiseConflict'})[0];
+assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+should propagate conflicts to calling transitions.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+				this.foo = ctx.init('Class2', args);
+			    },
+			    patch: function(ctx, p) {
+				this.foo = ctx.trans(this.foo, p.patch);
+			    },
+			    query: function(ctx, q) {
+				return ctx.query(this.foo, q.query);
+			    },
+			},
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class1', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
+assert(ctx.conf, 'Conflict flag should be true');
 done();
 ```
 
@@ -324,12 +378,12 @@ should support recursive transitions even at the event of not having items in th
 var ctx = {};
 var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
 v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
-v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
 cache.abolish();
 ctx = {};
-var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
-assert.equal(typeof r, "undefined");
+var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+assert.equal(typeof v1, "undefined");
 cache.waitFor(ctx.waitFor, function() {
+		v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
 		var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
 		assert.equal(r, 3);
 		done();
@@ -433,7 +487,7 @@ var disp = new ObjectDisp({
 	}
     }
 });
-var ostore = new DummyObjectStore(disp);
+var ostore = new createOstore(disp);
 ostore.init('bar', 'MyClass', {foo: 2});
 assert(called, 'MyClass.init() should have been called');
 done();
@@ -492,11 +546,66 @@ var disp = new ObjectDisp({
     },
     Counter: require('../counter.js'),
 });
-var ostore = new DummyObjectStore(disp);
+var ostore = new createOstore(disp);
 var v = ostore.init({}, 'MyClass', {});
 v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 5}})[0];
 r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
 assert.equal(r, 5);
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-context-conflict"></a>
+#### .conflict()
+should set the context's confclit flag to true.
+
+```js
+var disp = new ObjectDisp({
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class2', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'raiseConflict'})[0];
+assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+should propagate conflicts to calling transitions.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+				this.foo = ctx.init('Class2', args);
+			    },
+			    patch: function(ctx, p) {
+				this.foo = ctx.trans(this.foo, p.patch);
+			    },
+			    query: function(ctx, q) {
+				return ctx.query(this.foo, q.query);
+			    },
+			},
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class1', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
+assert(ctx.conf, 'Conflict flag should be true');
 done();
 ```
 

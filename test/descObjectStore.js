@@ -1,4 +1,16 @@
-module.exports = function(ostore) {
+module.exports = function(createOstore) {
+    var disp = new ObjectDisp({
+	MyClass: {
+	    init: function() { this.name = 'foo'; },
+	    patch1: function (ctx, patch) {
+		this._replaceWith = patch.rep;
+	    },
+	},
+	Counter: require('../counter.js'),
+	BinTree: require('../binTree.js'),
+    });
+    
+    var ostore = createOstore(disp);
     describe('as ObjectStore', function(){
 	describe('.init(ctx, className, args)', function(){
 	    it('should call the init() method of the relevant class with args as a parameter', function(done){
@@ -11,7 +23,7 @@ module.exports = function(ostore) {
 			}
 		    }
 		});
-		var ostore = new DummyObjectStore(disp);
+		var ostore = new createOstore(disp);
 		ostore.init('bar', 'MyClass', {foo: 2});
 		assert(called, 'MyClass.init() should have been called');
 		done();
@@ -60,13 +72,63 @@ module.exports = function(ostore) {
 		    },
 		    Counter: require('../counter.js'),
 		});
-		var ostore = new DummyObjectStore(disp);
+		var ostore = new createOstore(disp);
 		var v = ostore.init({}, 'MyClass', {});
 		v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 5}})[0];
 		r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
 		assert.equal(r, 5);
 		done();
 	    });
+	    describe('.conflict()', function(){
+		it('should set the context\'s confclit flag to true', function(done){
+		    var disp = new ObjectDisp({
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+		    });
+		    var ostore = new createOstore(disp);
+		    var v = ostore.init({}, 'Class2', {val:2});
+		    var ctx = {};
+		    v = ostore.trans(ctx, v, {_type: 'raiseConflict'})[0];
+		    assert(ctx.conf, 'Conflict flag should be true');
+		    done();
+		});
+		it('should propagate conflicts to calling transitions', function(done){
+		    var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+				this.foo = ctx.init('Class2', args);
+			    },
+			    patch: function(ctx, p) {
+				this.foo = ctx.trans(this.foo, p.patch);
+			    },
+			    query: function(ctx, q) {
+				return ctx.query(this.foo, q.query);
+			    },
+			},
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+		    });
+		    var ostore = new createOstore(disp);
+		    var v = ostore.init({}, 'Class1', {val:2});
+		    var ctx = {};
+		    v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
+		    assert(ctx.conf, 'Conflict flag should be true');
+		    done();
+		});
+	    });
 	});
     });
+    return ostore;
 }
