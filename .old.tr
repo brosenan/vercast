@@ -128,5 +128,5 @@
     vercast .objID(id) should return the object hash part of the given version ID
   ․ vercast .objID(id) should return the object hash part of the given version ID
 
-  64 passing (115ms)
+  64 passing (111ms)
 

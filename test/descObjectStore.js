@@ -74,9 +74,9 @@ module.exports = function(createOstore) {
 		});
 		var ostore = new createOstore(disp);
 		var v = ostore.init({}, 'MyClass', {});
-		v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 5}})[0];
+		v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 12}})[0];
 		r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
-		assert.equal(r, 5);
+		assert.equal(r, 12);
 		done();
 	    });
 	    describe('.conflict()', function(){

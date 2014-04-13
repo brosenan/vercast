@@ -8,6 +8,9 @@ module.exports = function() {
 	}
     };
     this.fetch = function(id, callback) {
+	if(!(id in this.buckets)) {
+	    throw new Error('Bucket ' + id + ' not found');
+	}
 	for(var i = 0; i < this.buckets[id].length; i++) {
 	    var item = this.buckets[id][i];
 	    setTimeout(createCallback(callback, item), 1);
