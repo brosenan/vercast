@@ -6,10 +6,10 @@ module.exports = function(disp, cache, bucketStore) {
     this.hash = function(bucket, obj) {
 	var json = JSON.stringify(obj);
 	var objID = vercast.hash(json);
-	var id = bucket + '-' + objID;
-	cache.store(id, obj, json);
-	bucketStore.add(id, JSON.parse(json))
-	return {$:id};
+	var id = vercast.genID(bucket, objID);
+	cache.store(id.$, obj, json);
+	bucketStore.add(id.$, JSON.parse(json))
+	return id;
     };
 
     this.unhash = function(id) {

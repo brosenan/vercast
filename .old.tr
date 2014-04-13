@@ -121,6 +121,12 @@
   ․ SimpleCache .waitFor(keys, callback) should throw an exception if one of the keys is already in the cache
     vercast .hash(obj) should return a SHA-256 digest of the given string
   ․ vercast .hash(obj) should return a SHA-256 digest of the given string
+    vercast .genID(bucketID, hash) should create a version ID based on a bucket ID (string) and a hash (string)
+  ․ vercast .genID(bucketID, hash) should create a version ID based on a bucket ID (string) and a hash (string)
+    vercast .bucketID(id) should return the bucket ID associated with the given version ID
+  ․ vercast .bucketID(id) should return the bucket ID associated with the given version ID
+    vercast .objID(id) should return the object hash part of the given version ID
+  ․ vercast .objID(id) should return the object hash part of the given version ID
 
-  61 passing (106ms)
+  64 passing (115ms)
 

@@ -15,5 +15,28 @@ describe('vercast', function(){
 	});
 
     });
+    describe('.genID(bucketID, hash)', function(){
+	it('should create a version ID based on a bucket ID (string) and a hash (string)', function(done){
+	    var id = vercast.genID('bucket', 'hash');
+	    assert.equal(id.$, 'bucket-hash');
+	    done();
+	});
+
+    });
+
+    describe('.bucketID(id)', function(){
+	it('should return the bucket ID associated with the given version ID', function(done){
+	    var id = vercast.genID('bucket', 'hash');
+	    assert.equal(vercast.bucketID(id), 'bucket');
+	    done();
+	});
+    });
+    describe('.objID(id)', function(){
+	it('should return the object hash part of the given version ID', function(done){
+	    var id = vercast.genID('bucket', 'hash');
+	    assert.equal(vercast.objID(id), 'hash');
+	    done();
+	});
+    });
 
 });

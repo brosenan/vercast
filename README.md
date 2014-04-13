@@ -36,6 +36,9 @@
      - [.waitFor(keys, callback)](#simplecache-waitforkeys-callback)
    - [vercast](#vercast)
      - [.hash(obj)](#vercast-hashobj)
+     - [.genID(bucketID, hash)](#vercast-genidbucketid-hash)
+     - [.bucketID(id)](#vercast-bucketidid)
+     - [.objID(id)](#vercast-objidid)
 <a name=""></a>
  
 <a name="bintree"></a>
@@ -439,33 +442,33 @@ done();
 should accumulate all added items and replay them when fetched.
 
 ```js
+var bucketStore = new DummyBucketStore();
+// Add values to the bucket
 var values = {one: 1, two: 2, three: 3};
 for(var key in values) {
     bucketStore.add('myBucket', {key: key, value: values[key]});
 }
-bucketStore.fetch('myBucket', function(err, bucket) {
-    for(var i = 0; i < bucket.length; i++) {
-	assert(bucket[i].key in values, 'the  bucket should only contain the added keys');
-	delete values[bucket[i].key];
-    }
-    for(var k in values) assert(false, 'all values should have been removed');
-    done();
+// Trigger a fetch
+bucketStore.fetch('myBucket', function(err, item) {
+    assert(item.key in values, 'the  bucket should only contain the added keys');
+    delete values[item.key];
+    if(isEmpty(values)) done();
 });
 ```
 
 should store each bucket individually.
 
 ```js
+var bucketStore = new DummyBucketStore();
 var values = {one: 1, two: 2, three: 3};
 for(var key in values) {
     bucketStore.add('myBucket', {key: key, value: values[key]});
     bucketStore.add('myOtherBucket', {key: 'other_' + key, value: values[key] + 2});
 }
-bucketStore.fetch('myBucket', function(err, bucket) {
-    for(var i = 0; i < bucket.length; i++) {
-	assert(bucket[i].key in values, 'item ' + JSON.stringify(bucket[i]) + ' should not be in bucket');
-    }
-    done();
+bucketStore.fetch('myBucket', function(err, item) {
+    assert(item.key in values, 'item ' + JSON.stringify(item) + ' should not be in bucket');
+    delete values[item.key];
+    if(isEmpty(values)) done();
 });
 ```
 
@@ -1047,6 +1050,36 @@ var strHash = vercast.hash(str);
 var hash = crypto.createHash('sha256');
 hash.update(str);
 assert.equal(strHash, hash.digest('base64'));
+done();
+```
+
+<a name="vercast-genidbucketid-hash"></a>
+## .genID(bucketID, hash)
+should create a version ID based on a bucket ID (string) and a hash (string).
+
+```js
+var id = vercast.genID('bucket', 'hash');
+assert.equal(id.$, 'bucket-hash');
+done();
+```
+
+<a name="vercast-bucketidid"></a>
+## .bucketID(id)
+should return the bucket ID associated with the given version ID.
+
+```js
+var id = vercast.genID('bucket', 'hash');
+assert.equal(vercast.bucketID(id), 'bucket');
+done();
+```
+
+<a name="vercast-objidid"></a>
+## .objID(id)
+should return the object hash part of the given version ID.
+
+```js
+var id = vercast.genID('bucket', 'hash');
+assert.equal(vercast.objID(id), 'hash');
 done();
 ```
 
