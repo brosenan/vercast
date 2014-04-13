@@ -17,8 +17,8 @@ module.exports = function(disp, cache, bucketStore) {
 	if(obj) {
 	    return obj;
 	} else {
-	    bucketStore.fetch(id.$, function(err, bucket) {
-		cache.store(id.$, bucket[0]);
+	    bucketStore.fetch(id.$, function(err, item) {
+		cache.store(id.$, item);
 	    });
 	}
     };
@@ -40,16 +40,14 @@ module.exports = function(disp, cache, bucketStore) {
 	if(!obj) { // v1 is not in the cache
 	    addWaitToCtx(origCtx, key);
 	    cache.waitFor([v1.$], function() {
-		self.trans({}, v1, p);
+		ensureTrans(origCtx, v1, p);
 	    });
 	    return [undefined, undefined];
 	}
 	var pair = disp.apply(createContext(ctx), obj, p);
 	origCtx.conf = origCtx.conf || ctx.conf;
 	if(ctx.waitFor.length > 0) { // The underlying transition is not complete
-	    cache.waitFor(ctx.waitFor, function() {
-		self.trans({}, v1, p);
-	    });
+	    origCtx.waitFor = ctx.waitFor.concat(origCtx.waitFor || []);
 	    return [undefined, undefined];
 	}
 	if(pair[0]._replaceWith) {
@@ -60,6 +58,15 @@ module.exports = function(disp, cache, bucketStore) {
 	cache.store(key, {v2: pair[0], res: pair[1], conf: ctx.conf});
 	return pair;
     };
+    function ensureTrans(origCtx, v1, p) {
+	var ctx = {waitFor: [], bucket: origCtx.bucket};
+	self.trans(ctx, v1, p); // first pass
+	if(ctx.waitFor) {
+	    cache.waitFor(ctx.waitFor, function() {
+		ensureTrans(origCtx, v1, p);
+	    });
+	}
+    }
     function addWaitToCtx(ctx, key) {
 	if(ctx.waitFor) {
 	    ctx.waitFor.push(key);
@@ -93,4 +100,3 @@ module.exports = function(disp, cache, bucketStore) {
 	};
     }
 }
-

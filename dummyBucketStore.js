@@ -8,9 +8,15 @@ module.exports = function() {
 	}
     };
     this.fetch = function(id, callback) {
-	var self = this;
-	setTimeout(function () {
-	    callback(undefined, self.buckets[id]);
-	}, 1);
+	for(var i = 0; i < this.buckets[id].length; i++) {
+	    var item = this.buckets[id][i];
+	    setTimeout(createCallback(callback, item), 1);
+	}
     };
+
+    function createCallback(callback, item) {
+	return function () {
+	    callback(undefined, item);
+	};
+    }
 }
