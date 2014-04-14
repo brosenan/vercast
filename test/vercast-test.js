@@ -38,5 +38,28 @@ describe('vercast', function(){
 	    done();
 	});
     });
+    describe('.childObjects(obj)', function(){
+	it('should return a list of sub-object IDs nested in obj', function(done){
+	    var obj = {left: vercast.genID('foo', 'bar'), right: vercast.genID('foo', 'baz'), value: 3};
+	    var children = vercast.childObjects(obj);
+	    assert.equal(children.length, 2);
+	    assert.equal(children[0].$, 'foo-bar');
+	    assert.equal(children[1].$, 'foo-baz');
+	    done();
+	});
+	it('should recursively search for children in nested objects and arrays', function(done){
+	    var obj = {
+		subObj: {
+		    list: [vercast.genID('foo', 'bar'), vercast.genID('foo', 'baz')], 
+		    value: 3}
+	    };
+	    var children = vercast.childObjects(obj);
+	    assert.equal(children.length, 2);
+	    assert.equal(children[0].$, 'foo-bar');
+	    assert.equal(children[1].$, 'foo-baz');
+	    done();
+	});
+
+    });
 
 });

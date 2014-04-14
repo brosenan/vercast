@@ -127,6 +127,10 @@
   ․ vercast .bucketID(id) should return the bucket ID associated with the given version ID
     vercast .objID(id) should return the object hash part of the given version ID
   ․ vercast .objID(id) should return the object hash part of the given version ID
+    vercast .childObjects(obj) should return a list of sub-object IDs nested in obj
+  ․ vercast .childObjects(obj) should return a list of sub-object IDs nested in obj
+    vercast .childObjects(obj) should recursively search for children in nested objects and arrays
+  ․ vercast .childObjects(obj) should recursively search for children in nested objects and arrays
 
-  64 passing (111ms)
+  66 passing (113ms)
 

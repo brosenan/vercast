@@ -17,3 +17,23 @@ exports.bucketID = function(id) {
 exports.objID = function(id) {
     return id.$.split('-')[1];
 }
+
+function findChildren(obj, list) {
+    if(obj.$) {
+	list.push(obj);
+    } else if(Array.isArray(obj)) {
+	for(var i = 0; i < obj.length; i++) {
+	    findChildren(obj[i], list);
+	}
+    } else if(typeof obj == 'object') {
+	for(var key in obj) {
+	    findChildren(obj[key], list);
+	}
+    }
+}
+
+exports.childObjects = function(obj) {
+    var list = [];
+    findChildren(obj, list);
+    return list;
+}

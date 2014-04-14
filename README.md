@@ -39,6 +39,7 @@
      - [.genID(bucketID, hash)](#vercast-genidbucketid-hash)
      - [.bucketID(id)](#vercast-bucketidid)
      - [.objID(id)](#vercast-objidid)
+     - [.childObjects(obj)](#vercast-childobjectsobj)
 <a name=""></a>
  
 <a name="bintree"></a>
@@ -1080,6 +1081,34 @@ should return the object hash part of the given version ID.
 ```js
 var id = vercast.genID('bucket', 'hash');
 assert.equal(vercast.objID(id), 'hash');
+done();
+```
+
+<a name="vercast-childobjectsobj"></a>
+## .childObjects(obj)
+should return a list of sub-object IDs nested in obj.
+
+```js
+var obj = {left: vercast.genID('foo', 'bar'), right: vercast.genID('foo', 'baz'), value: 3};
+var children = vercast.childObjects(obj);
+assert.equal(children.length, 2);
+assert.equal(children[0].$, 'foo-bar');
+assert.equal(children[1].$, 'foo-baz');
+done();
+```
+
+should recursively search for children in nested objects and arrays.
+
+```js
+var obj = {
+		subObj: {
+		    list: [vercast.genID('foo', 'bar'), vercast.genID('foo', 'baz')], 
+		    value: 3}
+};
+var children = vercast.childObjects(obj);
+assert.equal(children.length, 2);
+assert.equal(children[0].$, 'foo-bar');
+assert.equal(children[1].$, 'foo-baz');
 done();
 ```
 
