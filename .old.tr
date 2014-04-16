@@ -45,6 +45,8 @@
   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions
     BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)
   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)
+  - BucketObjectStore A 1000 element tree should recall any number
+  - BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -119,6 +121,8 @@
   ․ SimpleCache .waitFor(keys, callback) should call the given callback once all keys are in the cache
     SimpleCache .waitFor(keys, callback) should throw an exception if one of the keys is already in the cache
   ․ SimpleCache .waitFor(keys, callback) should throw an exception if one of the keys is already in the cache
+    SimpleCache .check(key) should return true if key exists in the cache
+  ․ SimpleCache .check(key) should return true if key exists in the cache
     vercast .hash(obj) should return a SHA-256 digest of the given string
   ․ vercast .hash(obj) should return a SHA-256 digest of the given string
     vercast .genID(bucketID, hash) should create a version ID based on a bucket ID (string) and a hash (string)
@@ -131,6 +135,11 @@
   ․ vercast .childObjects(obj) should return a list of sub-object IDs nested in obj
     vercast .childObjects(obj) should recursively search for children in nested objects and arrays
   ․ vercast .childObjects(obj) should recursively search for children in nested objects and arrays
+    vercast .randomByKey(key, prob) should return true in probability prob
+  ․ vercast .randomByKey(key, prob) should return true in probability prob
+    vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
+  ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  66 passing (113ms)
+  69 passing (181ms)
+  2 pending
 

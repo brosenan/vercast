@@ -1,14 +1,18 @@
-assert = require('assert');
-ObjectDisp = require('../objectDisp.js');
-BucketObjectStore = require('../bucketObjectStore.js');
-DummyBucketStore = require('../dummyBucketStore.js');
-SimpleCache = require('../simpleCache.js');
-
+var assert = require('assert');
+var ObjectDisp = require('../objectDisp.js');
+var BucketObjectStore = require('../bucketObjectStore.js');
+var DummyBucketStore = require('../dummyBucketStore.js');
+var SimpleCache = require('../simpleCache.js');
+var vercast = require('../vercast.js');
 var descObjectStore = require('./descObjectStore.js');
 
 var cache = new SimpleCache();
 var bucketStore = new DummyBucketStore();
 describe('BucketObjectStore', function(){
+    afterEach(function() {
+	bucketStore.abolish();
+	cache.abolish();
+    });
     var ostore = descObjectStore(function(disp) { return new BucketObjectStore(disp, cache, bucketStore); });
     describe('.hash(bucket, obj)', function(){
 	it('should return a unique ID for each given object and bucket ID', function(done){
@@ -75,6 +79,7 @@ describe('BucketObjectStore', function(){
 	    done();
 	});
 	it('should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)', function(done){
+//	    vercast.trace_on = true;
 	    var ctx = {};
 	    var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
 	    v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
@@ -89,5 +94,56 @@ describe('BucketObjectStore', function(){
 		done();
 	    });
 	});
+    });
+    describe.skip('A 1000 element tree', function(){
+	var thousand = 20;
+	var v;
+	beforeEach(function() {
+	    var numbers = [];
+	    for(var i = 0; i < thousand; i++) numbers.push(i);
+	    var first = true;
+	    while(numbers.length > 0) {
+		var index = Math.floor(Math.random() * numbers.length);
+		var key = numbers.splice(index, 1)[0];
+		if(first) {
+		    v = ostore.init({}, 'BinTree', {key: key, value: key * 2});
+		    first = false;
+		} else {
+		    v = ostore.trans({}, v, {_type: 'add', key: key, value: key * 2})[0];
+		}
+	    }
+	    cache.abolish();
+	});
+	it('should recall any number', function(done){
+	    console.log('=============');
+	    var ctx = {};
+	    var numToFetch = Math.floor(Math.random() * thousand);
+	    var p = {_type: 'fetch', key: numToFetch};
+	    ostore.trans(ctx, v, p);
+	    cache.waitFor(ctx.waitFor, function() {
+		console.log('-------------');
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		console.log('=============');
+		done();
+	    });
+	});
+	it.skip('should call make a reasonable number of calls to the bucket store', function(done){
+	    var baseline = bucketStore.callCount;
+	    var ctx = {};
+	    var numToFetch = Math.floor(Math.random() * 1000);
+	    var p = {_type: 'fetch', key: numToFetch};
+	    ostore.trans(ctx, v, p);
+	    cache.waitFor(ctx.waitFor, function() {
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		var accessCount = bucketStore.callCount - baseline;
+		assert(accessCount < 3, 'Bucket store was consulted ' + accessCount + ' times');
+		done();
+	    });
+	});
+
     });
 });

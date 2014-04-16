@@ -59,7 +59,39 @@ describe('vercast', function(){
 	    assert.equal(children[1].$, 'foo-baz');
 	    done();
 	});
-
     });
-
+    describe('.randomByKey(key, prob)', function(){
+	it('should return true in probability prob', function(done){
+	    var numTrue = 0;
+	    var total = 1000;
+	    var prob = 0.2;
+	    for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		if(vercast.randomByKey(key, prob)) {
+		    numTrue++;
+		}
+	    }
+	    var mean = total * prob;
+	    var sigma = Math.sqrt(total * prob * (1 - prob));
+	    var USL = mean + 3*sigma;
+	    var LSL = mean - 3*sigma;
+	    assert(numTrue > LSL, 'numTrue must be more than ' + LSL);
+	    assert(numTrue < USL, 'numTrue must be less than ' + USL);
+	    done();
+	});
+	it('should behave consistently given a constant sequence of keys', function(done){
+	    var history = [];
+	    var total = 1000;
+	    var prob = 0.2;
+	    for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		history.push(vercast.randomByKey(key, prob));
+	    }
+	    for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		assert.equal(vercast.randomByKey(key, prob), history[i]);
+	    }
+	    done();
+	});
+    });
 });

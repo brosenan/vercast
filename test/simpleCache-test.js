@@ -80,6 +80,15 @@ describe('SimpleCache', function(){
 	    }
 	    done();
 	});
+    });
+    describe('.check(key)', function(){
+	it('should return true if key exists in the cache', function(done){
+	    var cache = new SimpleCache();
+	    cache.store('foo', 14);
+	    assert(cache.check('foo'), 'foo is in the cache');
+	    assert(!cache.check('bar'), 'bar is not in the cache');
+	    done();
+	});
 
     });
 

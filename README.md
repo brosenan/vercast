@@ -14,6 +14,7 @@
      - [.hash(bucket, obj)](#bucketobjectstore-hashbucket-obj)
      - [.unhash(id)](#bucketobjectstore-unhashid)
      - [.trans(ctx, v1, p)](#bucketobjectstore-transctx-v1-p)
+     - [A 1000 element tree](#bucketobjectstore-a-1000-element-tree)
    - [counter](#counter)
      - [init](#counter-init)
      - [add](#counter-add)
@@ -34,12 +35,14 @@
      - [.fetch(id)](#simplecache-fetchid)
      - [.abolish()](#simplecache-abolish)
      - [.waitFor(keys, callback)](#simplecache-waitforkeys-callback)
+     - [.check(key)](#simplecache-checkkey)
    - [vercast](#vercast)
      - [.hash(obj)](#vercast-hashobj)
      - [.genID(bucketID, hash)](#vercast-genidbucketid-hash)
      - [.bucketID(id)](#vercast-bucketidid)
      - [.objID(id)](#vercast-objidid)
      - [.childObjects(obj)](#vercast-childobjectsobj)
+     - [.randomByKey(key, prob)](#vercast-randombykeykey-prob)
 <a name=""></a>
  
 <a name="bintree"></a>
@@ -379,21 +382,24 @@ done();
 should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly).
 
 ```js
-var ctx = {};
-var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
-v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
-cache.abolish();
-ctx = {};
-var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
-assert.equal(typeof v1, "undefined");
-cache.waitFor(ctx.waitFor, function() {
+//	    vercast.trace_on = true;
+	    var ctx = {};
+	    var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
+	    v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
+	    cache.abolish();
+	    ctx = {};
+	    var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+	    assert.equal(typeof v1, "undefined");
+	    cache.waitFor(ctx.waitFor, function() {
 		v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
 		var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
 		assert.equal(r, 3);
 		done();
-});
+	    });
 ```
 
+<a name="bucketobjectstore-a-1000-element-tree"></a>
+## A 1000 element tree
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
@@ -1038,6 +1044,18 @@ try {
 done();
 ```
 
+<a name="simplecache-checkkey"></a>
+## .check(key)
+should return true if key exists in the cache.
+
+```js
+var cache = new SimpleCache();
+cache.store('foo', 14);
+assert(cache.check('foo'), 'foo is in the cache');
+assert(!cache.check('bar'), 'bar is not in the cache');
+done();
+```
+
 <a name="vercast"></a>
 # vercast
 <a name="vercast-hashobj"></a>
@@ -1109,6 +1127,46 @@ var children = vercast.childObjects(obj);
 assert.equal(children.length, 2);
 assert.equal(children[0].$, 'foo-bar');
 assert.equal(children[1].$, 'foo-baz');
+done();
+```
+
+<a name="vercast-randombykeykey-prob"></a>
+## .randomByKey(key, prob)
+should return true in probability prob.
+
+```js
+var numTrue = 0;
+var total = 1000;
+var prob = 0.2;
+for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		if(vercast.randomByKey(key, prob)) {
+		    numTrue++;
+		}
+}
+var mean = total * prob;
+var sigma = Math.sqrt(total * prob * (1 - prob));
+var USL = mean + 3*sigma;
+var LSL = mean - 3*sigma;
+assert(numTrue > LSL, 'numTrue must be more than ' + LSL);
+assert(numTrue < USL, 'numTrue must be less than ' + USL);
+done();
+```
+
+should behave consistently given a constant sequence of keys.
+
+```js
+var history = [];
+var total = 1000;
+var prob = 0.2;
+for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		history.push(vercast.randomByKey(key, prob));
+}
+for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		assert.equal(vercast.randomByKey(key, prob), history[i]);
+}
 done();
 ```
 
