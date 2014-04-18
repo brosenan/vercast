@@ -30,7 +30,7 @@ module.exports = function() {
 	setTimeout(function() {
 	    self.locked = true;
 	    for(var i = 0; i < bucket.length; i++) {
-		callback(undefined, bucket[i]);
+		callback(undefined, bucket[i], id);
 	    }
 	    self.locked = false;
 	}, 0);

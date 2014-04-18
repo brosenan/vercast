@@ -20,7 +20,7 @@ module.exports = function() {
 		if(!reg) continue;
 		reg.count--;
 		if(reg.count == 0) {
-		    setTimeout(reg.cb, 0);
+		    setTimeout(reg.cb, 0)\;
 		}
 	    }
 	}

@@ -60,12 +60,11 @@ describe('SimpleCache', function(){
 	    var called = false;
 	    cache.waitFor(['foo', 'bar'], function() {
 		called = true;
+		done();
 	    });
 	    cache.store('foo', 12);
 	    assert(!called, 'Callback should not have been called yet');
 	    cache.store('bar', 21);
-	    assert(called, 'Callback should have been called');
-	    done();
 	});
 	it('should throw an exception if one of the keys is already in the cache', function(done){
 	    var cache = new SimpleCache();

@@ -79,7 +79,6 @@ describe('BucketObjectStore', function(){
 	    done();
 	});
 	it('should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)', function(done){
-//	    vercast.trace_on = true;
 	    var ctx = {};
 	    var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
 	    v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
@@ -95,8 +94,9 @@ describe('BucketObjectStore', function(){
 	    });
 	});
     });
-    describe.skip('A 1000 element tree', function(){
-	var thousand = 20;
+    describe('A 1000 element tree', function(){
+//	vercast.trace_on = true;
+	var thousand = 1000;
 	var v;
 	beforeEach(function() {
 	    var numbers = [];
@@ -115,17 +115,17 @@ describe('BucketObjectStore', function(){
 	    cache.abolish();
 	});
 	it('should recall any number', function(done){
-	    console.log('=============');
+	    //console.log('=============');
 	    var ctx = {};
 	    var numToFetch = Math.floor(Math.random() * thousand);
 	    var p = {_type: 'fetch', key: numToFetch};
 	    ostore.trans(ctx, v, p);
 	    cache.waitFor(ctx.waitFor, function() {
-		console.log('-------------');
+		//console.log('-------------');
 		var ctx = {};
 		var res = ostore.trans(ctx, v, p)[1];
 		assert.equal(res, numToFetch * 2);
-		console.log('=============');
+		//console.log('=============');
 		done();
 	    });
 	});

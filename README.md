@@ -382,24 +382,41 @@ done();
 should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly).
 
 ```js
-//	    vercast.trace_on = true;
-	    var ctx = {};
-	    var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
-	    v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
-	    cache.abolish();
-	    ctx = {};
-	    var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
-	    assert.equal(typeof v1, "undefined");
-	    cache.waitFor(ctx.waitFor, function() {
+var ctx = {};
+var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
+v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
+cache.abolish();
+ctx = {};
+var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+assert.equal(typeof v1, "undefined");
+cache.waitFor(ctx.waitFor, function() {
 		v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
 		var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
 		assert.equal(r, 3);
 		done();
-	    });
+});
 ```
 
 <a name="bucketobjectstore-a-1000-element-tree"></a>
 ## A 1000 element tree
+should recall any number.
+
+```js
+//console.log('=============');
+var ctx = {};
+var numToFetch = Math.floor(Math.random() * thousand);
+var p = {_type: 'fetch', key: numToFetch};
+ostore.trans(ctx, v, p);
+cache.waitFor(ctx.waitFor, function() {
+		//console.log('-------------');
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		//console.log('=============');
+		done();
+});
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
@@ -865,11 +882,10 @@ var sched = new Scheduler();
 var called = false;
 sched.register(['foo'], function() {
     called = true;
+    done();
 });
 assert(!called, 'Callback should not have been called yet');
 sched.notify('foo');
-assert(called, 'Callback should have been called');
-done();
 ```
 
 should not call a callback unless the condition has been met.
@@ -893,23 +909,22 @@ var sched = new Scheduler();
 var called1 = false;
 sched.register(['foo'], function() {
     called1 = true;
+    if(called1 && called2 && called3) done();
 });
 var called2 = false;
 sched.register(['foo'], function() {
     called2 = true;
+    if(called1 && called2 && called3) done();
 });
 var called3 = false;
 sched.register(['foo'], function() {
     called3 = true;
+    if(called1 && called2 && called3) done();
 });
 assert(!called1, 'Callback 1 should not have been called yet');
 assert(!called2, 'Callback 2 should not have been called yet');
 assert(!called3, 'Callback 3 should not have been called yet');
 sched.notify('foo');
-assert(called1, 'Callback 1 should have been called');
-assert(called2, 'Callback 1 should have been called');
-assert(called3, 'Callback 1 should have been called');
-done();
 ```
 
 should call each callback only once even if notified multiple times.
@@ -935,14 +950,13 @@ var sched = new Scheduler();
 var called = false;
 sched.register(['foo', 'bar', 'baz', 'bat'], function() {
     called = true;
+    done();
 });
 sched.notify('bar');
 sched.notify('foo');
 sched.notify('bat');
 assert(!called, 'Callback should not have been called yet');
 sched.notify('baz');
-assert(called, 'Callback should have been called');
-done();
 ```
 
 <a name="simplecache"></a>
@@ -1020,12 +1034,11 @@ var cache = new SimpleCache();
 var called = false;
 cache.waitFor(['foo', 'bar'], function() {
 		called = true;
+		done();
 });
 cache.store('foo', 12);
 assert(!called, 'Callback should not have been called yet');
 cache.store('bar', 21);
-assert(called, 'Callback should have been called');
-done();
 ```
 
 should throw an exception if one of the keys is already in the cache.

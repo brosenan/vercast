@@ -1,7 +1,7 @@
 var vercast = require('./vercast.js');
 //var dbg = 0;
 
-var MAX_BUCKET_SIZE = 10;
+var MAX_BUCKET_SIZE = 2;
 var NEW_BUCKET_PROB = 1/MAX_BUCKET_SIZE;
 
 module.exports = function(disp, cache, bucketStore) {
@@ -19,7 +19,7 @@ module.exports = function(disp, cache, bucketStore) {
 	var id = vercast.genID(bucket, objID);
 	cache.store(id.$, obj, json);
 	if(isRoot) {
-	    bucketStore.add(bucket, JSON.stringify(['seed', id, obj]));
+	    bucketStore.add(bucket, JSON.stringify(['seed', id.$, obj]));
 	}
 	return id;
     };
@@ -38,19 +38,23 @@ module.exports = function(disp, cache, bucketStore) {
 	var id = this.hash(ctx.bucket, obj);
 	return id;
     };
-    this.trans = function (origCtx, v1, p, offline) {
-	var ctx = {waitFor: [], bucket: vercast.bucketID(v1)};
+    this.trans = function (origCtx, v1, p) {
+	var ctx = {waitFor: [], 
+		   bucket: vercast.bucketID(v1),
+		   replay: origCtx.replay};
 	var pHash = this.hash(ctx.bucket, p);
 	p = cache.fetch(pHash.$); // take ownership of the object
 	var key = v1.$ + ':' + pHash.$;
-	var res = cache.fetch(key);
-	if(res) {
-	    origCtx.conf = origCtx.conf || res.conf;
-	    return [res.v2, res.res];
+	if(!ctx.replay || ctx.replay != ctx.bucket) {
+	    var res = cache.fetch(key);
+	    if(res) {
+		origCtx.conf = origCtx.conf || res.conf;
+		return [res.v2, res.res];
+	    }
 	}
 	var obj = this.unhash(v1);
 	if(!obj) { // v1 is not in the cache
-	    if(offline) throw new Error('Version not in cache when working offline');
+	    if(ctx.replay) throw new Error('Version not in cache when replaying');
 	    addWaitToCtx(origCtx, key);
 	    cache.waitFor([v1.$], function() {
 		ensureTrans(origCtx, v1, p);
@@ -60,7 +64,7 @@ module.exports = function(disp, cache, bucketStore) {
 	var pair = disp.apply(createContext(ctx), obj, p);
 	origCtx.conf = origCtx.conf || ctx.conf;
 	if(ctx.waitFor.length > 0) { // The underlying transition is not complete
-	    if(offline) throw new Error('Underlying transition');
+	    if(ctx.replay) throw new Error('Underlying transition is not complete replaying bucket ' + ctx.replay);
 	    origCtx.waitFor = ctx.waitFor.concat(origCtx.waitFor || []);
 	    return [undefined, undefined];
 	}
@@ -70,23 +74,24 @@ module.exports = function(disp, cache, bucketStore) {
 	    pair[0] = this.hash(ctx.bucket, pair[0]);
 	}
 	var transRec = {v2: pair[0], res: pair[1], conf: ctx.conf};
-	if(v1.$ != transRec.v2.$ && ctx.bucket != origCtx.bucket) {
-	    if(vercast.randomByKey(key, NEW_BUCKET_PROB)) {
-		transRec.v2 = moveToNewBucket(transRec.v2);
-		ctx.bucket = vercast.bucketID(transRec.v2);
-	    }
-	    if(!offline) {
+	if(!ctx.replay) {
+	    if(v1.$ != transRec.v2.$ && ctx.bucket != origCtx.bucket) {
+		if(vercast.randomByKey(key, NEW_BUCKET_PROB)) {
+		    transRec.v2 = moveToNewBucket(transRec.v2);
+		}
 		if(origCtx.bucket) {
 		    bucketStore.add(origCtx.bucket, JSON.stringify(['trans', key, transRec]));
 		}
 		bucketStore.add(ctx.bucket, JSON.stringify(['patch', v1, p]));
 	    }
 	}
-	cache.store(key, transRec);
-	return pair;
+	if(!ctx.replay || vercast.bucketID(transRec.v2) == ctx.replay) {
+	    cache.store(key, transRec);
+	}
+	return [transRec.v2, transRec.res];
     };
     function ensureTrans(origCtx, v1, p) {
-	var ctx = {waitFor: [], bucket: origCtx.bucket};
+	var ctx = {waitFor: [], bucket: origCtx.bucket, replay: origCtx.replay};
 	self.trans(ctx, v1, p); // first pass
 	if(ctx.waitFor) {
 	    cache.waitFor(ctx.waitFor, function() {
@@ -126,26 +131,27 @@ module.exports = function(disp, cache, bucketStore) {
 	    },
 	};
     }
-    function handleBucketItem(err, item) {
+    function handleBucketItem(err, item, bucket) {
 	item = JSON.parse(item);
 	tracer.trace({hanling_item: item});
 	var type = item[0];
 	if(type == 'seed' || type == 'trans') {
-	    cache.store(item[1].$, item[2]);
+	    cache.store(item[1], item[2]);
 	} else if(type == 'patch') {
 	    var v1 = item[1];
 	    var p = item[2];
-	    var ctx = {bucket: vercast.bucketID(v1)};
+	    var ctx = {replay: bucket};
 	    if(cache.check(v1.$)) {
-		self.trans(ctx, v1, p, true)
+		self.trans(ctx, v1, p)
 	    } else {
 		cache.waitFor(v1, function() {
-		    self.trans(ctx, v1, p, true);
+		    self.trans(ctx, v1, p);
 		});
 	    }
 	}
     }
     function moveToNewBucket(id) {
+	tracer.trace({moving: id});
 	var bucket = vercast.bucketID(id);
 	var q = [id];
 	var traverse = [];
@@ -176,8 +182,9 @@ module.exports = function(disp, cache, bucketStore) {
 	    }
 	    map[currID] = self.hash(newBucket, curr);
 	    tracer.trace({newBucketObj: map[currID], bucket: newBucket});
-	    bucketStore.add(newBucket, JSON.stringify(['seed', map[currID], curr]));
+	    bucketStore.add(newBucket, JSON.stringify(['seed', map[currID].$, curr]));
 	}
+	tracer.trace({moved: id, to: map[id.$]});
 	return map[id.$];
     }
 }
