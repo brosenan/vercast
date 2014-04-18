@@ -7,7 +7,12 @@ module.exports = function(disp) {
     };
     this.trans = function(ctx, v1, p) {
 	if(!v1.$) throw new Error('Bad ID: ' + v1.$);
-	var pair = disp.apply(createContext(ctx), JSON.parse(v1.$), p);
+	try {
+	    var pair = disp.apply(createContext(ctx), JSON.parse(v1.$), p);
+	} catch(e) {
+	    ctx.error = e;
+	    return [undefined, undefined];
+	}
 	if('_replaceWith' in pair[0]) {
 	    pair[0] = pair[0]._replaceWith;
 	} else {
@@ -36,6 +41,13 @@ module.exports = function(disp) {
 	    },
 	    conflict: function() {
 		ctx.conf = true;
+	    },
+	    effect: function(eff) {
+		if(ctx.eff) {
+		    ctx.eff.push(eff);
+		} else {
+		    ctx.eff = [eff];
+		}
 	    },
 	};
     }

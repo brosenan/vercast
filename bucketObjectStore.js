@@ -61,8 +61,18 @@ module.exports = function(disp, cache, bucketStore) {
 	    });
 	    return [undefined, undefined];
 	}
-	var pair = disp.apply(createContext(ctx), obj, p);
+	var pair;
+	try {
+	    pair = disp.apply(createContext(ctx), obj, p);
+	} catch(e) {
+	    origCtx.error = e;
+	}
 	origCtx.conf = origCtx.conf || ctx.conf;
+	origCtx.error = origCtx.error || ctx.error;
+	origCtx.eff = ctx.eff;
+	if(origCtx.error) { // An exception was thrown
+	    return [undefined, undefined];
+	}
 	if(ctx.waitFor.length > 0) { // The underlying transition is not complete
 	    if(ctx.replay) throw new Error('Underlying transition is not complete replaying bucket ' + ctx.replay);
 	    origCtx.waitFor = ctx.waitFor.concat(origCtx.waitFor || []);
@@ -128,6 +138,13 @@ module.exports = function(disp, cache, bucketStore) {
 	    },
 	    conflict: function() {
 		ctx.conf = true;
+	    },
+	    effect: function(eff) {
+		if(ctx.eff) {
+		    ctx.eff.push(eff);
+		} else {
+		    ctx.eff = [eff];
+		}
 	    },
 	};
     }

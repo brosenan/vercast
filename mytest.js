@@ -40,7 +40,7 @@ function run(SIZE) {
 	}
     }
     cache.abolish();
-    var ctx = {};
+/*    var ctx = {};
     var numToFetch = 7; //Math.floor(Math.random() * SIZE);
     var p = {_type: 'fetch', key: numToFetch};
     ostore.trans(ctx, v, p);
@@ -49,7 +49,7 @@ function run(SIZE) {
 	var res = ostore.trans(ctx, v, p)[1];
 	assert.equal(res, numToFetch * 2);
 	console.log('Done!');
-    });
+    });*/
 
 
     function buildNumberList(numbers, first, max) {
@@ -61,7 +61,7 @@ function run(SIZE) {
     }
 }
 
-for(var i = 50; i <= 1000; i+=50) {
+for(var i = 50; i <= 2000; i+=50) {
     var start = (new Date()).getTime();
     run(i);
     var end = (new Date()).getTime();

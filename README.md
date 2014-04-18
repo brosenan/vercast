@@ -11,6 +11,7 @@
        - [.trans(ctx, v1, p)](#bucketobjectstore-as-objectstore-transctx-v1-p)
        - [context](#bucketobjectstore-as-objectstore-context)
          - [.conflict()](#bucketobjectstore-as-objectstore-context-conflict)
+         - [.effect(patch)](#bucketobjectstore-as-objectstore-context-effectpatch)
      - [.hash(bucket, obj)](#bucketobjectstore-hashbucket-obj)
      - [.unhash(id)](#bucketobjectstore-unhashid)
      - [.trans(ctx, v1, p)](#bucketobjectstore-transctx-v1-p)
@@ -26,6 +27,7 @@
        - [.trans(ctx, v1, p)](#dummyobjectstore-as-objectstore-transctx-v1-p)
        - [context](#dummyobjectstore-as-objectstore-context)
          - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
+         - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
@@ -209,6 +211,54 @@ assert.equal(r, 5);
 done();
 ```
 
+should pass exceptions thrown by patch methods as the error field of the context.
+
+```js
+var disp = new ObjectDisp({
+    Class1: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    }
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'emitError'})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
+should propagate exceptions thrown by underlying invocations.
+
+```js
+var disp = new ObjectDisp({
+    Child: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    },
+    Parent: {
+	init: function(ctx, args) {
+	    this.foo = ctx.init('Child', args);
+	},
+	patch: function(ctx, p) {
+	    this.foo = ctx.trans(this.foo, p.patch);
+	},
+    },
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Parent', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'emitError'}})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
 <a name="bucketobjectstore-as-objectstore-context"></a>
 ### context
 should allow underlying initializations and transitions to perform initializations and transitions.
@@ -227,7 +277,7 @@ var disp = new ObjectDisp({
     },
     Counter: require('../counter.js'),
 });
-var ostore = new createOstore(disp);
+var ostore = createOstore(disp);
 var v = ostore.init({}, 'MyClass', {});
 v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 12}})[0];
 r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
@@ -287,6 +337,29 @@ var v = ostore.init({}, 'Class1', {val:2});
 var ctx = {};
 v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
 assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+<a name="bucketobjectstore-as-objectstore-context-effectpatch"></a>
+#### .effect(patch)
+should add a patch to the effect set held by the context.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+			    },
+			    addEffectPatch: function(ctx, patch) {
+				ctx.effect(patch.patch);
+			    },
+			}
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
+assert(!ctx.error, 'No error should occur');
+assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
 done();
 ```
 
@@ -574,6 +647,54 @@ assert.equal(r, 5);
 done();
 ```
 
+should pass exceptions thrown by patch methods as the error field of the context.
+
+```js
+var disp = new ObjectDisp({
+    Class1: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    }
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'emitError'})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
+should propagate exceptions thrown by underlying invocations.
+
+```js
+var disp = new ObjectDisp({
+    Child: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    },
+    Parent: {
+	init: function(ctx, args) {
+	    this.foo = ctx.init('Child', args);
+	},
+	patch: function(ctx, p) {
+	    this.foo = ctx.trans(this.foo, p.patch);
+	},
+    },
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Parent', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'emitError'}})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
 <a name="dummyobjectstore-as-objectstore-context"></a>
 ### context
 should allow underlying initializations and transitions to perform initializations and transitions.
@@ -592,7 +713,7 @@ var disp = new ObjectDisp({
     },
     Counter: require('../counter.js'),
 });
-var ostore = new createOstore(disp);
+var ostore = createOstore(disp);
 var v = ostore.init({}, 'MyClass', {});
 v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 12}})[0];
 r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
@@ -652,6 +773,29 @@ var v = ostore.init({}, 'Class1', {val:2});
 var ctx = {};
 v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
 assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-context-effectpatch"></a>
+#### .effect(patch)
+should add a patch to the effect set held by the context.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+			    },
+			    addEffectPatch: function(ctx, patch) {
+				ctx.effect(patch.patch);
+			    },
+			}
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
+assert(!ctx.error, 'No error should occur');
+assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
 done();
 ```
 

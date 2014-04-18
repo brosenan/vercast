@@ -56,6 +56,48 @@ module.exports = function(createOstore) {
 		assert.equal(r, 5);
 		done();
 	    });
+	    it('should pass exceptions thrown by patch methods as the error field of the context', function(done){
+		var disp = new ObjectDisp({
+		    Class1: {
+			init: function(ctx, args) {
+			},
+			emitError: function(ctx, patch) {
+			    throw new Error('This is an error');
+			},
+		    }
+		});
+		var ostore = createOstore(disp);
+		var v = ostore.init({}, 'Class1', {});
+		var ctx = {};
+		v = ostore.trans(ctx, v, {_type: 'emitError'})[1];
+		assert.equal(ctx.error.message, 'This is an error');
+		done();
+	    });
+	    it('should propagate exceptions thrown by underlying invocations', function(done){
+		var disp = new ObjectDisp({
+		    Child: {
+			init: function(ctx, args) {
+			},
+			emitError: function(ctx, patch) {
+			    throw new Error('This is an error');
+			},
+		    },
+		    Parent: {
+			init: function(ctx, args) {
+			    this.foo = ctx.init('Child', args);
+			},
+			patch: function(ctx, p) {
+			    this.foo = ctx.trans(this.foo, p.patch);
+			},
+		    },
+		});
+		var ostore = createOstore(disp);
+		var v = ostore.init({}, 'Parent', {});
+		var ctx = {};
+		v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'emitError'}})[1];
+		assert.equal(ctx.error.message, 'This is an error');
+		done();
+	    });
 	});
 	describe('context', function(){
 	    it('should allow underlying initializations and transitions to perform initializations and transitions', function(done){
@@ -72,7 +114,7 @@ module.exports = function(createOstore) {
 		    },
 		    Counter: require('../counter.js'),
 		});
-		var ostore = new createOstore(disp);
+		var ostore = createOstore(disp);
 		var v = ostore.init({}, 'MyClass', {});
 		v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 12}})[0];
 		r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
@@ -128,6 +170,28 @@ module.exports = function(createOstore) {
 		    done();
 		});
 	    });
+	    describe('.effect(patch)', function(){
+		it('should add a patch to the effect set held by the context', function(done){
+		    var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+			    },
+			    addEffectPatch: function(ctx, patch) {
+				ctx.effect(patch.patch);
+			    },
+			}
+		    });
+		    var ostore = createOstore(disp);
+		    var v = ostore.init({}, 'Class1', {});
+		    var ctx = {};
+		    v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
+		    assert(!ctx.error, 'No error should occur');
+		    assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
+		    done();
+		});
+
+	    });
+
 	});
     });
     return ostore;

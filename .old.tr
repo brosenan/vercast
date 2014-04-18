@@ -21,12 +21,18 @@
   ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
     BucketObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
   ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
+    BucketObjectStore as ObjectStore .trans(ctx, v1, p) should pass exceptions thrown by patch methods as the error field of the context
+  ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should pass exceptions thrown by patch methods as the error field of the context
+    BucketObjectStore as ObjectStore .trans(ctx, v1, p) should propagate exceptions thrown by underlying invocations
+  ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should propagate exceptions thrown by underlying invocations
     BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
   ․ BucketObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
     BucketObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
   ․ BucketObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
     BucketObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
   ․ BucketObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
+    BucketObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
+  ․ BucketObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
     BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
   ․ BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
     BucketObjectStore .hash(bucket, obj) should cache the object under its ID
@@ -69,12 +75,18 @@
   ․ DummyObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
     DummyObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
   ․ DummyObjectStore as ObjectStore .trans(ctx, v1, p) should replace the object if a _replaceWith field is added to the object
+    DummyObjectStore as ObjectStore .trans(ctx, v1, p) should pass exceptions thrown by patch methods as the error field of the context
+  ․ DummyObjectStore as ObjectStore .trans(ctx, v1, p) should pass exceptions thrown by patch methods as the error field of the context
+    DummyObjectStore as ObjectStore .trans(ctx, v1, p) should propagate exceptions thrown by underlying invocations
+  ․ DummyObjectStore as ObjectStore .trans(ctx, v1, p) should propagate exceptions thrown by underlying invocations
     DummyObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
   ․ DummyObjectStore as ObjectStore context should allow underlying initializations and transitions to perform initializations and transitions
     DummyObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
   ․ DummyObjectStore as ObjectStore context .conflict() should set the context's confclit flag to true
     DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
   ․ DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
+    DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
+  ․ DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
@@ -142,5 +154,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  71 passing (2s)
+  77 passing (4s)
 
