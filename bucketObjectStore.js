@@ -1,7 +1,7 @@
 var vercast = require('./vercast.js');
 //var dbg = 0;
 
-var MAX_BUCKET_SIZE = 2;
+var MAX_BUCKET_SIZE = 10;
 var NEW_BUCKET_PROB = 1/MAX_BUCKET_SIZE;
 
 module.exports = function(disp, cache, bucketStore) {
@@ -157,9 +157,9 @@ module.exports = function(disp, cache, bucketStore) {
 	var traverse = [];
 	while(q.length > 0 && traverse.length < MAX_BUCKET_SIZE) {
 	    var v = q.shift();
-	    if(vercast.bucketID(v) != bucket) continue;
+	    //if(vercast.bucketID(v) != bucket) continue;
 	    var obj = cache.fetch(v.$);
-	    var children = vercast.childObjects();
+	    var children = vercast.childObjects(obj);
 	    q = q.concat(children);
 	    traverse.unshift([v.$, obj]);
 	}

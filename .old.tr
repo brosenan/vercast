@@ -47,7 +47,8 @@
   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)
     BucketObjectStore A 1000 element tree should recall any number
   ․ BucketObjectStore A 1000 element tree should recall any number
-  - BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
+    BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
+  ․ BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -141,6 +142,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  70 passing (1s)
-  1 pending
+  71 passing (2s)
 

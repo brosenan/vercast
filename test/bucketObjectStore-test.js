@@ -129,21 +129,21 @@ describe('BucketObjectStore', function(){
 		done();
 	    });
 	});
-	it.skip('should call make a reasonable number of calls to the bucket store', function(done){
+	it('should call make a reasonable number of calls to the bucket store', function(done){
 	    var baseline = bucketStore.callCount;
 	    var ctx = {};
-	    var numToFetch = Math.floor(Math.random() * 1000);
+	    var numToFetch = Math.floor(Math.random() * thousand);
 	    var p = {_type: 'fetch', key: numToFetch};
+	    //console.log('================');
 	    ostore.trans(ctx, v, p);
 	    cache.waitFor(ctx.waitFor, function() {
 		var ctx = {};
 		var res = ostore.trans(ctx, v, p)[1];
 		assert.equal(res, numToFetch * 2);
 		var accessCount = bucketStore.callCount - baseline;
-		assert(accessCount < 3, 'Bucket store was consulted ' + accessCount + ' times');
+		assert(accessCount < 6, 'Bucket store was consulted ' + accessCount + ' times');
 		done();
 	    });
 	});
-
     });
 });
