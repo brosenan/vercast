@@ -3,6 +3,7 @@ ObjectDisp = require('./objectDisp.js');
 BucketObjectStore = require('./bucketObjectStore.js');
 DummyBucketStore = require('./dummyBucketStore.js');
 SimpleCache = require('./simpleCache.js');
+Scheduler = require('./scheduler.js');
 
 function run(SIZE) {
 
@@ -17,9 +18,9 @@ function run(SIZE) {
 	BinTree: require('./binTree.js'),
     });
 
-
-    var cache = new SimpleCache();
-    var bucketStore = new DummyBucketStore();
+    var sched = new Scheduler();
+    var cache = new SimpleCache(sched);
+    var bucketStore = new DummyBucketStore(sched);
 
     var ostore = new BucketObjectStore(disp, cache, bucketStore);
     var v;

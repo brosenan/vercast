@@ -5,9 +5,11 @@ var DummyBucketStore = require('../dummyBucketStore.js');
 var SimpleCache = require('../simpleCache.js');
 var vercast = require('../vercast.js');
 var descObjectStore = require('./descObjectStore.js');
+var Scheduler = require('../scheduler.js');
 
-var cache = new SimpleCache();
-var bucketStore = new DummyBucketStore();
+var sched = new Scheduler();
+var cache = new SimpleCache(sched);
+var bucketStore = new DummyBucketStore(sched);
 describe('BucketObjectStore', function(){
     afterEach(function() {
 	bucketStore.abolish();

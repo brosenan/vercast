@@ -7,6 +7,8 @@
   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r of the patch
     AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result version even if the source version is not in the cache
   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result version even if the source version is not in the cache
+    AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r even if the source version is not in the cache
+  ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r even if the source version is not in the cache
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
     BinTree fetch should return the value associated with a key
@@ -73,6 +75,10 @@
   ․ DummyBucketStore should accumulate all added items and replay them when fetched
     DummyBucketStore should store each bucket individually
   ․ DummyBucketStore should store each bucket individually
+    DummyBucketStore async mode should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved
+  ․ DummyBucketStore async mode should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved
+    DummyBucketStore async mode should not apply changes immediately
+  ․ DummyBucketStore async mode should not apply changes immediately
     DummyObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
   ․ DummyObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     DummyObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
@@ -160,6 +166,6 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  79 passing (218ms)
+  82 passing (269ms)
   2 pending
 

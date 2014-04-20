@@ -1,10 +1,13 @@
 var assert = require('assert');
+var Scheduler = require('../scheduler.js');
 var SimpleCache = require('../simpleCache.js');
+
+var sched = new Scheduler();
 
 describe('SimpleCache', function(){
     describe('.store(id, obj[, json])', function(){
 	it('should store an object in the cache under the given ID', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    cache.store('one', {value: 1});
 	    cache.store('two', {value: 2});
 	    cache.store('three', {value: 3});
@@ -14,7 +17,7 @@ describe('SimpleCache', function(){
 	    done();
 	});
 	it('should retrieve the same instance on a first fetch', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    var one = {value: 1};
 	    cache.store('one', one);
 	    one.value = 2;
@@ -22,7 +25,7 @@ describe('SimpleCache', function(){
 	    done();
 	});
 	it('should retrieve the same object once and again, even if it was modified on the outside', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    cache.store('one', {value: 1});
 	    var one = cache.fetch('one');
 	    one.value = 2;
@@ -30,7 +33,7 @@ describe('SimpleCache', function(){
 	    done();
 	});
 	it('should use the json argument, if supplied, as the JSON representation of the object to be used when the instance is no longer available', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    cache.store('one', {value: 1}, JSON.stringify({value: 2}));
 	    assert.equal(cache.fetch('one').value, 1); // first time
 	    assert.equal(cache.fetch('one').value, 2); // second time
@@ -43,7 +46,7 @@ describe('SimpleCache', function(){
     });
     describe('.abolish()', function(){
 	it('should remove all elements from the cache', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    cache.store('one', {value: 1});
 	    cache.store('two', {value: 2});
 	    cache.store('three', {value: 3});
@@ -56,7 +59,7 @@ describe('SimpleCache', function(){
     });
     describe('.waitFor(keys, callback)', function(){
 	it('should call the given callback once all keys are in the cache', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    var called = false;
 	    cache.waitFor(['foo', 'bar'], function() {
 		called = true;
@@ -67,7 +70,7 @@ describe('SimpleCache', function(){
 	    cache.store('bar', 21);
 	});
 	it('should throw an exception if one of the keys is already in the cache', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    cache.store('foo', 12);
 	    try {
 		cache.waitFor(['foo', 'bar'], function() {
@@ -82,7 +85,7 @@ describe('SimpleCache', function(){
     });
     describe('.check(key)', function(){
 	it('should return true if key exists in the cache', function(done){
-	    var cache = new SimpleCache();
+	    var cache = new SimpleCache(sched);
 	    cache.store('foo', 14);
 	    assert(cache.check('foo'), 'foo is in the cache');
 	    assert(!cache.check('bar'), 'bar is not in the cache');

@@ -5,12 +5,14 @@ var SimpleCache = require('../simpleCache.js');
 var vercast = require('../vercast.js');
 var DummyBucketStore = require('../dummyBucketStore.js');
 var AsyncObjectStore = require('../asyncObjectStore.js');
+var Scheduler = require('../scheduler.js');
 
-var cache = new SimpleCache();
-var bucketStore = new DummyBucketStore();
+var sched = new Scheduler();
+var cache = new SimpleCache(sched);
+var bucketStore = new DummyBucketStore(sched);
 
 function createOstore(disp) {
-    return new AsyncObjectStore(new BucketObjectStore(disp, cache, bucketStore), cache);
+    return new AsyncObjectStore(new BucketObjectStore(disp, cache, bucketStore), sched);
 }
 
 describe('AsyncObjectStore', function(){
@@ -77,7 +79,12 @@ describe('AsyncObjectStore', function(){
 		done();
 	    });
 	});
-
+	it('should return the result r even if the source version is not in the cache', function(done){
+	    cache.abolish();
+	    ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
+		assert.equal(r, 0);
+		done();
+	    });
+	});
     });
-
 });

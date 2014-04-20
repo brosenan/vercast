@@ -1,18 +1,24 @@
 var vercast = require('./vercast.js');
 
-module.exports = function() {
+module.exports = function(sched) {
+    var self = this;
     this.buckets = {};
     this.callCount = 0;
     this.locked = false;
     var tracer = new vercast.Tracer('bucketStore');
     
-    this.add = function(id, value) {
-	tracer.trace({add: id, value: value});
-	if(!(id in this.buckets)) {
-	    this.buckets[id] = [value];
-	} else {
-	    this.buckets[id].push(value);
+    this.add = function(bucket, item) {
+	if(!this.async) {
+	    add(bucket, item);
 	}
+	var id = Math.floor(Math.random() * 1000000000);
+	setTimeout(function() {
+	    if(self.async) {
+		add(bucket, item);
+	    }
+	    sched.notify(id);
+	}, 0);
+	return id;
     };
     this.fetch = function(id, callback) {
 	tracer.trace({fetch: id});
@@ -25,7 +31,7 @@ module.exports = function() {
 	this.callCount++;
 	var bucket = this.buckets[id]
 	if(!bucket) {
-	    throw new Error('Bucket ' + id + ' not found');
+	    return callback(new Error('Bucket ' + id + ' not found'));
 	}
 	setTimeout(function() {
 	    self.locked = true;
@@ -42,5 +48,13 @@ module.exports = function() {
 	return function () {
 	    callback(undefined, item);
 	};
+    }
+    function add(bucket, item) {
+	tracer.trace({add: bucket, value: item});
+	if(!(bucket in self.buckets)) {
+	    self.buckets[bucket] = [item];
+	} else {
+	    self.buckets[bucket].push(item);
+	}
     }
 }

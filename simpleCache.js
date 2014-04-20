@@ -1,8 +1,7 @@
 var Scheduler = require('./scheduler.js');
 var vercast = require('./vercast.js');
 
-module.exports = function() {
-    var sched = new Scheduler();
+module.exports = function(sched) {
     this.objCache = {};
     this.jsonCache = {};
     var tracer = new vercast.Tracer('cache');

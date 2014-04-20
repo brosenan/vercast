@@ -24,6 +24,7 @@
      - [add](#counter-add)
      - [get](#counter-get)
    - [DummyBucketStore](#dummybucketstore)
+     - [async mode](#dummybucketstore-async-mode)
    - [DummyObjectStore](#dummyobjectstore)
      - [as ObjectStore](#dummyobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#dummyobjectstore-as-objectstore-initctx-classname-args)
@@ -109,6 +110,16 @@ cache.abolish();
 ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
 		var obj = cache.fetch(v2.$);
 		assert.equal(obj.value, 2);
+		done();
+});
+```
+
+should return the result r even if the source version is not in the cache.
+
+```js
+cache.abolish();
+ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
+		assert.equal(r, 0);
 		done();
 });
 ```
@@ -587,7 +598,7 @@ done();
 should accumulate all added items and replay them when fetched.
 
 ```js
-var bucketStore = new DummyBucketStore();
+var bucketStore = new DummyBucketStore(sched);
 // Add values to the bucket
 var values = {one: 1, two: 2, three: 3};
 for(var key in values) {
@@ -604,7 +615,7 @@ bucketStore.fetch('myBucket', function(err, item) {
 should store each bucket individually.
 
 ```js
-var bucketStore = new DummyBucketStore();
+var bucketStore = new DummyBucketStore(sched);
 var values = {one: 1, two: 2, three: 3};
 for(var key in values) {
     bucketStore.add('myBucket', {key: key, value: values[key]});
@@ -614,6 +625,43 @@ bucketStore.fetch('myBucket', function(err, item) {
     assert(item.key in values, 'item ' + JSON.stringify(item) + ' should not be in bucket');
     delete values[item.key];
     if(isEmpty(values)) done();
+});
+```
+
+<a name="dummybucketstore-async-mode"></a>
+## async mode
+should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved.
+
+```js
+var bucketStore = new DummyBucketStore(sched);
+bucketStore.async = true; // async mode on
+// Add values to the bucket
+var values = {one: 1, two: 2, three: 3};
+var IDs = [];
+for(var key in values) {
+		var ID = bucketStore.add('myBucket', {key: key, value: values[key]});
+		IDs.push(ID);
+}
+// Wait until all is written
+sched.register(IDs, function() {
+		// Trigger a fetch
+		bucketStore.fetch('myBucket', function(err, item) {
+		    assert(item.key in values, 'the  bucket should only contain the added keys');
+		    delete values[item.key];
+		    if(isEmpty(values)) done();
+		});
+});
+```
+
+should not apply changes immediately.
+
+```js
+var bucketStore = new DummyBucketStore(sched);
+bucketStore.async = true; // async mode on
+bucketStore.add('myBucket', {foo: 'bar'});
+bucketStore.fetch('myBucket', function(err) {
+		assert.equal(err.message, 'Bucket myBucket not found');
+		done();
 });
 ```
 
@@ -1158,7 +1206,7 @@ sched.notify('baz');
 should store an object in the cache under the given ID.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 cache.store('one', {value: 1});
 cache.store('two', {value: 2});
 cache.store('three', {value: 3});
@@ -1171,7 +1219,7 @@ done();
 should retrieve the same instance on a first fetch.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 var one = {value: 1};
 cache.store('one', one);
 one.value = 2;
@@ -1182,7 +1230,7 @@ done();
 should retrieve the same object once and again, even if it was modified on the outside.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 cache.store('one', {value: 1});
 var one = cache.fetch('one');
 one.value = 2;
@@ -1193,7 +1241,7 @@ done();
 should use the json argument, if supplied, as the JSON representation of the object to be used when the instance is no longer available.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 cache.store('one', {value: 1}, JSON.stringify({value: 2}));
 assert.equal(cache.fetch('one').value, 1); // first time
 assert.equal(cache.fetch('one').value, 2); // second time
@@ -1206,7 +1254,7 @@ done();
 should remove all elements from the cache.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 cache.store('one', {value: 1});
 cache.store('two', {value: 2});
 cache.store('three', {value: 3});
@@ -1222,7 +1270,7 @@ done();
 should call the given callback once all keys are in the cache.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 var called = false;
 cache.waitFor(['foo', 'bar'], function() {
 		called = true;
@@ -1236,7 +1284,7 @@ cache.store('bar', 21);
 should throw an exception if one of the keys is already in the cache.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 cache.store('foo', 12);
 try {
 		cache.waitFor(['foo', 'bar'], function() {
@@ -1254,7 +1302,7 @@ done();
 should return true if key exists in the cache.
 
 ```js
-var cache = new SimpleCache();
+var cache = new SimpleCache(sched);
 cache.store('foo', 14);
 assert(cache.check('foo'), 'foo is in the cache');
 assert(!cache.check('bar'), 'bar is not in the cache');
