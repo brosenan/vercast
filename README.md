@@ -549,6 +549,43 @@ cache.waitFor(ctx.waitFor, function() {
 
 <a name="bucketobjectstore-a-1000-element-tree"></a>
 ## A 1000 element tree
+should recall any number.
+
+```js
+//console.log('=============');
+var ctx = {};
+var numToFetch = Math.floor(Math.random() * thousand);
+var p = {_type: 'fetch', key: numToFetch};
+ostore.trans(ctx, v, p);
+cache.waitFor(ctx.waitFor, function() {
+		//console.log('-------------');
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		//console.log('=============');
+		done();
+});
+```
+
+should call make a reasonable number of calls to the bucket store.
+
+```js
+var baseline = bucketStore.callCount;
+var ctx = {};
+var numToFetch = Math.floor(Math.random() * thousand);
+var p = {_type: 'fetch', key: numToFetch};
+//console.log('================');
+ostore.trans(ctx, v, p);
+cache.waitFor(ctx.waitFor, function() {
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		var accessCount = bucketStore.callCount - baseline;
+		assert(accessCount < 6, 'Bucket store was consulted ' + accessCount + ' times');
+		done();
+});
+```
+
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>

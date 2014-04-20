@@ -194,7 +194,7 @@ module.exports = function(disp, cache, bucketStore) {
 		var newID = map[child.$];
 		if(!newID && vercast.bucketID(child) == bucket) {
 		    tracer.trace({move: {child: child.$, bucket: bucket}});
-		    newID = moveToNewBucket(child);
+		    newID = moveToNewBucket(child, ctx);
 		} else if(!newID) {
 		    newID = child;
 		}
