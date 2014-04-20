@@ -10,6 +10,7 @@ var Scheduler = require('../scheduler.js');
 var sched = new Scheduler();
 var cache = new SimpleCache(sched);
 var bucketStore = new DummyBucketStore(sched);
+bucketStore.async = true;
 
 function createOstore(disp) {
     return new AsyncObjectStore(new BucketObjectStore(disp, cache, bucketStore), sched);

@@ -8,7 +8,7 @@ module.exports = function(disp, cache, bucketStore) {
     var self = this;
     var tracer = new vercast.Tracer('bucketObjStore');
 
-    this.hash = function(bucket, obj) {
+    this.hash = function(bucket, obj, ctx) {
 	var json = JSON.stringify(obj);
 	var objID = vercast.hash(json);
 	var isRoot = false;
@@ -19,7 +19,7 @@ module.exports = function(disp, cache, bucketStore) {
 	var id = vercast.genID(bucket, objID);
 	cache.store(id.$, obj, json);
 	if(isRoot) {
-	    bucketStore.add(bucket, JSON.stringify(['seed', id.$, obj]));
+	    addDependency(bucketStore.add(bucket, JSON.stringify(['seed', id.$, obj])), ctx);
 	}
 	return id;
     };
@@ -35,14 +35,14 @@ module.exports = function(disp, cache, bucketStore) {
 
     this.init = function(ctx, clazz, args) {
 	var obj = disp.init(createContext(ctx), clazz, args);
-	var id = this.hash(ctx.bucket, obj);
+	var id = this.hash(ctx.bucket, obj, ctx);
 	return id;
     };
     this.trans = function (origCtx, v1, p) {
 	var ctx = {waitFor: [], 
 		   bucket: vercast.bucketID(v1),
 		   replay: origCtx.replay};
-	var pHash = this.hash(ctx.bucket, p);
+	var pHash = this.hash(ctx.bucket, p, origCtx);
 	p = cache.fetch(pHash.$); // take ownership of the object
 	var key = v1.$ + ':' + pHash.$;
 	if(!ctx.replay || ctx.replay != ctx.bucket) {
@@ -70,6 +70,9 @@ module.exports = function(disp, cache, bucketStore) {
 	origCtx.conf = origCtx.conf || ctx.conf;
 	origCtx.error = origCtx.error || ctx.error;
 	origCtx.eff = ctx.eff;
+	if(origCtx.depend) {
+	    origCtx.depend = origCtx.depend.concat(ctx.depend || []);
+	}
 	if(origCtx.error) { // An exception was thrown
 	    return [undefined, undefined];
 	}
@@ -81,18 +84,18 @@ module.exports = function(disp, cache, bucketStore) {
 	if(pair[0]._replaceWith) {
 	    pair[0] = pair[0]._replaceWith;
 	} else {
-	    pair[0] = this.hash(ctx.bucket, pair[0]);
+	    pair[0] = this.hash(ctx.bucket, pair[0], origCtx);
 	}
 	var transRec = {v2: pair[0], res: pair[1], conf: ctx.conf};
 	if(!ctx.replay) {
 	    if(v1.$ != transRec.v2.$ && ctx.bucket != origCtx.bucket) {
 		if(vercast.randomByKey(key, NEW_BUCKET_PROB)) {
-		    transRec.v2 = moveToNewBucket(transRec.v2);
+		    transRec.v2 = moveToNewBucket(transRec.v2, origCtx);
 		}
 		if(origCtx.bucket) {
-		    bucketStore.add(origCtx.bucket, JSON.stringify(['trans', key, transRec]));
+		    addDependency(bucketStore.add(origCtx.bucket, JSON.stringify(['trans', key, transRec])), origCtx);
 		}
-		bucketStore.add(ctx.bucket, JSON.stringify(['patch', v1, p]));
+		addDependency(bucketStore.add(ctx.bucket, JSON.stringify(['patch', v1, p])), origCtx);
 	    }
 	}
 	if(!ctx.replay || vercast.bucketID(transRec.v2) == ctx.replay) {
@@ -167,7 +170,7 @@ module.exports = function(disp, cache, bucketStore) {
 	    }
 	}
     }
-    function moveToNewBucket(id) {
+    function moveToNewBucket(id, ctx) {
 	tracer.trace({moving: id});
 	var bucket = vercast.bucketID(id);
 	var q = [id];
@@ -197,11 +200,18 @@ module.exports = function(disp, cache, bucketStore) {
 		}
 		child.$ = newID.$; // This should change the object itself
 	    }
-	    map[currID] = self.hash(newBucket, curr);
+	    map[currID] = self.hash(newBucket, curr, ctx);
 	    tracer.trace({newBucketObj: map[currID], bucket: newBucket});
-	    bucketStore.add(newBucket, JSON.stringify(['seed', map[currID].$, curr]));
+	    addDependency(bucketStore.add(newBucket, JSON.stringify(['seed', map[currID].$, curr])), ctx);
 	}
 	tracer.trace({moved: id, to: map[id.$]});
 	return map[id.$];
+    }
+    function addDependency(id, ctx) {
+	if(ctx.depend) {
+	    ctx.depend.push(id);
+	} else {
+	    ctx.depend = [id];
+	}
     }
 }

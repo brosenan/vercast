@@ -166,6 +166,6 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  82 passing (269ms)
+  82 passing (292ms)
   2 pending
 
