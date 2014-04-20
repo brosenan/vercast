@@ -1,4 +1,12 @@
 
+    AsyncObjectStore .init(className, args, cb(err, v0)) should initialize an object of class className with arguments args and return the ID
+  ․ AsyncObjectStore .init(className, args, cb(err, v0)) should initialize an object of class className with arguments args and return the ID
+    AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should apply patch p to v1, to receive v2
+  ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should apply patch p to v1, to receive v2
+    AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r of the patch
+  ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r of the patch
+    AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result version even if the source version is not in the cache
+  ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result version even if the source version is not in the cache
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
     BinTree fetch should return the value associated with a key
@@ -51,10 +59,8 @@
   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions
     BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)
   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)
-    BucketObjectStore A 1000 element tree should recall any number
-  ․ BucketObjectStore A 1000 element tree should recall any number
-    BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
-  ․ BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
+  - BucketObjectStore A 1000 element tree should recall any number
+  - BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
     counter init should create a counter with value = 0
   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value
@@ -154,5 +160,6 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  77 passing (4s)
+  79 passing (218ms)
+  2 pending
 

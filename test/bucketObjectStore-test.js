@@ -94,7 +94,7 @@ describe('BucketObjectStore', function(){
 	    });
 	});
     });
-    describe('A 1000 element tree', function(){
+    describe.skip('A 1000 element tree', function(){
 //	vercast.trace_on = true;
 	var thousand = 1000;
 	var v;

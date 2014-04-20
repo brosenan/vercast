@@ -1,4 +1,7 @@
 # TOC
+   - [AsyncObjectStore](#asyncobjectstore)
+     - [.init(className, args, cb(err, v0))](#asyncobjectstore-initclassname-args-cberr-v0)
+     - [.transRaw(v1, p, cb(err, v2, r, conf, eff))](#asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff)
    - [BinTree](#bintree)
      - [init](#bintree-init)
      - [fetch](#bintree-fetch)
@@ -47,6 +50,69 @@
      - [.randomByKey(key, prob)](#vercast-randombykeykey-prob)
 <a name=""></a>
  
+<a name="asyncobjectstore"></a>
+# AsyncObjectStore
+<a name="asyncobjectstore-initclassname-args-cberr-v0"></a>
+## .init(className, args, cb(err, v0))
+should initialize an object of class className with arguments args and return the ID.
+
+```js
+var called = false;
+var disp = new ObjectDisp({
+		Class1: {
+		    init: function(ctx, args) {
+			called = true;
+			this.foo = args.bar;
+		    }
+		},
+		Class2: {
+		    init: function(ctx, args) {
+			assert(false, 'Class2\'s constructor should not be called');
+		    }
+		}
+});
+var ostore = createOstore(disp);
+ostore.init('Class1', {bar: 12}, function(err, v0) {
+		assert.ifError(err);
+		assert(called, 'Constructor should have been called');
+		var obj = cache.fetch(v0.$);
+		assert.equal(obj.foo, 12);
+		done();
+});
+```
+
+<a name="asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff"></a>
+## .transRaw(v1, p, cb(err, v2, r, conf, eff))
+should apply patch p to v1, to receive v2.
+
+```js
+ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
+		var obj = cache.fetch(v2.$);
+		assert.equal(obj.value, 2);
+		done();
+});
+```
+
+should return the result r of the patch.
+
+```js
+ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
+		assert.equal(r, 0);
+		done();
+});
+```
+
+should return the result version even if the source version is not in the cache.
+
+```js
+cache.abolish();
+ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
+		var obj = cache.fetch(v2.$);
+		assert.equal(obj.value, 2);
+		done();
+});
+```
+
 <a name="bintree"></a>
 # BinTree
 <a name="bintree-init"></a>
@@ -472,43 +538,6 @@ cache.waitFor(ctx.waitFor, function() {
 
 <a name="bucketobjectstore-a-1000-element-tree"></a>
 ## A 1000 element tree
-should recall any number.
-
-```js
-//console.log('=============');
-var ctx = {};
-var numToFetch = Math.floor(Math.random() * thousand);
-var p = {_type: 'fetch', key: numToFetch};
-ostore.trans(ctx, v, p);
-cache.waitFor(ctx.waitFor, function() {
-		//console.log('-------------');
-		var ctx = {};
-		var res = ostore.trans(ctx, v, p)[1];
-		assert.equal(res, numToFetch * 2);
-		//console.log('=============');
-		done();
-});
-```
-
-should call make a reasonable number of calls to the bucket store.
-
-```js
-var baseline = bucketStore.callCount;
-var ctx = {};
-var numToFetch = Math.floor(Math.random() * thousand);
-var p = {_type: 'fetch', key: numToFetch};
-//console.log('================');
-ostore.trans(ctx, v, p);
-cache.waitFor(ctx.waitFor, function() {
-		var ctx = {};
-		var res = ostore.trans(ctx, v, p)[1];
-		assert.equal(res, numToFetch * 2);
-		var accessCount = bucketStore.callCount - baseline;
-		assert(accessCount < 6, 'Bucket store was consulted ' + accessCount + ' times');
-		done();
-});
-```
-
 <a name="counter"></a>
 # counter
 <a name="counter-init"></a>
