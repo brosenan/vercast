@@ -10,6 +10,9 @@ var Scheduler = require('../scheduler.js');
 var sched = new Scheduler();
 var cache = new SimpleCache(sched);
 var bucketStore = new DummyBucketStore(sched);
+
+//vercast.trace_on = true;
+
 describe('BucketObjectStore', function(){
     afterEach(function() {
 	bucketStore.abolish();
@@ -97,7 +100,6 @@ describe('BucketObjectStore', function(){
 	});
     });
     describe('A 1000 element tree', function(){
-//	vercast.trace_on = true;
 	var thousand = 1000;
 	var v;
 	beforeEach(function() {

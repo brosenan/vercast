@@ -11,16 +11,8 @@ module.exports = function(disp, cache, bucketStore) {
     this.hash = function(bucket, obj, ctx) {
 	var json = JSON.stringify(obj);
 	var objID = vercast.hash(json);
-	var isRoot = false;
-	if(!bucket) {
-	    bucket = objID;
-	    isRoot = true;
-	}
 	var id = vercast.genID(bucket, objID);
 	cache.store(id.$, obj, json);
-	if(isRoot) {
-	    addDependency(bucketStore.add(bucket, JSON.stringify(['seed', id.$, obj])), ctx);
-	}
 	return id;
     };
     this.unhash = function(id) {
@@ -33,7 +25,16 @@ module.exports = function(disp, cache, bucketStore) {
 	}
     };
 
-    this.init = function(ctx, clazz, args) {
+    this.init = function(origCtx, clazz, args) {
+	var ctx = {waitFor: [], 
+		   bucket: origCtx.bucket,
+		   replay: origCtx.replay};
+	if(ctx.replay) ctx.bucket = ctx.replay;
+	if(!ctx.bucket) {
+	    args._type = clazz;
+	    ctx.bucket = vercast.hash(JSON.stringify(args));
+	    addDependency(bucketStore.add(ctx.bucket, JSON.stringify(['init', args])), origCtx);
+	}
 	var obj = disp.init(createContext(ctx), clazz, args);
 	var id = this.hash(ctx.bucket, obj, ctx);
 	return id;
@@ -48,7 +49,7 @@ module.exports = function(disp, cache, bucketStore) {
 	if(!ctx.replay || ctx.replay != ctx.bucket) {
 	    var res = cache.fetch(key);
 	    if(res) {
-		origCtx.conf = origCtx.conf || res.conf;
+		combineContexts(origCtx, res);
 		return [res.v2, res.res];
 	    }
 	}
@@ -67,12 +68,7 @@ module.exports = function(disp, cache, bucketStore) {
 	} catch(e) {
 	    origCtx.error = e;
 	}
-	origCtx.conf = origCtx.conf || ctx.conf;
-	origCtx.error = origCtx.error || ctx.error;
-	origCtx.eff = ctx.eff;
-	if(origCtx.depend) {
-	    origCtx.depend = origCtx.depend.concat(ctx.depend || []);
-	}
+	combineContexts(origCtx, ctx);
 	if(origCtx.error) { // An exception was thrown
 	    return [undefined, undefined];
 	}
@@ -168,6 +164,11 @@ module.exports = function(disp, cache, bucketStore) {
 		    self.trans(ctx, v1, p);
 		});
 	    }
+	} else if(type == 'init') {
+	    var className = item[1]._type;
+	    var args = item[1];
+	    var ctx = {replay: bucket};
+	    self.init(ctx, className, args);
 	}
     }
     function moveToNewBucket(id, ctx) {
@@ -212,6 +213,14 @@ module.exports = function(disp, cache, bucketStore) {
 	    ctx.depend.push(id);
 	} else {
 	    ctx.depend = [id];
+	}
+    }
+    function combineContexts(origCtx, ctx) {
+	origCtx.conf = origCtx.conf || ctx.conf;
+	origCtx.error = origCtx.error || ctx.error;
+	origCtx.eff = ctx.eff;
+	if(origCtx.depend) {
+	    origCtx.depend = origCtx.depend.concat(ctx.depend || []);
 	}
     }
 }

@@ -16,7 +16,7 @@ module.exports = function(ostore, sched) {
 	var depend = ctx.depend || [];
 	var all = waitFor.concat(depend);
 	if(all.length == 0) {
-	    cb(undefined, pair[0], pair[1]);
+	    cb(ctx.error, pair[0], pair[1], ctx.conf);
 	} else {
 	    sched.register(all, function() {
 		self.transRaw(v1, p, cb);

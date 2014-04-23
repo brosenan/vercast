@@ -87,8 +87,10 @@ ostore.init('Class1', {bar: 12}, function(err, v0) {
 should apply patch p to v1, to receive v2.
 
 ```js
-ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
+ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2, r, conf) {
 		var obj = cache.fetch(v2.$);
+		assert.ifError(err);
+		assert(!conf, 'should not conflict');
 		assert.equal(obj.value, 2);
 		done();
 });
@@ -107,8 +109,10 @@ should return the result version even if the source version is not in the cache.
 
 ```js
 cache.abolish();
-ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
+ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2, r, conf) {
 		var obj = cache.fetch(v2.$);
+		assert.ifError(err);
+		assert(!conf, 'should not conflict');
 		assert.equal(obj.value, 2);
 		done();
 });
@@ -120,6 +124,27 @@ should return the result r even if the source version is not in the cache.
 cache.abolish();
 ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
 		assert.equal(r, 0);
+		done();
+});
+```
+
+should return the conflict flag (in cache).
+
+```js
+ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}}, function(err, v2, r, conf) {
+		assert.ifError(err);
+		assert(conf, 'should be conflicting');
+		done();
+});
+```
+
+should return the conflict flag (out of cache).
+
+```js
+cache.abolish();
+ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}}, function(err, v2, r, conf) {
+		assert.ifError(err);
+		assert(conf, 'should be conflicting');
 		done();
 });
 ```

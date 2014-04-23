@@ -9,6 +9,10 @@
   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result version even if the source version is not in the cache
     AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r even if the source version is not in the cache
   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r even if the source version is not in the cache
+    AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the conflict flag (in cache)
+  ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the conflict flag (in cache)
+    AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the conflict flag (out of cache)
+  ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the conflict flag (out of cache)
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
     BinTree fetch should return the value associated with a key
@@ -168,5 +172,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  84 passing (5s)
+  86 passing (5s)
 

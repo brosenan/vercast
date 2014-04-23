@@ -46,13 +46,53 @@ describe('AsyncObjectStore', function(){
     describe('.transRaw(v1, p, cb(err, v2, r, conf, eff))', function(){
 	var disp = new ObjectDisp({
 	    Counter: require('../counter.js'),
+	    MyClass: {
+		init: function(ctx, args) {},
+		throwException: function(ctx, patch) {
+		    throw new Error(patch.msg);
+		},
+		raiseConflict: function(ctx, patch) {
+		    ctx.conflict();
+		},
+		hasEffect: function(ctx, patch) {
+		    ctx.effect({_type: 'foo', arg: patch.arg});
+		},
+	    },
+	    Nested: {
+		init: function(ctx, args) {
+		    if(args.depth > 0) {
+			this.child = ctx.init('Nested', {depth: args.depth - 1});
+		    } else {
+			this.leaf = ctx.init('MyClass', {});
+		    }
+		},
+		patch: function(ctx, patch) {
+		    if(this.child) {
+			var pair = ctx.trans(this.child, patch);
+			this.child = pair[0];
+			return pair[1];
+		    } else {
+			var pair = ctx.trans(this.leaf, patch.patch);
+			this.leaf = pair[0];
+			return pair[1];
+		    }
+		},
+	    },
 	});
 	var ostore = createOstore(disp);
 	var counterVersion;
+	var myObjVersion;
 	beforeEach(function(done) {
+	    var count = 2;
 	    ostore.init('Counter', {}, function(err, v0) {
 		counterVersion = v0;
-		done();
+		count--;
+		if(count == 0) done();
+	    });
+	    ostore.init('Nested', {depth: 1}, function(err, v0) {
+		myObjVersion = v0;
+		count--;
+		if(count == 0) done();
 	    });
 	});
 	afterEach(function() {
@@ -60,8 +100,10 @@ describe('AsyncObjectStore', function(){
 	    bucketStore.abolish();
 	});
 	it('should apply patch p to v1, to receive v2', function(done){
-	    ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
+	    ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2, r, conf) {
 		var obj = cache.fetch(v2.$);
+		assert.ifError(err);
+		assert(!conf, 'should not conflict');
 		assert.equal(obj.value, 2);
 		done();
 	    });
@@ -74,8 +116,10 @@ describe('AsyncObjectStore', function(){
 	});
 	it('should return the result version even if the source version is not in the cache', function(done){
 	    cache.abolish();
-	    ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2) {
+	    ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2, r, conf) {
 		var obj = cache.fetch(v2.$);
+		assert.ifError(err);
+		assert(!conf, 'should not conflict');
 		assert.equal(obj.value, 2);
 		done();
 	    });
@@ -84,6 +128,21 @@ describe('AsyncObjectStore', function(){
 	    cache.abolish();
 	    ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
 		assert.equal(r, 0);
+		done();
+	    });
+	});
+	it('should return the conflict flag (in cache)', function(done){
+	    ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}}, function(err, v2, r, conf) {
+		assert.ifError(err);
+		assert(conf, 'should be conflicting');
+		done();
+	    });
+	});
+	it('should return the conflict flag (out of cache)', function(done){
+	    cache.abolish();
+	    ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}}, function(err, v2, r, conf) {
+		assert.ifError(err);
+		assert(conf, 'should be conflicting');
 		done();
 	    });
 	});
