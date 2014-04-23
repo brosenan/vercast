@@ -149,6 +149,27 @@ ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}},
 });
 ```
 
+should return all effect patches (in cache).
+
+```js
+ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, conf, eff) {
+		assert.ifError(err);
+		assert.equal(eff.length, 6);
+		done();
+});
+```
+
+should return all effect patches (out of cache).
+
+```js
+cache.abolish();
+ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, conf, eff) {
+		assert.ifError(err);
+		assert.equal(eff.length, 6);
+		done();
+});
+```
+
 <a name="bintree"></a>
 # BinTree
 <a name="bintree-init"></a>

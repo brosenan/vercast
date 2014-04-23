@@ -77,6 +77,12 @@ describe('AsyncObjectStore', function(){
 			return pair[1];
 		    }
 		},
+		patchWithEffect: function(ctx, patch) {
+		    ctx.effect({_type: 'myEffect'});
+		    if(this.child) {
+			ctx.query(this.child, patch);
+		    }
+		},
 	    },
 	});
 	var ostore = createOstore(disp);
@@ -89,7 +95,7 @@ describe('AsyncObjectStore', function(){
 		count--;
 		if(count == 0) done();
 	    });
-	    ostore.init('Nested', {depth: 1}, function(err, v0) {
+	    ostore.init('Nested', {depth: 5}, function(err, v0) {
 		myObjVersion = v0;
 		count--;
 		if(count == 0) done();
@@ -146,5 +152,21 @@ describe('AsyncObjectStore', function(){
 		done();
 	    });
 	});
+	it('should return all effect patches (in cache)', function(done){
+	    ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, conf, eff) {
+		assert.ifError(err);
+		assert.equal(eff.length, 6);
+		done();
+	    });
+	});
+	it('should return all effect patches (out of cache)', function(done){
+	    cache.abolish();
+	    ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, conf, eff) {
+		assert.ifError(err);
+		assert.equal(eff.length, 6);
+		done();
+	    });
+	});
+
     });
 });

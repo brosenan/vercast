@@ -82,7 +82,7 @@ module.exports = function(disp, cache, bucketStore) {
 	} else {
 	    pair[0] = this.hash(ctx.bucket, pair[0], origCtx);
 	}
-	var transRec = {v2: pair[0], res: pair[1], conf: ctx.conf};
+	var transRec = {v2: pair[0], res: pair[1], conf: ctx.conf, eff: ctx.eff};
 	if(!ctx.replay) {
 	    if(v1.$ != transRec.v2.$ && ctx.bucket != origCtx.bucket) {
 		if(vercast.randomByKey(key, NEW_BUCKET_PROB)) {
@@ -218,7 +218,7 @@ module.exports = function(disp, cache, bucketStore) {
     function combineContexts(origCtx, ctx) {
 	origCtx.conf = origCtx.conf || ctx.conf;
 	origCtx.error = origCtx.error || ctx.error;
-	origCtx.eff = ctx.eff;
+	if(ctx.eff) origCtx.eff = ctx.eff.concat(origCtx.eff || []);
 	if(origCtx.depend) {
 	    origCtx.depend = origCtx.depend.concat(ctx.depend || []);
 	}
