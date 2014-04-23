@@ -180,14 +180,11 @@ describe('AsyncObjectStore', function(){
 		    this.counter = pair[0];
 		    return pair[1];
 		},
-		throwException: function(ctx, patch) {
-		    throw new Error(patch.msg);
-		},
 		raiseConflict: function(ctx, patch) {
 		    ctx.conflict();
 		},
 		hasEffect: function(ctx, patch) {
-		    ctx.effect({_type: 'foo', arg: patch.arg});
+		    ctx.effect(patch.eff);
 		},
 	    },
 	});
@@ -218,11 +215,45 @@ describe('AsyncObjectStore', function(){
 					{_type: 'counterPatch', patch: {_type: 'get'}},
 					{_type: 'counterPatch', patch: {_type: 'add', amount: 2}},
 					{_type: 'counterPatch', patch: {_type: 'get'}}],
-			 function(err, v2, rs) {
+			 function(err, v2, rs, conf, w) {
 			     if(err) return done(err);
 			     assert.equal(rs[1], 4);
 			     assert.equal(rs[3], 6);
+			     assert(!conf, 'should not be conflicting');
+			     assert.equal(w, 4); // w should capture the overall number of patches applied
 			     done();
+			 });
+	});
+	it('should update the conflict flag appropriately', function(done){
+	    ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'raiseConflict'},
+					{_type: 'counterPatch', patch: {_type: 'add', amount: 2}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs, conf) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[4], 6);
+			     assert(conf, 'should be conflicting');
+			     done();
+			 });
+	});
+	it('should apply effect patches resulting from previous patches, automatically', function(done){
+	    ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'hasEffect',
+					 eff: {_type: 'counterPatch', patch: {_type: 'add', amount: 3}}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs, conf, w) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[3], 4); // The effect has not been encountered yet
+			     assert(!conf, 'should not be conflicting');
+			     assert.equal(w, 5); // w captures the number of patches, including effect patches
+			     ostore.trans(v2, [{_type: 'counterPatch', patch: {_type: 'get'}}], function(err, v3, rs) {
+				 assert.equal(rs[0], 7);
+				 done();
+			     });
 			 });
 	});
     });

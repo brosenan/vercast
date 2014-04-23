@@ -21,6 +21,10 @@
   ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform transitions and return the result version and result
     AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform a sequence of transitions, returning the result of each
   ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform a sequence of transitions, returning the result of each
+    AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should update the conflict flag appropriately
+  ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should update the conflict flag appropriately
+    AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should apply effect patches resulting from previous patches, automatically
+  ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should apply effect patches resulting from previous patches, automatically
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
     BinTree fetch should return the value associated with a key
@@ -180,5 +184,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  90 passing (5s)
+  92 passing (5s)
 

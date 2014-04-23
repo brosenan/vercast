@@ -23,14 +23,16 @@ module.exports = function(ostore, sched) {
 	    });
 	}
     };
-    this.trans = function(v1, ps, cb, _prev) {
-	_prev = _prev || [];
+    this.trans = function(v1, ps, cb, _rs, _conf, _w) {
+	_rs = _rs || [];
+	_w = _w || 0;
 	if(ps.length == 0) {
-	    return cb(undefined, v1, _prev);
+	    return cb(undefined, v1, _rs, _conf, _w);
 	}
-	this.transRaw(v1, ps[0], function(err, v2, r) {
+	this.transRaw(v1, ps[0], function(err, v2, r, conf, eff) {
+	    eff = eff || [];
 	    if(err) return cb(err);
-	    self.trans(v2, ps.slice(1), cb, _prev.concat([r]));
+	    self.trans(v2, ps.slice(1).concat(eff), cb, _rs.concat([r]), _conf || conf, _w + 1);
 	});
     };
 }
