@@ -17,6 +17,10 @@
   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return all effect patches (in cache)
     AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return all effect patches (out of cache)
   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return all effect patches (out of cache)
+    AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform transitions and return the result version and result
+  ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform transitions and return the result version and result
+    AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform a sequence of transitions, returning the result of each
+  ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should perform a sequence of transitions, returning the result of each
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
     BinTree fetch should return the value associated with a key
@@ -176,5 +180,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  88 passing (5s)
+  90 passing (5s)
 

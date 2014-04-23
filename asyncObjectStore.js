@@ -23,5 +23,15 @@ module.exports = function(ostore, sched) {
 	    });
 	}
     };
+    this.trans = function(v1, ps, cb, _prev) {
+	_prev = _prev || [];
+	if(ps.length == 0) {
+	    return cb(undefined, v1, _prev);
+	}
+	this.transRaw(v1, ps[0], function(err, v2, r) {
+	    if(err) return cb(err);
+	    self.trans(v2, ps.slice(1), cb, _prev.concat([r]));
+	});
+    };
 }
 

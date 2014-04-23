@@ -2,6 +2,7 @@
    - [AsyncObjectStore](#asyncobjectstore)
      - [.init(className, args, cb(err, v0))](#asyncobjectstore-initclassname-args-cberr-v0)
      - [.transRaw(v1, p, cb(err, v2, r, conf, eff))](#asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff)
+     - [.trans(v1, ps, cb(err, v2, r, conf, w))](#asyncobjectstore-transv1-ps-cberr-v2-r-conf-w)
    - [BinTree](#bintree)
      - [init](#bintree-init)
      - [fetch](#bintree-fetch)
@@ -168,6 +169,36 @@ ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, c
 		assert.equal(eff.length, 6);
 		done();
 });
+```
+
+<a name="asyncobjectstore-transv1-ps-cberr-v2-r-conf-w"></a>
+## .trans(v1, ps, cb(err, v2, r, conf, w))
+should perform transitions and return the result version and result.
+
+```js
+ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}}], function(err, v2) {
+		if(err) return done(err);
+		ostore.trans(v2, [{_type: 'counterPatch', patch: {_type: 'get'}}], function(err, v3, r) {
+		    if(err) return done(err);
+		    assert.equal(r[0], 4);
+		    done();
+		});
+});
+```
+
+should perform a sequence of transitions, returning the result of each.
+
+```js
+ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'counterPatch', patch: {_type: 'add', amount: 2}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[3], 6);
+			     done();
+			 });
 ```
 
 <a name="bintree"></a>

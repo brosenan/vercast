@@ -145,6 +145,7 @@ module.exports = function(disp, cache, bucketStore) {
 		    ctx.eff = [eff];
 		}
 	    },
+	    _dbg: ctx,
 	};
     }
     function handleBucketItem(err, item, bucket) {

@@ -167,6 +167,63 @@ describe('AsyncObjectStore', function(){
 		done();
 	    });
 	});
-
+    });
+    describe('.trans(v1, ps, cb(err, v2, r, conf, w))', function(){
+	var disp = new ObjectDisp({
+	    Counter: require('../counter.js'),
+	    MyClass: {
+		init: function(ctx, args) {
+		    this.counter = ctx.init('Counter', {});
+		},
+		counterPatch: function(ctx, patch) {
+		    var pair = ctx.transQuery(this.counter, patch.patch);
+		    this.counter = pair[0];
+		    return pair[1];
+		},
+		throwException: function(ctx, patch) {
+		    throw new Error(patch.msg);
+		},
+		raiseConflict: function(ctx, patch) {
+		    ctx.conflict();
+		},
+		hasEffect: function(ctx, patch) {
+		    ctx.effect({_type: 'foo', arg: patch.arg});
+		},
+	    },
+	});
+	var ostore = createOstore(disp);
+	var myObjVersion;
+	beforeEach(function(done) {
+	    ostore.init('MyClass', {depth: 5}, function(err, v0) {
+		myObjVersion = v0;
+		done();
+	    });
+	});
+	afterEach(function() {
+	    cache.abolish();
+	    bucketStore.abolish();
+	});
+	it('should perform transitions and return the result version and result', function(done){
+	    ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}}], function(err, v2) {
+		if(err) return done(err);
+		ostore.trans(v2, [{_type: 'counterPatch', patch: {_type: 'get'}}], function(err, v3, r) {
+		    if(err) return done(err);
+		    assert.equal(r[0], 4);
+		    done();
+		});
+	    });
+	});
+	it('should perform a sequence of transitions, returning the result of each', function(done){
+	    ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'counterPatch', patch: {_type: 'add', amount: 2}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[3], 6);
+			     done();
+			 });
+	});
     });
 });
