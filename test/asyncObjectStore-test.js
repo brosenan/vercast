@@ -193,6 +193,7 @@ describe('AsyncObjectStore', function(){
 	beforeEach(function(done) {
 	    ostore.init('MyClass', {depth: 5}, function(err, v0) {
 		myObjVersion = v0;
+		cache.abolish();
 		done();
 	    });
 	});

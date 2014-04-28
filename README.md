@@ -26,6 +26,10 @@
      - [get](#counter-get)
    - [DummyBucketStore](#dummybucketstore)
      - [async mode](#dummybucketstore-async-mode)
+   - [DummyGraphDB](#dummygraphdb)
+     - [as GraphDB](#dummygraphdb-as-graphdb)
+       - [addEdge](#dummygraphdb-as-graphdb-addedge)
+       - [findCommonAncestor](#dummygraphdb-as-graphdb-findcommonancestor)
    - [DummyObjectStore](#dummyobjectstore)
      - [as ObjectStore](#dummyobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#dummyobjectstore-as-objectstore-initctx-classname-args)
@@ -43,6 +47,18 @@
      - [.abolish()](#simplecache-abolish)
      - [.waitFor(keys, callback)](#simplecache-waitforkeys-callback)
      - [.check(key)](#simplecache-checkkey)
+   - [util](#util)
+     - [seq(funcs, done)](#util-seqfuncs-done)
+       - [_.to(names...)](#util-seqfuncs-done-_tonames)
+     - [timeUid()](#util-timeuid)
+     - [Encoder(allowedSpecial)](#util-encoderallowedspecial)
+       - [.encode(str)](#util-encoderallowedspecial-encodestr)
+       - [.decode(enc)](#util-encoderallowedspecial-decodeenc)
+     - [parallel(n, callback)](#util-paralleln-callback)
+     - [Worker](#util-worker)
+     - [GrowingInterval](#util-growinginterval)
+     - [repeat](#util-repeat)
+     - [depend](#util-depend)
    - [vercast](#vercast)
      - [.hash(obj)](#vercast-hashobj)
      - [.genID(bucketID, hash)](#vercast-genidbucketid-hash)
@@ -819,6 +835,72 @@ bucketStore.fetch('myBucket', function(err) {
 });
 ```
 
+<a name="dummygraphdb"></a>
+# DummyGraphDB
+<a name="dummygraphdb-as-graphdb"></a>
+## as GraphDB
+<a name="dummygraphdb-as-graphdb-addedge"></a>
+### addEdge
+should accept an edge and add it to the graph.
+
+```js
+util.seq([
+    function(_) { graphDB.addEdge("foo", "likes", "bar", _); },
+    function(_) { graphDB.queryEdge("foo", "likes", _.to('shouldBeBar')); },
+    function(_) { assert.equal(this.shouldBeBar, 'bar'); _(); },
+], done)();
+```
+
+should create a dual mapping, mapping also the destination to the source.
+
+```js
+util.seq([
+    function(_) { graphDB.addEdge("foo", "likes", "bar", _); },
+    function(_) { graphDB.queryBackEdge("bar", "likes", _.to('shouldBeFoo')); },
+    function(_) { assert.equal(this.shouldBeFoo, 'foo'); _(); },
+], done)();
+```
+
+<a name="dummygraphdb-as-graphdb-findcommonancestor"></a>
+### findCommonAncestor
+should find the common ancestor of two nodes, and the path to each of them.
+
+```js
+util.seq([
+    function(_) { graphDB.addEdge('terah', 'p1', 'abraham', _); },
+    function(_) { graphDB.addEdge('abraham', 'p2', 'isaac', _); },
+    function(_) { graphDB.addEdge('isaac', 'p3', 'jacob', _); },
+    function(_) { graphDB.addEdge('jacob', 'p4', 'joseph', _); },
+    function(_) { graphDB.addEdge('abraham', 'p5', 'ismael', _); },
+    function(_) { graphDB.addEdge('isaac', 'p6', 'esaw', _); },
+    function(_) { graphDB.addEdge('jacob', 'p7', 'simon', _); },
+    function(_) { graphDB.findCommonAncestor('simon', 'ismael', _.to('ancestor', 'path1', 'path2')); },
+    function(_) { assert.equal(this.ancestor, 'abraham'); _(); },
+], done)();
+```
+
+should handle the case where there are also common descendants.
+
+```js
+util.seq([
+    function(_) { createGraph(1, 1, 30, _); },
+    function(_) { graphDB.findCommonAncestor(4, 6, _.to('ancestor', 'p1', 'p2')); },
+    function(_) { assert.equal(this.ancestor, 2); _(); },
+], done)();
+```
+
+should return the path from the common ancestor to both nodes.
+
+```js
+util.seq([
+    function(_) { createGraph(1, 1, 30, _); },
+    function(_) { graphDB.findCommonAncestor(8, 10, _.to('ancestor', 'p1', 'p2')); },
+    function(_) { assert.equal(this.ancestor, 2); _(); },
+    function(_) { assert.deepEqual(this.p1, ['2', '2']); _(); },
+    function(_) { assert.deepEqual(this.p2, ['5']); _(); },
+], done)();
+```
+
 <a name="dummyobjectstore"></a>
 # DummyObjectStore
 <a name="dummyobjectstore-as-objectstore"></a>
@@ -1461,6 +1543,226 @@ cache.store('foo', 14);
 assert(cache.check('foo'), 'foo is in the cache');
 assert(!cache.check('bar'), 'bar is not in the cache');
 done();
+```
+
+<a name="util"></a>
+# util
+<a name="util-seqfuncs-done"></a>
+## seq(funcs, done)
+should return a function that runs asynchronous functions in funcs in order.
+
+```js
+var d;
+var f = util.seq([
+    function(_) {d = done; setTimeout(_, 10);},
+    function(_) {d();}
+], function() {});
+f();
+```
+
+should handle errors by calling done with the error.
+
+```js
+util.seq([
+    function(_) {_(new Error('someError'));},
+    function(_) {assert(0, 'This should not be called'); _()}
+], function(err) { assert.equal(err.message, 'someError'); done(); })();
+```
+
+should handle exceptions thrown by functions by calling done with the exception.
+
+```js
+util.seq([
+    function(_) { throw new Error('someError');},
+    function(_) {assert(0, 'This should not be called'); _()}
+], function(err) { assert.equal(err.message, 'someError'); done(); })();
+```
+
+should call done with no error if all is successful.
+
+```js
+util.seq([
+    function(_) {setTimeout(_, 10);},
+    function(_) {setTimeout(_, 10);},
+    function(_) {setTimeout(_, 10);}
+], done)();
+```
+
+<a name="util-seqfuncs-done-_tonames"></a>
+### _.to(names...)
+should return a function that places the corresponding arguments in "this" (skipping err).
+
+```js
+util.seq([
+    function(_) { _.to('a', 'b', 'c')(undefined, 1, 2, 3); },
+    function(_) { assert.equal(this.a, 1); _(); },
+    function(_) { assert.equal(this.b, 2); _(); },
+    function(_) { assert.equal(this.c, 3); _(); },
+], done)();
+```
+
+<a name="util-timeuid"></a>
+## timeUid()
+should return a unique string.
+
+```js
+var vals = {};
+for(var i = 0; i < 10000; i++) {
+    var tuid = util.timeUid();
+    assert.equal(typeof(tuid), 'string');
+    assert(!(tuid in vals), 'Value not unique');
+    vals[tuid] = 1;
+}
+```
+
+should return a larger value when called over one millisecond later.
+
+```js
+var a, b;
+util.seq([
+    function(_) { a = util.timeUid(); setTimeout(_, 2); },
+    function(_) { b = util.timeUid(); setTimeout(_, 2); },
+    function(_) { assert(b > a, 'Later value is not larger than earlier'); _();},
+], done)();
+```
+
+<a name="util-encoderallowedspecial"></a>
+## Encoder(allowedSpecial)
+<a name="util-encoderallowedspecial-encodestr"></a>
+### .encode(str)
+should encode str in a way that will only include letters, digits or characters from allowedSpecial.
+
+```js
+var specialChars = '!@#$%^&*()_+<>?,./~`\'"[]{}\\|';
+var allowed = '_-+';
+var encoder = new util.Encoder(allowed);
+var enc = encoder.encode('abc' + specialChars + 'XYZ');
+for(var i = 0; i < specialChars.length; i++) {
+    if(allowed.indexOf(specialChars.charAt(i)) != -1) continue; // Ignore allowed characters
+    assert.equal(enc.indexOf(specialChars.charAt(i)), -1);
+}
+```
+
+should throw an exception if less than three special characters are allowed.
+
+```js
+assert.throws(function() {
+    util.encode('foo bar', '_+');
+}, 'at least three special characters must be allowed');
+```
+
+<a name="util-encoderallowedspecial-decodeenc"></a>
+### .decode(enc)
+should decode a string encoded with .encode().
+
+```js
+var encoder = new util.Encoder(allowed);
+var str = 'This is a test' + specialChars + ' woo hoo\n';
+assert.equal(encoder.decode(encoder.encode(str)), str);
+```
+
+<a name="util-paralleln-callback"></a>
+## parallel(n, callback)
+should return a callback function that will call "callback" after it has been called n times.
+
+```js
+var c = util.parallel(100, done);
+for(var i = 0; i < 200; i++) {
+    setTimeout(c, 20);
+}
+```
+
+should call the callback immediately with an error if an error is given to the parallel callback.
+
+```js
+var c = util.parallel(4, function(err) {
+    assert(err, 'This should fail');
+    done();
+});
+c();
+c();
+c(new Error('Some error'));
+c(); // This will not call the callback
+```
+
+<a name="util-worker"></a>
+## Worker
+should call a given function iteratively, in given intervals, until stopped.
+
+```js
+var n = 0;
+function f(callback) {
+    n++;
+    callback();
+}
+var worker = new util.Worker(f, 10 /*ms intervals*/);
+worker.start();
+setTimeout(util.protect(done, function() {
+    worker.stop();
+    assert(n >= 9 && n <= 11, 'n should be 10 +- 1 (' + n + ')');
+    done();
+}), 100);
+```
+
+should assure that no more than a given number of instances of the function are running at any given time.
+
+```js
+var n = 0;
+function f(callback) {
+    n++;
+    setTimeout(callback, 50); // Each run will take 50 ms
+}
+var worker = new util.Worker(f, 10 /*ms intervals*/, 2 /* instances in parallel */);
+worker.start();
+setTimeout(util.protect(done, function() {
+    worker.stop();
+    // Two parallel 50 ms instances over 100 ms gives us 4 instances.
+    assert(n >= 3 && n <= 5, 'n should be 4 +- 1 (' + n + ')');
+    done();
+}), 100);
+```
+
+<a name="util-repeat"></a>
+## repeat
+should repeat the given loop a given number of times, sending the iteration number to each invocation.
+
+```js
+var sum = 0;
+util.seq([
+    function(_) { util.repeat(10, 'foo', 0, function(_, i) { 
+	sum += i; _(); 
+    }, _); },
+    function(_) { assert.equal(sum, 9 * 10 / 2); _(); /*1+2+3...+9*/ },
+], done)();
+```
+
+<a name="util-depend"></a>
+## depend
+should execute the given callback functions in the order of their dependencies.
+
+```js
+util.depend([
+    function(_) { _('a')(undefined, 2); },
+    function(_) { _('b')(undefined, 3); },
+    function(a, b, _) { _('c', 'd')(undefined, a+b, b-a); },
+    function(c, d, _) { assert.equal(c, 5);
+			assert.equal(d, 1);
+			done(); },
+], function(err) { done(err || new Error('This should not have been called')); });
+```
+
+should only call the callback once in the face of an exception.
+
+```js
+util.depend([
+    function(_) { setTimeout(_('one', 'two'), 1); },
+    function(one, _) { throw new Error('foo'); },
+    function(two, _) { setTimeout(_('three'), 1); },
+    function(three, _) { done(); },
+], function(err) {
+    assert(err, 'An error must be emitted');
+    done(err.message == 'foo' ? undefined : err);
+});
 ```
 
 <a name="vercast"></a>

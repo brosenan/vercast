@@ -97,6 +97,16 @@
   ․ DummyBucketStore async mode should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved
     DummyBucketStore async mode should not apply changes immediately
   ․ DummyBucketStore async mode should not apply changes immediately
+    DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+  ․ DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+    DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+  ․ DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+    DummyGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+  ․ DummyGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    DummyGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+  ․ DummyGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+    DummyGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+  ․ DummyGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
     DummyObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
   ․ DummyObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     DummyObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
@@ -167,6 +177,40 @@
   ․ SimpleCache .waitFor(keys, callback) should throw an exception if one of the keys is already in the cache
     SimpleCache .check(key) should return true if key exists in the cache
   ․ SimpleCache .check(key) should return true if key exists in the cache
+    util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
+  ․ util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
+    util seq(funcs, done) should handle errors by calling done with the error
+  ․ util seq(funcs, done) should handle errors by calling done with the error
+    util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
+  ․ util seq(funcs, done) should handle exceptions thrown by functions by calling done with the exception
+    util seq(funcs, done) should call done with no error if all is successful
+  ․ util seq(funcs, done) should call done with no error if all is successful
+    util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err)
+  ․ util seq(funcs, done) _.to(names...) should return a function that places the corresponding arguments in "this" (skipping err)
+    util timeUid() should return a unique string
+  ․ util timeUid() should return a unique string
+    util timeUid() should return a larger value when called over one millisecond later
+  ․ util timeUid() should return a larger value when called over one millisecond later
+    util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial
+  ․ util Encoder(allowedSpecial) .encode(str) should encode str in a way that will only include letters, digits or characters from allowedSpecial
+    util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed
+  ․ util Encoder(allowedSpecial) .encode(str) should throw an exception if less than three special characters are allowed
+    util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode()
+  ․ util Encoder(allowedSpecial) .decode(enc) should decode a string encoded with .encode()
+    util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times
+  ․ util parallel(n, callback) should return a callback function that will call "callback" after it has been called n times
+    util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback
+  ․ util parallel(n, callback) should call the callback immediately with an error if an error is given to the parallel callback
+    util Worker should call a given function iteratively, in given intervals, until stopped
+  ․ util Worker should call a given function iteratively, in given intervals, until stopped
+    util Worker should assure that no more than a given number of instances of the function are running at any given time
+  ․ util Worker should assure that no more than a given number of instances of the function are running at any given time
+    util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
+  ․ util repeat should repeat the given loop a given number of times, sending the iteration number to each invocation
+    util depend should execute the given callback functions in the order of their dependencies
+  ․ util depend should execute the given callback functions in the order of their dependencies
+    util depend should only call the callback once in the face of an exception
+  ․ util depend should only call the callback once in the face of an exception
     vercast .hash(obj) should return a SHA-256 digest of the given string
   ․ vercast .hash(obj) should return a SHA-256 digest of the given string
     vercast .genID(bucketID, hash) should create a version ID based on a bucket ID (string) and a hash (string)
@@ -184,5 +228,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  92 passing (5s)
+  114 passing (6s)
 
