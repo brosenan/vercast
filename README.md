@@ -1669,6 +1669,25 @@ util.seq([
 ], done)();
 ```
 
+should record the overall weight on each new edge.
+
+```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
+var v3 = {$:Math.floor(Math.random() * 29) + 1};
+var v4 = {$:Math.floor(Math.random() * 29) + 1};
+util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { this.v12 = {$:v1.$ * v2.$ / this.x.$};
+			      versionGraph.recordMerge(this.mergeInfo, this.v12, _); },
+		function(_) { versionGraph.getMergeStrategy(v3, v4, _.to('V3', 'x', 'V4', 'mergeInfo')); },
+		function(_) { this.v34 = {$:v3.$ * v4.$ / this.x.$};
+			      versionGraph.recordMerge(this.mergeInfo, this.v34, _); },
+		function(_) { versionGraph.getMergeStrategy(this.v12, this.v34, _.to('V5', 'x', 'V6')); },
+		function(_) { assert(this.V6 <= this.V5, 'V6 should be lower'); _(); },
+], done)();
+```
+
 <a name="util"></a>
 # util
 <a name="util-seqfuncs-done"></a>

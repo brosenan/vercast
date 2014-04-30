@@ -193,6 +193,8 @@
   ․ SimpleVersionGraph .getPatches(v1, v2, cb(err, patches)) should expand patches that result from previous merges
     SimpleVersionGraph .recordMerge(mergeInfo, newV, cb(err)) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
   ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, cb(err)) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
+    SimpleVersionGraph .recordMerge(mergeInfo, newV, cb(err)) should record the overall weight on each new edge
+  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, cb(err)) should record the overall weight on each new edge
     util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
   ․ util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
     util seq(funcs, done) should handle errors by calling done with the error
@@ -244,5 +246,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  122 passing (6s)
+  123 passing (5s)
 
