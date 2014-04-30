@@ -50,8 +50,9 @@
      - [.check(key)](#simplecache-checkkey)
    - [SimpleVersionGraph](#simpleversiongraph)
      - [.recordTrans(v1, p, w, v2, cb(err))](#simpleversiongraph-recordtransv1-p-w-v2-cberr)
-     - [.getMergeStrategy(v1, v2, cb(err, V1, x, V2))](#simpleversiongraph-getmergestrategyv1-v2-cberr-v1-x-v2)
+     - [.getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo))](#simpleversiongraph-getmergestrategyv1-v2-cberr-v1-x-v2-mergeinfo)
      - [.getPatches(v1, v2, cb(err, patches))](#simpleversiongraph-getpatchesv1-v2-cberr-patches)
+     - [.recordMerge(mergeInfo, newV, cb(err))](#simpleversiongraph-recordmergemergeinfo-newv-cberr)
    - [util](#util)
      - [seq(funcs, done)](#util-seqfuncs-done)
        - [_.to(names...)](#util-seqfuncs-done-_tonames)
@@ -1577,8 +1578,8 @@ should return a callback with no error if all is OK.
 versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, 1, {$:'bar'}, done);
 ```
 
-<a name="simpleversiongraph-getmergestrategyv1-v2-cberr-v1-x-v2"></a>
-## .getMergeStrategy(v1, v2, cb(err, V1, x, V2))
+<a name="simpleversiongraph-getmergestrategyv1-v2-cberr-v1-x-v2-mergeinfo"></a>
+## .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo))
 should return x as the common ancestor of v1 and v2.
 
 ```js
@@ -1605,8 +1606,8 @@ util.seq([
 should set V1 and V2 such that the path between x and V2 is lighter than from x to V1.
 
 ```js
-var v1 = {$:Math.floor(Math.random() * 30)};
-var v2 = {$:Math.floor(Math.random() * 30)};
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
 util.seq([
 		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2')); },
 		function(_) { assert((this.V1.$ * 1) >= (this.V2.$ * 1), 'V2 should be the lower of the two (closer to the GCD)');
@@ -1630,6 +1631,41 @@ util.seq([
 		    assert.equal(m, 9);
 		    _();
 		},
+], done)();
+```
+
+should expand patches that result from previous merges.
+
+```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
+util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, _); },
+		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _.to('patches')); },
+		function(_) { 
+		    var m = 1;
+		    for(var i = 0; i < this.patches.length; i++) {
+			assert.equal(this.patches[i]._type, 'mult');
+			m *= this.patches[i].amount;
+		    }
+		    assert.equal(m, v2.$/this.x.$);
+		    _();
+		},
+], done)();
+```
+
+<a name="simpleversiongraph-recordmergemergeinfo-newv-cberr"></a>
+## .recordMerge(mergeInfo, newV, cb(err))
+should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version.
+
+```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
+util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, _); },
+		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _); }, // The new version should be in the graph
 ], done)();
 ```
 

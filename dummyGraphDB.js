@@ -111,6 +111,9 @@ module.exports = function() {
     this.abolish = function() {
 	G = {};
     }
+    this.dump = function() {
+	console.log(G);
+    }
 };
 
 function pathLabels(path) {

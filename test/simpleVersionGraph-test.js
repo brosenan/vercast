@@ -45,7 +45,7 @@ describe('SimpleVersionGraph', function(){
 	    versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, 1, {$:'bar'}, done);
 	});
     });
-    describe('.getMergeStrategy(v1, v2, cb(err, V1, x, V2))', function(){
+    describe('.getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo))', function(){
 	beforeEach(function(done) {
 	    createGraph(1, 1, 30, done);
 	});
@@ -67,8 +67,8 @@ describe('SimpleVersionGraph', function(){
 	    ], done)();
 	});
 	it('should set V1 and V2 such that the path between x and V2 is lighter than from x to V1', function(done){
-	    var v1 = {$:Math.floor(Math.random() * 30)};
-	    var v2 = {$:Math.floor(Math.random() * 30)};
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
 	    util.seq([
 		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2')); },
 		function(_) { assert((this.V1.$ * 1) >= (this.V2.$ * 1), 'V2 should be the lower of the two (closer to the GCD)');
@@ -94,9 +94,39 @@ describe('SimpleVersionGraph', function(){
 		    _();
 		},
 	    ], done)();
-
+	});
+	it('should expand patches that result from previous merges', function(done){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, _); },
+		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _.to('patches')); },
+		function(_) { 
+		    var m = 1;
+		    for(var i = 0; i < this.patches.length; i++) {
+			assert.equal(this.patches[i]._type, 'mult');
+			m *= this.patches[i].amount;
+		    }
+		    assert.equal(m, v2.$/this.x.$);
+		    _();
+		},
+	    ], done)();
 	});
 
     });
-
+    describe('.recordMerge(mergeInfo, newV, cb(err))', function(){
+	beforeEach(function(done) {
+	    createGraph(1, 1, 30, done);
+	});
+	it('should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version', function(done){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, _); },
+		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _); }, // The new version should be in the graph
+	    ], done)();
+	});
+    });
 });

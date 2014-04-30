@@ -181,14 +181,18 @@
   ․ SimpleCache .check(key) should return true if key exists in the cache
     SimpleVersionGraph .recordTrans(v1, p, w, v2, cb(err)) should return a callback with no error if all is OK
   ․ SimpleVersionGraph .recordTrans(v1, p, w, v2, cb(err)) should return a callback with no error if all is OK
-    SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2)) should return x as the common ancestor of v1 and v2
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2)) should return x as the common ancestor of v1 and v2
-    SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2)) should return either v1 or v2 as V1, and the other as V2
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2)) should return either v1 or v2 as V1, and the other as V2
-    SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2)) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2)) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1
+    SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo)) should return x as the common ancestor of v1 and v2
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo)) should return x as the common ancestor of v1 and v2
+    SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo)) should return either v1 or v2 as V1, and the other as V2
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo)) should return either v1 or v2 as V1, and the other as V2
+    SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo)) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, cb(err, V1, x, V2, mergeInfo)) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1
     SimpleVersionGraph .getPatches(v1, v2, cb(err, patches)) should return the patches along the path between v1 and v2 (here, v1 is an ancestor of v2)
   ․ SimpleVersionGraph .getPatches(v1, v2, cb(err, patches)) should return the patches along the path between v1 and v2 (here, v1 is an ancestor of v2)
+    SimpleVersionGraph .getPatches(v1, v2, cb(err, patches)) should expand patches that result from previous merges
+  ․ SimpleVersionGraph .getPatches(v1, v2, cb(err, patches)) should expand patches that result from previous merges
+    SimpleVersionGraph .recordMerge(mergeInfo, newV, cb(err)) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
+  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, cb(err)) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
     util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
   ․ util seq(funcs, done) should return a function that runs asynchronous functions in funcs in order
     util seq(funcs, done) should handle errors by calling done with the error
@@ -240,5 +244,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  120 passing (5s)
+  122 passing (6s)
 
