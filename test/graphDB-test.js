@@ -75,7 +75,23 @@ module.exports = function(graphDB) {
 		    function(_) { assert.deepEqual(this.p2, ['5']); _(); },
 		], done)();
 	    });
-
 	});
     });
+    describe('.findPath(x, y, cb(err, path))', function(){
+	it('should return the labels along the edges from x to y', function(done){
+	    util.seq([
+		function(_) { createGraph(1, 1, 30, _); },
+		function(_) { graphDB.findPath(3, 24, _.to('path')); },
+		function(_) { var m = 1;
+			      for(var i = 0; i < this.path.length; i++) {
+				  m *= this.path[i];
+			      }
+			      assert.equal(m, 8); // 24 / 3
+			      _(); },
+	    ], done)();
+
+	});
+
+    });
+
 };

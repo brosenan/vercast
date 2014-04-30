@@ -1,3 +1,5 @@
+var util = require('./util.js');
+
 module.exports = function() {
     var G = {};
     this.clear = function(cb) {
@@ -82,4 +84,39 @@ module.exports = function() {
 	}
 	return results;
     };
+    this.findPath = function(x, y, cb) {
+	var self = this;
+	util.seq([
+	    function(_) { setTimeout(_, 0); },
+	    function(_) {
+		this.res = self.bfs(x, function(node, path) {
+		    var res = {};
+		    var i = 0;
+		    // Go forwards only
+		    while(i < path.length && path[i].d) i++;
+		    if(i < path.length) res.prune = true;
+		    else if(node == y) {
+			res.include = true;
+			res.done = true;
+		    }
+		    return res;
+		});
+		_();
+	    },
+	    function(_) { if(this.res.length > 0) cb(undefined, pathLabels(this.res[0].p));
+			  else cb(new Error('Could not find path from ' + x + ' to ' + y)); },
+	], cb)();
+
+    };
+    this.abolish = function() {
+	G = {};
+    }
 };
+
+function pathLabels(path) {
+    var labels = [];
+    for(var i = 0; i < path.length; i++) {
+	labels.push(path[i].l);
+    }
+    return labels;
+}

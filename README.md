@@ -30,6 +30,7 @@
      - [as GraphDB](#dummygraphdb-as-graphdb)
        - [addEdge](#dummygraphdb-as-graphdb-addedge)
        - [findCommonAncestor](#dummygraphdb-as-graphdb-findcommonancestor)
+     - [.findPath(x, y, cb(err, path))](#dummygraphdb-findpathx-y-cberr-path)
    - [DummyObjectStore](#dummyobjectstore)
      - [as ObjectStore](#dummyobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#dummyobjectstore-as-objectstore-initctx-classname-args)
@@ -47,6 +48,10 @@
      - [.abolish()](#simplecache-abolish)
      - [.waitFor(keys, callback)](#simplecache-waitforkeys-callback)
      - [.check(key)](#simplecache-checkkey)
+   - [SimpleVersionGraph](#simpleversiongraph)
+     - [.recordTrans(v1, p, w, v2, cb(err))](#simpleversiongraph-recordtransv1-p-w-v2-cberr)
+     - [.getMergeStrategy(v1, v2, cb(err, V1, x, V2))](#simpleversiongraph-getmergestrategyv1-v2-cberr-v1-x-v2)
+     - [.getPatches(v1, v2, cb(err, patches))](#simpleversiongraph-getpatchesv1-v2-cberr-patches)
    - [util](#util)
      - [seq(funcs, done)](#util-seqfuncs-done)
        - [_.to(names...)](#util-seqfuncs-done-_tonames)
@@ -901,6 +906,23 @@ util.seq([
 ], done)();
 ```
 
+<a name="dummygraphdb-findpathx-y-cberr-path"></a>
+## .findPath(x, y, cb(err, path))
+should return the labels along the edges from x to y.
+
+```js
+util.seq([
+		function(_) { createGraph(1, 1, 30, _); },
+		function(_) { graphDB.findPath(3, 24, _.to('path')); },
+		function(_) { var m = 1;
+			      for(var i = 0; i < this.path.length; i++) {
+				  m *= this.path[i];
+			      }
+			      assert.equal(m, 8); // 24 / 3
+			      _(); },
+], done)();
+```
+
 <a name="dummyobjectstore"></a>
 # DummyObjectStore
 <a name="dummyobjectstore-as-objectstore"></a>
@@ -1543,6 +1565,72 @@ cache.store('foo', 14);
 assert(cache.check('foo'), 'foo is in the cache');
 assert(!cache.check('bar'), 'bar is not in the cache');
 done();
+```
+
+<a name="simpleversiongraph"></a>
+# SimpleVersionGraph
+<a name="simpleversiongraph-recordtransv1-p-w-v2-cberr"></a>
+## .recordTrans(v1, p, w, v2, cb(err))
+should return a callback with no error if all is OK.
+
+```js
+versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, 1, {$:'bar'}, done);
+```
+
+<a name="simpleversiongraph-getmergestrategyv1-v2-cberr-v1-x-v2"></a>
+## .getMergeStrategy(v1, v2, cb(err, V1, x, V2))
+should return x as the common ancestor of v1 and v2.
+
+```js
+util.seq([
+		function(_) { versionGraph.getMergeStrategy({$:18}, {$:14}, _.to('V1', 'x', 'V2')); },
+		function(_) { assert.equal(this.x.$, 2); _(); }, // x here represents the GCD of v1 and v2
+], done)();
+```
+
+should return either v1 or v2 as V1, and the other as V2.
+
+```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
+util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2')); },
+		function(_) { assert(this.V1.$ == v1.$ || this.V1.$ == v2.$, 'V1 should be either v1 or v2: ' + this.V1.$);
+			      assert(this.V2.$ == v1.$ || this.V2.$ == v2.$, 'V2 should be either v1 or v2: ' + this.V2.$);
+			      assert(this.V1.$ != this.V2.$ || v1.$ == v2.$, 'V1 and V2 should not be the same one');
+			      _();},
+], done)();
+```
+
+should set V1 and V2 such that the path between x and V2 is lighter than from x to V1.
+
+```js
+var v1 = {$:Math.floor(Math.random() * 30)};
+var v2 = {$:Math.floor(Math.random() * 30)};
+util.seq([
+		function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2')); },
+		function(_) { assert((this.V1.$ * 1) >= (this.V2.$ * 1), 'V2 should be the lower of the two (closer to the GCD)');
+			      _();},
+], done)();
+```
+
+<a name="simpleversiongraph-getpatchesv1-v2-cberr-patches"></a>
+## .getPatches(v1, v2, cb(err, patches))
+should return the patches along the path between v1 and v2 (here, v1 is an ancestor of v2).
+
+```js
+util.seq([
+		function(_) { versionGraph.getPatches({$:2}, {$:18}, _.to('patches')); },
+		function(_) { 
+		    var m = 1;
+		    for(var i = 0; i < this.patches.length; i++) {
+			assert.equal(this.patches[i]._type, 'mult');
+			m *= this.patches[i].amount;
+		    }
+		    assert.equal(m, 9);
+		    _();
+		},
+], done)();
 ```
 
 <a name="util"></a>
