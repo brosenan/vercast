@@ -19,6 +19,10 @@ module.exports = function(graphDB) {
 		    var tmp = mergeInfo.V1;
 		    mergeInfo.V1 = mergeInfo.V2;
 		    mergeInfo.V2 = tmp;
+		} else {
+		    var tmp = mergeInfo.w1;
+		    mergeInfo.w1 = mergeInfo.w2;
+		    mergeInfo.w2 = tmp;
 		}
 		cb(undefined, mergeInfo.V1, mergeInfo.x, mergeInfo.V2, mergeInfo); 
 	    },
@@ -31,12 +35,12 @@ module.exports = function(graphDB) {
 	var p1 = JSON.stringify({p: {_type: '_reapply', 
 				     from: mergeInfo.x, 
 				     to: mergeInfo.V2},
-				// w: mergeInfo.w1
+				w: mergeInfo.w1
 				});
 	var p2 = JSON.stringify({p: {_type: '_reapply', 
 				     from: mergeInfo.x, 
 				     to: mergeInfo.V1},
-				// w: mergeInfo.w2
+				w: mergeInfo.w2
 				});
 	util.seq([
 	    function(_) { graphDB.addEdge(mergeInfo.V1.$, p1, newV.$, _); },
