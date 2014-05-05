@@ -15,9 +15,13 @@ module.exports = function(stateStore, versionGraph) {
 	util.seq([
 	    function(_) { versionGraph.getMergeStrategy(v1, v2, _.to('V1', 'x', 'V2', 'info')); },
 	    function(_) { versionGraph.getPatches(this.x, this.V2, _.to('patches')); },
-	    function(_) { stateStore.trans(this.V1, this.patches, _.to('vm')); },
+	    function(_) { stateStore.trans(this.V1, this.patches, _.to('vm', 'r', 'c')); },
 	    function(_) { versionGraph.recordMerge(this.info, this.vm, _); },
-	    function(_) { cb(undefined, this.vm); },
+	    function(_) { 
+		if(this.c) {
+		    this.c = {base: this.V1, patches: this.c};
+		}
+		cb(undefined, this.vm, this.c); },
 	], cb)();
     };
 }

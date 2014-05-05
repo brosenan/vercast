@@ -16,7 +16,7 @@ module.exports = function(ostore, sched) {
 	var depend = ctx.depend || [];
 	var all = waitFor.concat(depend);
 	if(all.length == 0) {
-	    cb(ctx.error, pair[0], pair[1], ctx.conf, ctx.eff);
+	    cb(ctx.error, pair[0], pair[1], ctx.conf && [p], ctx.eff);
 	} else {
 	    sched.register(all, function() {
 		self.transRaw(v1, p, cb);
@@ -30,9 +30,10 @@ module.exports = function(ostore, sched) {
 	    return cb(undefined, v1, _rs, _conf, _w);
 	}
 	this.transRaw(v1, ps[0], function(err, v2, r, conf, eff) {
-	    eff = eff || [];
 	    if(err) return cb(err);
-	    self.trans(v2, ps.slice(1).concat(eff), cb, _rs.concat([r]), _conf || conf, _w + 1);
+	    _conf = _conf ? _conf.concat(conf || []) : conf;
+	    eff = eff || [];
+	    self.trans(v2, ps.slice(1).concat(eff), cb, _rs.concat([r]), _conf, _w + 1);
 	});
     };
 }

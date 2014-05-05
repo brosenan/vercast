@@ -135,6 +135,10 @@
   ․ MergingStateStore .merge(v1, v2, cb(err, vm, c)) should return version vm which is a merge of both versions v1 and v2
     MergingStateStore .merge(v1, v2, cb(err, vm, c)) should record the merge so that further merges would work
   ․ MergingStateStore .merge(v1, v2, cb(err, vm, c)) should record the merge so that further merges would work
+    MergingStateStore .merge(v1, v2, cb(err, vm, c)) should report a conflict when one occurs
+  ․ MergingStateStore .merge(v1, v2, cb(err, vm, c)) should report a conflict when one occurs
+    MergingStateStore .merge(v1, v2, cb(err, vm, c)) should return a list of the conflicting patches in case of a conflict
+  ․ MergingStateStore .merge(v1, v2, cb(err, vm, c)) should return a list of the conflicting patches in case of a conflict
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
@@ -252,5 +256,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  126 passing (2s)
+  128 passing (2s)
 
