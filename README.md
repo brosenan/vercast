@@ -38,6 +38,10 @@
        - [context](#dummyobjectstore-as-objectstore-context)
          - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
          - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
+   - [MergingStateStore](#mergingstatestore)
+     - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
+     - [.trans(v1, p, cb(v2, r, c))](#mergingstatestore-transv1-p-cbv2-r-c)
+     - [.merge(v1, v2, cb(err, vm, c))](#mergingstatestore-mergev1-v2-cberr-vm-c)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
@@ -1133,6 +1137,58 @@ v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
 assert(!ctx.error, 'No error should occur');
 assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
 done();
+```
+
+<a name="mergingstatestore"></a>
+# MergingStateStore
+<a name="mergingstatestore-transv1-p-cbv2-r-c"></a>
+## .trans(v1, p, cb(v2, r, c))
+should apply p to v1 to receive v2.
+
+```js
+util.seq([
+		function(_) { stateStore.init('BinTree', {}, _.to('v')); },
+		function(_) { stateStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v')); },
+		function(_) { stateStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v')); },
+		function(_) { stateStore.trans(this.v, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+], done)();
+```
+
+<a name="mergingstatestore-mergev1-v2-cberr-vm-c"></a>
+## .merge(v1, v2, cb(err, vm, c))
+should return version vm which is a merge of both versions v1 and v2.
+
+```js
+util.seq([
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+], done)();
+```
+
+should record the merge so that further merges would work.
+
+```js
+util.seq([
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('v1')); }, // merge once
+		function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'baz', value: 'BAZ'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('v1')); }, // merge twice
+		function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'bar'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+		function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'baz'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'BAZ'); _(); },
+], done)();
 ```
 
 <a name="objectdisp"></a>

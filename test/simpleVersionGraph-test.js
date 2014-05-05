@@ -143,8 +143,6 @@ describe('SimpleVersionGraph', function(){
 		function(_) { versionGraph.getMergeStrategy(this.v12, this.v34, _.to('V5', 'x', 'V6')); },
 		function(_) { assert(this.V6.$ <= this.V5.$, 'V6 should be lower'); _(); },
 	    ], done)();
-	    
 	});
-
     });
 });
