@@ -45,7 +45,7 @@ describe('MergingStateStore', function(){
 	    ], done)();
 	});
     });
-    describe('.merge(v1, v2, cb(err, vm, c))', function(){
+    describe('.merge(v1, v2[, resolve], cb(err, vm, c))', function(){
 	it('should return version vm which is a merge of both versions v1 and v2', function(done){
 	    util.seq([
 		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
@@ -76,33 +76,28 @@ describe('MergingStateStore', function(){
 		function(_) { assert.equal(this.r, 'BAZ'); _(); },
 	    ], done)();
 	});
-	it('should report a conflict when one occurs', function(done){
+	it('should report a conflict as an error, when one occurs', function(done){
 	    util.seq([
 		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
 		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
 		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Notice the "foo"
 		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm', 'c')); },
-		function(_) { assert(this.c, 'should conflict'); _(); },
-	    ], done)();
+		function(_) { assert(false, 'Last step should have raised a conflict exception'); _(); },
+	    ], function(err) {
+		if(!err.conflict) done(err);
+		else done();
+	    })();
 	});
-	it('should return a list of the conflicting patches in case of a conflict', function(done){
+	it.skip('should resolve conflicts if asked to, by prioritizing v2 over v1', function(done){
 	    util.seq([
 		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
 		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
-		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Notice the "foo"
-		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm', 'c')); },
-		function(_) {
-		    assert.equal(this.c.patches.length, 1);
-		    assert.equal(this.c.patches[0].key, 'foo');
-		    if(this.c.base.$ == this.v2.$) {
-			assert.equal(this.c.patches[0].value, 'FOO');
-		    } else {
-			assert.equal(this.c.patches[0].value, 'BAR');
-		    }
-		    _();
-		},
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Note the same key
+		function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm', 'c')); },
+		function(_) { assert(!this.c, 'should not conflict'); _(); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
 	    ], done)();
 	});
-
     });
 });
