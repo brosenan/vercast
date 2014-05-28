@@ -1207,6 +1207,20 @@ util.seq([
     })();
 ```
 
+should resolve conflicts if asked to, by prioritizing v1 over v2.
+
+```js
+util.seq([
+	function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Note the same key
+	function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm', 'c')); },
+	function(_) { assert(!this.c, 'should not conflict'); _(); },
+	function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+	function(_) { assert.equal(this.r, 'FOO'); _(); },
+    ], done)();
+```
+
 <a name="objectdisp"></a>
 # ObjectDisp
 <a name="objectdisp-initctx-classname-args"></a>

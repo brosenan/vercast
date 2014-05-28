@@ -21,11 +21,7 @@ module.exports = function(stateStore, versionGraph) {
 	    function(_) { versionGraph.getPatches(this.x, this.V2, _.to('patches')); },
 	    function(_) { doTrans(this.V1, this.patches, resolve, _.to('vm', 'p', 'pconf')); },
 	    function(_) { versionGraph.recordMerge(this.info, this.vm, this.p, this.pconf, _); },
-	    function(_) { 
-		if(this.c) {
-		    this.c = {base: this.V1, patches: this.c};
-		}
-		cb(undefined, this.vm, this.c); },
+	    function(_) { cb(undefined, this.vm, this.c); },
 	], cb)();
     };
 

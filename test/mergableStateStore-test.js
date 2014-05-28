@@ -88,7 +88,7 @@ describe('MergingStateStore', function(){
 		else done();
 	    })();
 	});
-	it.skip('should resolve conflicts if asked to, by prioritizing v2 over v1', function(done){
+	it('should resolve conflicts if asked to, by prioritizing v1 over v2', function(done){
 	    util.seq([
 		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
 		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
@@ -96,7 +96,7 @@ describe('MergingStateStore', function(){
 		function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm', 'c')); },
 		function(_) { assert(!this.c, 'should not conflict'); _(); },
 		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
-		function(_) { assert.equal(this.r, 'BAR'); _(); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
 	    ], done)();
 	});
     });

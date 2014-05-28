@@ -68,7 +68,7 @@
     MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should return version vm which is a merge of both versions v1 and v2:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should return version vm which is a merge of both versions v1 and v2
     MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should record the merge so that further merges would work:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should record the merge so that further merges would work
     MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should report a conflict as an error, when one occurs:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should report a conflict as an error, when one occurs
-  - MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should resolve conflicts if asked to, by prioritizing v2 over v1
+    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should resolve conflicts if asked to, by prioritizing v1 over v2:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should resolve conflicts if asked to, by prioritizing v1 over v2
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class:   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist:   ․ ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
     ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function:   ․ ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function
@@ -130,6 +130,5 @@
     vercast .randomByKey(key, prob) should return true in probability prob:   ․ vercast .randomByKey(key, prob) should return true in probability prob
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys:   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  129 passing (2s)
-  1 pending
+  130 passing (2s)
 
