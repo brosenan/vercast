@@ -44,6 +44,11 @@
     counter add should add the given ammount to the counter value:   ․ counter add should add the given ammount to the counter value
     counter add should subtract the given amount when unapplied:   ․ counter add should subtract the given amount when unapplied
     counter get should return the counter value:   ․ counter get should return the counter value
+    DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist:   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
+    DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists:   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
+    DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist:   ․ DummyAtomicKVS as AtomicKeyValue .retrieve(key, cb(err, val)) should emit an error if the value does not exist
+    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal:   ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should change the value under key to newVal, given that the previous value was oldVal
+    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal:   ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal, cb(err, valAfterMod)) should not change the value under key if the current value does not equal oldVal
     DummyBucketStore should accumulate all added items and replay them when fetched:   ․ DummyBucketStore should accumulate all added items and replay them when fetched
     DummyBucketStore should store each bucket individually:   ․ DummyBucketStore should store each bucket individually
     DummyBucketStore async mode should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved:   ․ DummyBucketStore async mode should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved
@@ -65,10 +70,10 @@
     DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions:   ․ DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
     DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context:   ․ DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
     MergingStateStore .trans(v1, p, cb(v2, r, c)) should apply p to v1 to receive v2:   ․ MergingStateStore .trans(v1, p, cb(v2, r, c)) should apply p to v1 to receive v2
-    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should return version vm which is a merge of both versions v1 and v2:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should return version vm which is a merge of both versions v1 and v2
-    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should record the merge so that further merges would work:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should record the merge so that further merges would work
-    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should report a conflict as an error, when one occurs:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should report a conflict as an error, when one occurs
-    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should resolve conflicts if asked to, by prioritizing v1 over v2:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm, c)) should resolve conflicts if asked to, by prioritizing v1 over v2
+    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should return version vm which is a merge of both versions v1 and v2:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should return version vm which is a merge of both versions v1 and v2
+    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should record the merge so that further merges would work:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should record the merge so that further merges would work
+    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should report a conflict as an error, when one occurs:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should report a conflict as an error, when one occurs
+    MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should resolve conflicts if asked to, by prioritizing v1 over v2:   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should resolve conflicts if asked to, by prioritizing v1 over v2
     ObjectDisp .init(ctx, className, args) should call the init() function associated with the class:   ․ ObjectDisp .init(ctx, className, args) should call the init() function associated with the class
     ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist:   ․ ObjectDisp .init(ctx, className, args) should throw an exception if the class does not exist
     ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function:   ․ ObjectDisp .init(ctx, className, args) should pass the given context and args to the class's init() function
@@ -130,5 +135,5 @@
     vercast .randomByKey(key, prob) should return true in probability prob:   ․ vercast .randomByKey(key, prob) should return true in probability prob
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys:   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  130 passing (2s)
+  135 passing (2s)
 

@@ -24,6 +24,11 @@
      - [init](#counter-init)
      - [add](#counter-add)
      - [get](#counter-get)
+   - [DummyAtomicKVS](#dummyatomickvs)
+     - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
+       - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
+       - [.retrieve(key, cb(err, val))](#dummyatomickvs-as-atomickeyvalue-retrievekey-cberr-val)
+       - [.modify(key, oldVal, newVal, cb(err, valAfterMod))](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval-cberr-valaftermod)
    - [DummyBucketStore](#dummybucketstore)
      - [async mode](#dummybucketstore-async-mode)
    - [DummyGraphDB](#dummygraphdb)
@@ -41,7 +46,7 @@
    - [MergingStateStore](#mergingstatestore)
      - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
      - [.trans(v1, p, cb(v2, r, c))](#mergingstatestore-transv1-p-cbv2-r-c)
-     - [.merge(v1, v2[, resolve], cb(err, vm, c))](#mergingstatestore-mergev1-v2-resolve-cberr-vm-c)
+     - [.merge(v1, v2[, resolve], cb(err, vm))](#mergingstatestore-mergev1-v2-resolve-cberr-vm)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
@@ -772,6 +777,74 @@ var c = disp.init({}, 'counter', {});
     done();
 ```
 
+<a name="dummyatomickvs"></a>
+# DummyAtomicKVS
+<a name="dummyatomickvs-as-atomickeyvalue"></a>
+## as AtomicKeyValue
+<a name="dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr"></a>
+### .newKey(key, val, cb(err))
+should store a new key/value pair, given that key does not already exist.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.retrieve('foo', _.to('value')); },
+    function(_) { assert.equal(this.value, 'bar'); _(); },
+], done)();
+```
+
+should emit an error when the key already exists.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+], function(err) {
+    assert(err, 'An error should be emitted');
+    done(err.message == 'Key foo already exists' ? undefined : err);
+})();
+```
+
+<a name="dummyatomickvs-as-atomickeyvalue-retrievekey-cberr-val"></a>
+### .retrieve(key, cb(err, val))
+should emit an error if the value does not exist.
+
+```js
+util.seq([
+    function(_) { atomicKV.retrieve('foo', _.to('value')); },
+    function(_) { assert(false, 'the value is not supposed to be found'); _(); },
+], function(err) {
+    assert(err, 'An error should be emitted');
+    done(err.message == 'Key foo was not found' ? undefined : err);
+})();
+```
+
+<a name="dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval-cberr-valaftermod"></a>
+### .modify(key, oldVal, newVal, cb(err, valAfterMod))
+should change the value under key to newVal, given that the previous value was oldVal.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.modify('foo', 'bar', 'baz', _.to('valAfterMod')); },
+    function(_) { assert.equal(this.valAfterMod, 'baz'); _(); },
+    function(_) { atomicKV.retrieve('foo', _.to('val')); },
+    function(_) { assert.equal(this.val, 'baz'); _(); },
+], done)();
+```
+
+should not change the value under key if the current value does not equal oldVal.
+
+```js
+util.seq([
+    function(_) { atomicKV.newKey('foo', 'bar', _); },
+    function(_) { atomicKV.modify('foo', 'baz', 'bat', _.to('valAfterMod')); },
+    function(_) { assert.equal(this.valAfterMod, 'bar'); _(); }, // The value before the change
+    function(_) { atomicKV.retrieve('foo', _.to('val')); },
+    function(_) { assert.equal(this.val, 'bar'); _(); },
+], done)();
+```
+
 <a name="dummybucketstore"></a>
 # DummyBucketStore
 should accumulate all added items and replay them when fetched.
@@ -1154,8 +1227,8 @@ util.seq([
     ], done)();
 ```
 
-<a name="mergingstatestore-mergev1-v2-resolve-cberr-vm-c"></a>
-## .merge(v1, v2[, resolve], cb(err, vm, c))
+<a name="mergingstatestore-mergev1-v2-resolve-cberr-vm"></a>
+## .merge(v1, v2[, resolve], cb(err, vm))
 should return version vm which is a merge of both versions v1 and v2.
 
 ```js
@@ -1178,11 +1251,9 @@ util.seq([
 	function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
 	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
 	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
-	function(_) { stateStore.merge(this.v1, this.v2, _.to('v1', 'c')); }, // merge once
-	function(_) { assert(!this.c, 'no conflicts'); _(); },
+	function(_) { stateStore.merge(this.v1, this.v2, _.to('v1')); }, // merge once
 	function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'baz', value: 'BAZ'}, _.to('v2')); },
-	function(_) { stateStore.merge(this.v1, this.v2, _.to('v1', 'c')); }, // merge twice
-	function(_) { assert(!this.c, 'no conflicts'); _(); },
+	function(_) { stateStore.merge(this.v1, this.v2, _.to('v1')); }, // merge twice
 	function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
 	function(_) { assert.equal(this.r, 'FOO'); _(); },
 	function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'bar'}, _.to('v', 'r')); },
@@ -1199,7 +1270,7 @@ util.seq([
 	function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
 	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
 	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Notice the "foo"
-	function(_) { stateStore.merge(this.v1, this.v2, _.to('vm', 'c')); },
+	function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
 	function(_) { assert(false, 'Last step should have raised a conflict exception'); _(); },
     ], function(err) {
 	if(!err.conflict) done(err);
@@ -1213,11 +1284,16 @@ should resolve conflicts if asked to, by prioritizing v1 over v2.
 util.seq([
 	function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
 	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
-	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Note the same key
-	function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm', 'c')); },
-	function(_) { assert(!this.c, 'should not conflict'); _(); },
+	function(_) { stateStore.trans(this.v1, {_type: 'add', key: 'baz', value: 'BAZ'}, _.to('v1')); },
+	function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO2'}, _.to('v2')); }, // Note the same key
+	function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+	function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm')); },
 	function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
 	function(_) { assert.equal(this.r, 'FOO'); _(); },
+	function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('vm', 'r')); },
+	function(_) { assert.equal(this.r, 'BAR'); _(); },
+	function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'baz'}, _.to('vm', 'r')); },
+	function(_) { assert.equal(this.r, 'BAZ'); _(); },
     ], done)();
 ```
 
