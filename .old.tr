@@ -19,6 +19,8 @@
     BinTree add should report a conflict and not change the state if the the key already exists:   ․ BinTree add should report a conflict and not change the state if the the key already exists
     BinTree getMin should retrieve the the minimum key, with its associated value:   ․ BinTree getMin should retrieve the the minimum key, with its associated value
     BinTree remove should remove the element with the given key and value:   ․ BinTree remove should remove the element with the given key and value
+    BranchStore .fork(name, v0, cb(err)) should create a new branch of the given name, and set its head version to v0:   ․ BranchStore .fork(name, v0, cb(err)) should create a new branch of the given name, and set its head version to v0
+    BranchStore .head(branchName) should return the last known version of the given branch:   ․ BranchStore .head(branchName) should return the last known version of the given branch
     BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter:   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object:   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
     BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result:   ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
@@ -135,5 +137,5 @@
     vercast .randomByKey(key, prob) should return true in probability prob:   ․ vercast .randomByKey(key, prob) should return true in probability prob
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys:   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  135 passing (2s)
+  137 passing (2s)
 

@@ -9,6 +9,11 @@
      - [add](#bintree-add)
      - [getMin](#bintree-getmin)
      - [remove](#bintree-remove)
+   - [BranchStore](#branchstore)
+     - [.init(className, args, cb(err, v0))](#branchstore-initclassname-args-cberr-v0)
+     - [.trans(v1, p, cb(v2, r, c))](#branchstore-transv1-p-cbv2-r-c)
+     - [.fork(name, v0, cb(err))](#branchstore-forkname-v0-cberr)
+     - [.head(branchName)](#branchstore-headbranchname)
    - [BucketObjectStore](#bucketobjectstore)
      - [as ObjectStore](#bucketobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
@@ -374,6 +379,32 @@ function allInTree(v, list) {
     assert(!r, 'key 4 should be removed');
     assert(allInTree(removed4, [2, 5, 3]), '2, 5, and 3 should remain in the tree');
     done();
+```
+
+<a name="branchstore"></a>
+# BranchStore
+<a name="branchstore-forkname-v0-cberr"></a>
+## .fork(name, v0, cb(err))
+should create a new branch of the given name, and set its head version to v0.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.fork('b1', this.v, _); },
+	function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
+    ], done)();
+```
+
+<a name="branchstore-headbranchname"></a>
+## .head(branchName)
+should return the last known version of the given branch.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.fork('b1', this.v, _); },
+	function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
+    ], done)();
 ```
 
 <a name="bucketobjectstore"></a>

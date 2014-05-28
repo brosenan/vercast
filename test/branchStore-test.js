@@ -30,5 +30,28 @@ function createBranchStore(handlers) {
     return new BranchStore(mergingStateStore, atomicStore);
 }
 
-var stateStore = createBranchStore({BinTree: require('../binTree.js')});
+var branchStore = createBranchStore({BinTree: require('../binTree.js')});
 
+describe('BranchStore', function(){
+    describe('.init(className, args, cb(err, v0))', function(){});
+    describe('.trans(v1, p, cb(v2, r, c))', function(){});
+    describe('.fork(name, v0, cb(err))', function(){
+	it('should create a new branch of the given name, and set its head version to v0', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
+	    ], done)();
+	});
+
+    });
+    describe('.head(branchName)', function(){
+	it('should return the last known version of the given branch', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
+	    ], done)();
+	});
+    });
+});
