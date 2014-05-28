@@ -125,6 +125,33 @@ describe('BranchStore', function(){
 		function(_) { assert.equal(this.r, 'BAR'); _(); },
 	    ], done)();
 	});
+	it('should merge between the given version and the given branch (if so given)', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.fork('b1', this.v1, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v2, 'b1', _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+	    ], done)();
+	});
+	it('should resolve conflicts, should they occur, by preferring the second argument', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'bar', value: 'BARFOOD'}, _.to('v1')); },
+		function(_) { branchStore.fork('b1', this.v1, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v2, 'b1', _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BARFOOD'); _(); },
+	    ], done)();
+	});
 
     });
 

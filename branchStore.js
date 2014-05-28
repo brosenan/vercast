@@ -36,6 +36,7 @@ module.exports = function(stateStore, kvs) {
     }
 
     this.pull = function(v1, v2, cb) {
-	stateStore.merge(v1, v2, cb);
+	if(typeof v2 == 'string') v2 = heads[v2];
+	stateStore.merge(v2, v1, true, cb);
     }
 }
