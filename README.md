@@ -14,6 +14,7 @@
      - [.trans(v1, p, cb(v2, r, c))](#branchstore-transv1-p-cbv2-r-c)
      - [.fork(name, v0, cb(err))](#branchstore-forkname-v0-cberr)
      - [.head(branchName)](#branchstore-headbranchname)
+     - [.push(branchName, v2, cb(err))](#branchstore-pushbranchname-v2-cberr)
    - [BucketObjectStore](#bucketobjectstore)
      - [as ObjectStore](#bucketobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
@@ -405,6 +406,54 @@ util.seq([
 	function(_) { branchStore.fork('b1', this.v, _); },
 	function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
     ], done)();
+```
+
+<a name="branchstore-pushbranchname-v2-cberr"></a>
+## .push(branchName, v2, cb(err))
+should assign v2 to the head of the branch, if v2 is a descendant of the current head.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.fork('b1', this.v, _); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v2')); },
+	function(_) { branchStore.push('b1', this.v2, _); },
+	function(_) { assert.deepEqual(branchStore.head('b1'), this.v2); _(); },
+    ], done)();
+```
+
+should merge the head version and v2 if not a direct descendant.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.fork('b1', this.v, _); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { branchStore.push('b1', this.v1, _); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+	function(_) { branchStore.push('b1', this.v2, _); },
+	function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+	function(_) { assert.equal(this.r, 'FOO'); _(); },
+	function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+	function(_) { assert.equal(this.r, 'BAR'); _(); },
+    ], done)();
+```
+
+should fail if a conflict is encountered.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.fork('b1', this.v, _); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { branchStore.push('b1', this.v1, _); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO2'}, _.to('v2')); },
+	function(_) { branchStore.push('b1', this.v2, _); },
+	function(_) { assert(false, 'push() should fail'); _(); },
+    ], function(err) {
+	if(err.conflict) done();
+	else done(err);
+    })();
 ```
 
 <a name="bucketobjectstore"></a>
