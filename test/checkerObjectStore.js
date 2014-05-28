@@ -9,6 +9,8 @@ module.exports = function(ostore) {
 
     this.trans = function(ctx, v1, p) {
 	var pair = ostore.trans(ctx, v1, p);
+	if(ctx.error) return pair;
+
 	for(var i = 0; i < this.transHooks.length; i++) {
 	    this.transHooks[i].call(this, v1, p, pair[0], pair[1], ctx.conf);
 	}
@@ -51,8 +53,8 @@ function checkInvertibility(v1, p, v2, r, c) {
 
     console.error('Non-invertible patch:', p);
     console.error('From state:', v2);
-    console.error('Moved to:', pair[0]);
-    console.error('Instead of:', v1);
+    console.error('Moved to:', v1PrimeDigest);
+    console.error('Instead of:', v1Digest);
     throw new Error('Patch ' + p._type + ' is not invertible');
 
 }
