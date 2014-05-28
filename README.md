@@ -1,4 +1,7 @@
 # TOC
+   - [Array](#array)
+     - [init](#array-init)
+     - [apply](#array-apply)
    - [AsyncObjectStore](#asyncobjectstore)
      - [.init(className, args, cb(err, v0))](#asyncobjectstore-initclassname-args-cberr-v0)
      - [.transRaw(v1, p, cb(err, v2, r, conf, eff))](#asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff)
@@ -90,6 +93,33 @@
      - [.randomByKey(key, prob)](#vercast-randombykeykey-prob)
 <a name=""></a>
  
+<a name="array"></a>
+# Array
+<a name="array-init"></a>
+## init
+should create an array containing objects in their initial version.
+
+```js
+var ctx = {};
+    var v = ostore.init(ctx, 'Array', {size: 10, className: 'Counter'});
+    var counter = ostore.trans(ctx, v, {_type: 'get', index: 2})[1];
+    var zero = ostore.trans(ctx, counter, {_type: 'get'})[1];
+    assert.equal(zero, 0);
+```
+
+<a name="array-apply"></a>
+## apply
+should relay a patch to an array entry corresponding to the given index.
+
+```js
+var ctx = {};
+    var v = ostore.init(ctx, 'Array', {size: 10, className: 'Counter'});
+    v = ostore.trans(ctx, v, {_type: 'apply', index: 3, patch: {_type: 'add', amount: 4}})[0];
+    var counter = ostore.trans(ctx, v, {_type: 'get', index: 3})[1];
+    var four = ostore.trans(ctx, counter, {_type: 'get'})[1];
+    assert.equal(four, 4);
+```
+
 <a name="asyncobjectstore"></a>
 # AsyncObjectStore
 <a name="asyncobjectstore-initclassname-args-cberr-v0"></a>
@@ -2035,7 +2065,7 @@ var v1 = {$: 10};
 	function(_) { assert.deepEqual(this.patches_v2_new, this.patches_x_v1.concat(invertPatches(this.patches_x_v2.slice(1)))); _(); },
     ], done)();
     function invertPatches(patches) {
-	var inv = patches.map(function(p) { return {_type: '_inv', patch: p}; });
+	var inv = patches.map(function(p) { return {_type: 'inv', patch: p}; });
 	return inv.reverse();
     }
 ```

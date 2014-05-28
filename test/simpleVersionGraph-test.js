@@ -177,7 +177,7 @@ describe('SimpleVersionGraph', function(){
 	    ], done)();
 
 	    function invertPatches(patches) {
-		var inv = patches.map(function(p) { return {_type: '_inv', patch: p}; });
+		var inv = patches.map(function(p) { return {_type: 'inv', patch: p}; });
 		return inv.reverse();
 	    }
 	});

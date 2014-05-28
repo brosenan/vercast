@@ -1,4 +1,6 @@
 
+    Array init should create an array containing objects in their initial version:   ․ Array init should create an array containing objects in their initial version
+    Array apply should relay a patch to an array entry corresponding to the given index:   ․ Array apply should relay a patch to an array entry corresponding to the given index
     AsyncObjectStore .init(className, args, cb(err, v0)) should initialize an object of class className with arguments args and return the ID:   ․ AsyncObjectStore .init(className, args, cb(err, v0)) should initialize an object of class className with arguments args and return the ID
     AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should apply patch p to v1, to receive v2:   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should apply patch p to v1, to receive v2
     AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r of the patch:   ․ AsyncObjectStore .transRaw(v1, p, cb(err, v2, r, conf, eff)) should return the result r of the patch
@@ -144,5 +146,5 @@
     vercast .randomByKey(key, prob) should return true in probability prob:   ․ vercast .randomByKey(key, prob) should return true in probability prob
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys:   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  144 passing (2s)
+  146 passing (3s)
 

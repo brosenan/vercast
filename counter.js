@@ -1,4 +1,4 @@
-exports.init = function() {
+exports.init = function(ctx, args) {
     this.value = 0;
 }
 
