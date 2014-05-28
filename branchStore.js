@@ -1,6 +1,7 @@
 var util = require('./util.js');
 
 module.exports = function(stateStore, kvs) {
+    var self = this;
     var heads = {};
 
     this.init = function(className, args, cb) {
@@ -13,7 +14,7 @@ module.exports = function(stateStore, kvs) {
 
     this.fork = function(name, v0, cb) {
 	heads[name] = v0;
-	cb();
+	kvs.newKey(name, v0.$, cb);
     }
 
     this.head = function(branchName) {
@@ -21,9 +22,20 @@ module.exports = function(stateStore, kvs) {
     }
 
     this.push = function(branchName, v2, cb) {
+	var head = heads[branchName]
 	util.seq([
-	    function(_) { stateStore.merge(heads[branchName], v2, _.to('vm')); },
-	    function(_) { heads[branchName] = this.vm; _(); },
+	    function(_) { stateStore.merge(head, v2, _.to('vm')); },
+	    function(_) { kvs.modify(branchName, head.$, this.vm.$, _.to('newHead')); },
+	    function(_) { heads[branchName] = {$:this.newHead};
+			  if(this.newHead == this.vm.$) {
+			      _();
+			  } else {
+			      self.push(branchName, v2, cb);
+			  }},
 	], cb)();
+    }
+
+    this.pull = function(v1, v2, cb) {
+	stateStore.merge(v1, v2, cb);
     }
 }

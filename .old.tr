@@ -24,6 +24,8 @@
     BranchStore .push(branchName, v2, cb(err)) should assign v2 to the head of the branch, if v2 is a descendant of the current head:   ․ BranchStore .push(branchName, v2, cb(err)) should assign v2 to the head of the branch, if v2 is a descendant of the current head
     BranchStore .push(branchName, v2, cb(err)) should merge the head version and v2 if not a direct descendant:   ․ BranchStore .push(branchName, v2, cb(err)) should merge the head version and v2 if not a direct descendant
     BranchStore .push(branchName, v2, cb(err)) should fail if a conflict is encountered:   ․ BranchStore .push(branchName, v2, cb(err)) should fail if a conflict is encountered
+    BranchStore .push(branchName, v2, cb(err)) should handle cases where two pushes are done in parallel. If no conflicts occur, the resulting head should include all contributions:   ․ BranchStore .push(branchName, v2, cb(err)) should handle cases where two pushes are done in parallel. If no conflicts occur, the resulting head should include all contributions
+    BranchStore .pull(v1, versionOrBranch, cb(err, vm)) should merge between the two versions (if so given):   ․ BranchStore .pull(v1, versionOrBranch, cb(err, vm)) should merge between the two versions (if so given)
     BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter:   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object:   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
     BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result:   ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
@@ -140,5 +142,5 @@
     vercast .randomByKey(key, prob) should return true in probability prob:   ․ vercast .randomByKey(key, prob) should return true in probability prob
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys:   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  140 passing (2s)
+  142 passing (2s)
 

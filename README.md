@@ -15,6 +15,7 @@
      - [.fork(name, v0, cb(err))](#branchstore-forkname-v0-cberr)
      - [.head(branchName)](#branchstore-headbranchname)
      - [.push(branchName, v2, cb(err))](#branchstore-pushbranchname-v2-cberr)
+     - [.pull(v1, versionOrBranch, cb(err, vm))](#branchstore-pullv1-versionorbranch-cberr-vm)
    - [BucketObjectStore](#bucketobjectstore)
      - [as ObjectStore](#bucketobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
@@ -454,6 +455,41 @@ util.seq([
 	if(err.conflict) done();
 	else done(err);
     })();
+```
+
+should handle cases where two pushes are done in parallel. If no conflicts occur, the resulting head should include all contributions.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.fork('b1', this.v, _); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+	function(_) { var para = util.parallel(2, _); 
+		      branchStore.push('b1', this.v1, para);
+		      branchStore.push('b1', this.v2, para); },
+	function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+	function(_) { assert.equal(this.r, 'FOO'); _(); },
+	function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+	function(_) { assert.equal(this.r, 'BAR'); _(); },
+    ], done)();
+```
+
+<a name="branchstore-pullv1-versionorbranch-cberr-vm"></a>
+## .pull(v1, versionOrBranch, cb(err, vm))
+should merge between the two versions (if so given).
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+	function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+	function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+	function(_) { assert.equal(this.r, 'FOO'); _(); },
+	function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+	function(_) { assert.equal(this.r, 'BAR'); _(); },
+    ], done)();
 ```
 
 <a name="bucketobjectstore"></a>

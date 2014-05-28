@@ -27,4 +27,7 @@ module.exports = function() {
 	data[key] = newVal;
 	cb(undefined, newVal);
     };
+    this.abolish = function() {
+	data = {};
+    }
 };

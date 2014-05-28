@@ -33,6 +33,10 @@ function createBranchStore(handlers) {
 var branchStore = createBranchStore({BinTree: require('../binTree.js')});
 
 describe('BranchStore', function(){
+    afterEach(function() { 
+	graphDB.abolish();
+	atomicStore.abolish(); 
+    });
     describe('.init(className, args, cb(err, v0))', function(){});
     describe('.trans(v1, p, cb(v2, r, c))', function(){});
     describe('.fork(name, v0, cb(err))', function(){
@@ -92,6 +96,36 @@ describe('BranchStore', function(){
 		else done(err);
 	    })();
 	});
+	it('should handle cases where two pushes are done in parallel. If no conflicts occur, the resulting head should include all contributions', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { var para = util.parallel(2, _); 
+			      branchStore.push('b1', this.v1, para);
+			      branchStore.push('b1', this.v2, para); },
+		function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+	    ], done)();
+	});
+    });
+    describe('.pull(v1, versionOrBranch, cb(err, vm))', function(){
+	it('should merge between the two versions (if so given)', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+	    ], done)();
+	});
 
     });
+
 });
