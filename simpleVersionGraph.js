@@ -2,7 +2,11 @@ var util = require('./util.js');
 
 module.exports = function(graphDB) {
     this.recordTrans = function (v1, p, w, v2, cb) {
-	graphDB.addEdge(v1.$, JSON.stringify({p: p, w: w}), v2.$, cb);
+	if(v1.$ != v2.$) {
+	    graphDB.addEdge(v1.$, JSON.stringify({p: p, w: w}), v2.$, cb);
+	} else {
+	    cb();
+	}
     }
     this.getMergeStrategy = function(v1, v2, resolve, cb) {
 	util.seq([
