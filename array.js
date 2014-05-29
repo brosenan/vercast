@@ -78,3 +78,29 @@ exports.digest = function(ctx, patch, unapply) {
     return str;
 }
 
+exports.apply_range = function(ctx, patch, unapply) {
+    var indexFrom = Math.max(patch.from, this.start);
+    var indexTo = Math.min(patch.to - 1, this.start + this.size - 1);
+    var childFromIndex = Math.floor((indexFrom - this.start) * this.b / this.size);
+    var childToIndex = Math.floor((indexTo - this.start) * this.b / this.size);
+    var p = patch.patch;
+    if(unapply) p = {_type: 'inv', patch: p};
+    var patchToPropagate = patch;
+    if(unapply) patchToPropagate = {_type: 'inv', patch: patch};
+    for(var childIndex = childFromIndex; childIndex <= childToIndex; childIndex++) {
+	if(this.childSizes[childIndex] == 1) {
+	    if(!this.children[childIndex]) {
+		this.children[childIndex] = this.initial;
+	    }
+	    this.children[childIndex] = ctx.trans(this.children[childIndex], p);
+	} else {
+	    if(!this.children[childIndex]) {
+		this.children[childIndex] = ctx.init(this._type, {size: this.childSizes[childIndex], 
+								  b: this.b, 
+								  initial: this.initial,
+								  start: this.start + childIndex * this.childSizes[childIndex]});
+	    }
+	    this.children[childIndex] = ctx.trans(this.children[childIndex], patchToPropagate);
+	}
+    }
+}

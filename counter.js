@@ -3,8 +3,9 @@ exports.init = function(ctx, args) {
 }
 
 exports.add = function(ctx, patch, unapply) {
-    if(unapply) patch.amount = -patch.amount;
-    this.value += patch.amount;
+    var amount = patch.amount;
+    if(unapply) amount = -amount;
+    this.value += amount;
 }
 
 exports.get = function(ctx, patch) {

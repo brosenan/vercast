@@ -51,8 +51,9 @@ function checkInvertibility(v1, p, v2, r, c) {
     var v1PrimeDigest = this.ostore.trans(ctx, v1Prime, {_type: 'digest'})[1];
     if(v1Digest == v1PrimeDigest) return;
 
+    var v2Digest = this.ostore.trans(ctx, v2, {_type: 'digest'})[1];
     console.error('Non-invertible patch:', p);
-    console.error('From state:', v2);
+    console.error('From state:', v2Digest);
     console.error('Moved to:', v1PrimeDigest);
     console.error('Instead of:', v1Digest);
     throw new Error('Patch ' + p._type + ' is not invertible');
