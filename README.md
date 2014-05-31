@@ -15,12 +15,13 @@
      - [remove](#bintree-remove)
    - [BranchStore](#branchstore)
      - [.init(className, args, cb(err, v0))](#branchstore-initclassname-args-cberr-v0)
-     - [.trans(v1, p, cb(v2, r, c))](#branchstore-transv1-p-cbv2-r-c)
+     - [.trans(v1, p, cb(err, v2, r, c))](#branchstore-transv1-p-cberr-v2-r-c)
      - [.fork(name, v0, cb(err))](#branchstore-forkname-v0-cberr)
      - [.head(branchName)](#branchstore-headbranchname)
      - [.push(branchName, v2, cb(err))](#branchstore-pushbranchname-v2-cberr)
      - [.pull(v1, versionOrBranch, cb(err, vm))](#branchstore-pullv1-versionorbranch-cberr-vm)
      - [.beginTransaction(v0)](#branchstore-begintransactionv0)
+     - [.commit(tranaction, cb(err, v))](#branchstore-committranaction-cberr-v)
    - [BucketObjectStore](#bucketobjectstore)
      - [as ObjectStore](#bucketobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
@@ -445,6 +446,38 @@ done();
 
 <a name="branchstore"></a>
 # BranchStore
+<a name="branchstore-transv1-p-cberr-v2-r-c"></a>
+## .trans(v1, p, cb(err, v2, r, c))
+should accept a transaction object in place of v1, and update it.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1'));},
+		function(_) { branchStore.trans(this.t, {_type: 'fetch', key: 'foo'}, _.to('v1', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); 
+			      assert.equal(this.t.curr.$, this.v1.$); _(); },
+], done)();
+```
+
+should not record transitions based on transactions in the version graph.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Pull should throw an exception'); _(); },
+], function(err) {
+		var prefix = 'No path found from'
+		if(err.message.substr(0, prefix.length) == prefix) done();
+		else done(err);
+})();
+```
+
 <a name="branchstore-forkname-v0-cberr"></a>
 ## .fork(name, v0, cb(err))
 should create a new branch of the given name, and set its head version to v0.
@@ -597,6 +630,24 @@ util.seq([
 			      assert.equal(trans.curr.$, this.v0.$);
 			      _();
 			    },
+], done)();
+```
+
+<a name="branchstore-committranaction-cberr-v"></a>
+## .commit(tranaction, cb(err, v))
+should record the transaction in the version graph.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
 ], done)();
 ```
 

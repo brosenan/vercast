@@ -30,7 +30,10 @@ function createBranchStore(handlers) {
     return new BranchStore(mergingStateStore, atomicStore);
 }
 
-var branchStore = createBranchStore({BinTree: require('../binTree.js')});
+var branchStore = createBranchStore({
+    BinTree: require('../binTree.js'),
+    ':transaction': require('../transaction.js'),
+});
 
 describe('BranchStore', function(){
     afterEach(function() { 
@@ -38,7 +41,33 @@ describe('BranchStore', function(){
 	atomicStore.abolish(); 
     });
     describe('.init(className, args, cb(err, v0))', function(){});
-    describe('.trans(v1, p, cb(v2, r, c))', function(){});
+    describe('.trans(v1, p, cb(err, v2, r, c))', function(){
+	it('should accept a transaction object in place of v1, and update it', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1'));},
+		function(_) { branchStore.trans(this.t, {_type: 'fetch', key: 'foo'}, _.to('v1', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); 
+			      assert.equal(this.t.curr.$, this.v1.$); _(); },
+	    ], done)();
+	});
+	it('should not record transitions based on transactions in the version graph', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Pull should throw an exception'); _(); },
+	    ], function(err) {
+		var prefix = 'No path found from'
+		if(err.message.substr(0, prefix.length) == prefix) done();
+		else done(err);
+	    })();
+	});
+
+    });
     describe('.fork(name, v0, cb(err))', function(){
 	it('should create a new branch of the given name, and set its head version to v0', function(done){
 	    util.seq([
@@ -162,6 +191,21 @@ describe('BranchStore', function(){
 			      assert.equal(trans.curr.$, this.v0.$);
 			      _();
 			    },
+	    ], done)();
+	});
+    });
+    describe('.commit(tranaction, cb(err, v))', function(){
+	it('should record the transaction in the version graph', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
 	    ], done)();
 	});
     });

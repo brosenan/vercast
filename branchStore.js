@@ -9,7 +9,19 @@ module.exports = function(stateStore, kvs) {
     }
 
     this.trans = function(v1, p, cb) {
-	stateStore.trans(v1, p, cb);
+	var transaction;
+	if(v1.curr) {
+	    transaction = v1;
+	    v1 = v1.curr;
+	}
+	if(transaction) {
+	    transaction.patches.push(p);
+	}
+	util.seq([
+	    function(_) { stateStore.trans(v1, p, transaction ? true : false, _.to('v2', 'r', 'c')); },
+	    function(_) { if(transaction) transaction.curr = this.v2;
+			  cb(undefined, this.v2, this.r, this.c); },
+	], cb)();
     }
 
     this.fork = function(name, v0, cb) {
@@ -40,6 +52,10 @@ module.exports = function(stateStore, kvs) {
 	stateStore.merge(v2, v1, true, cb);
     }
     this.beginTransaction = function(v0) {
-	return {baseline: v0, curr: v0};
+	return {baseline: v0, curr: v0, patches: []};
+    }
+    this.commit = function(trans, cb) {
+	var transPatch = {_type: 'transaction', patches: trans.patches};
+	stateStore.trans(trans.baseline, transPatch, cb);
     }
 }

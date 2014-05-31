@@ -47,6 +47,10 @@
   ․ BinTree getMin should retrieve the the minimum key, with its associated value
     BinTree remove should remove the element with the given key and value
   ․ BinTree remove should remove the element with the given key and value
+    BranchStore .trans(v1, p, cb(err, v2, r, c)) should accept a transaction object in place of v1, and update it
+  ․ BranchStore .trans(v1, p, cb(err, v2, r, c)) should accept a transaction object in place of v1, and update it
+    BranchStore .trans(v1, p, cb(err, v2, r, c)) should not record transitions based on transactions in the version graph
+  ․ BranchStore .trans(v1, p, cb(err, v2, r, c)) should not record transitions based on transactions in the version graph
     BranchStore .fork(name, v0, cb(err)) should create a new branch of the given name, and set its head version to v0
   ․ BranchStore .fork(name, v0, cb(err)) should create a new branch of the given name, and set its head version to v0
     BranchStore .head(branchName) should return the last known version of the given branch
@@ -67,6 +71,8 @@
   ․ BranchStore .pull(v1, versionOrBranch, cb(err, vm)) should resolve conflicts, should they occur, by preferring the second argument
     BranchStore .beginTransaction(v0) should return a transaction object for which both baseline version and current version are v0
   ․ BranchStore .beginTransaction(v0) should return a transaction object for which both baseline version and current version are v0
+    BranchStore .commit(tranaction, cb(err, v)) should record the transaction in the version graph
+  ․ BranchStore .commit(tranaction, cb(err, v)) should record the transaction in the version graph
     BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
@@ -300,5 +306,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  150 passing (3s)
+  153 passing (5s)
 
