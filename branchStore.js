@@ -39,4 +39,7 @@ module.exports = function(stateStore, kvs) {
 	if(typeof v2 == 'string') v2 = heads[v2];
 	stateStore.merge(v2, v1, true, cb);
     }
+    this.beginTransaction = function(v0) {
+	return {baseline: v0, curr: v0};
+    }
 }

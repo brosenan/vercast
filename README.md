@@ -20,6 +20,7 @@
      - [.head(branchName)](#branchstore-headbranchname)
      - [.push(branchName, v2, cb(err))](#branchstore-pushbranchname-v2-cberr)
      - [.pull(v1, versionOrBranch, cb(err, vm))](#branchstore-pullv1-versionorbranch-cberr-vm)
+     - [.beginTransaction(v0)](#branchstore-begintransactionv0)
    - [BucketObjectStore](#bucketobjectstore)
      - [as ObjectStore](#bucketobjectstore-as-objectstore)
        - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
@@ -56,7 +57,7 @@
          - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
    - [MergingStateStore](#mergingstatestore)
      - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
-     - [.trans(v1, p, cb(v2, r, c))](#mergingstatestore-transv1-p-cbv2-r-c)
+     - [.trans(v1, p,[ simulate,] cb(v2, r, c))](#mergingstatestore-transv1-p-simulate-cbv2-r-c)
      - [.merge(v1, v2[, resolve], cb(err, vm))](#mergingstatestore-mergev1-v2-resolve-cberr-vm)
    - [ObjectDisp](#objectdisp)
      - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
@@ -581,6 +582,21 @@ util.seq([
 		function(_) { assert.equal(this.r, 'FOO'); _(); },
 		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
 		function(_) { assert.equal(this.r, 'BARFOOD'); _(); },
+], done)();
+```
+
+<a name="branchstore-begintransactionv0"></a>
+## .beginTransaction(v0)
+should return a transaction object for which both baseline version and current version are v0.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { var trans = branchStore.beginTransaction(this.v0); 
+			      assert.equal(trans.baseline.$, this.v0.$);
+			      assert.equal(trans.curr.$, this.v0.$);
+			      _();
+			    },
 ], done)();
 ```
 
@@ -1421,8 +1437,8 @@ done();
 
 <a name="mergingstatestore"></a>
 # MergingStateStore
-<a name="mergingstatestore-transv1-p-cbv2-r-c"></a>
-## .trans(v1, p, cb(v2, r, c))
+<a name="mergingstatestore-transv1-p-simulate-cbv2-r-c"></a>
+## .trans(v1, p,[ simulate,] cb(v2, r, c))
 should apply p to v1 to receive v2.
 
 ```js
@@ -1433,6 +1449,22 @@ util.seq([
 		function(_) { stateStore.trans(this.v, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
 		function(_) { assert.equal(this.r, 'FOO'); _(); },
 ], done)();
+```
+
+should not record the transition if simulate is true.
+
+```js
+util.seq([
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, true, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Merge should throw an exception'); _(); },
+], function(err) {
+		var prefix = 'No path found from'
+		if(err.message.substr(0, prefix.length) == prefix) done();
+		else done(err);
+})();
 ```
 
 <a name="mergingstatestore-mergev1-v2-resolve-cberr-vm"></a>

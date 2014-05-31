@@ -34,7 +34,7 @@ describe('MergingStateStore', function(){
 	graphDB.abolish();
     });
     describe('.init(className, args, cb(v0))', function(){});
-    describe('.trans(v1, p, cb(v2, r, c))', function(){
+    describe('.trans(v1, p,[ simulate,] cb(v2, r, c))', function(){
 	it('should apply p to v1 to receive v2', function(done){
 	    util.seq([
 		function(_) { stateStore.init('BinTree', {}, _.to('v')); },
@@ -44,6 +44,20 @@ describe('MergingStateStore', function(){
 		function(_) { assert.equal(this.r, 'FOO'); _(); },
 	    ], done)();
 	});
+	it('should not record the transition if simulate is true', function(done){
+	    util.seq([
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, true, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Merge should throw an exception'); _(); },
+	    ], function(err) {
+		var prefix = 'No path found from'
+		if(err.message.substr(0, prefix.length) == prefix) done();
+		else done(err);
+	    })();
+	});
+
     });
     describe('.merge(v1, v2[, resolve], cb(err, vm))', function(){
 	it('should return version vm which is a merge of both versions v1 and v2', function(done){

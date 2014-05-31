@@ -65,6 +65,8 @@
   ․ BranchStore .pull(v1, versionOrBranch, cb(err, vm)) should merge between the given version and the given branch (if so given)
     BranchStore .pull(v1, versionOrBranch, cb(err, vm)) should resolve conflicts, should they occur, by preferring the second argument
   ․ BranchStore .pull(v1, versionOrBranch, cb(err, vm)) should resolve conflicts, should they occur, by preferring the second argument
+    BranchStore .beginTransaction(v0) should return a transaction object for which both baseline version and current version are v0
+  ․ BranchStore .beginTransaction(v0) should return a transaction object for which both baseline version and current version are v0
     BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
@@ -165,8 +167,10 @@
   ․ DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
     DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
   ․ DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
-    MergingStateStore .trans(v1, p, cb(v2, r, c)) should apply p to v1 to receive v2
-  ․ MergingStateStore .trans(v1, p, cb(v2, r, c)) should apply p to v1 to receive v2
+    MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
+  ․ MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
+    MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should not record the transition if simulate is true
+  ․ MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should not record the transition if simulate is true
     MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should return version vm which is a merge of both versions v1 and v2
   ․ MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should return version vm which is a merge of both versions v1 and v2
     MergingStateStore .merge(v1, v2[, resolve], cb(err, vm)) should record the merge so that further merges would work
@@ -296,5 +300,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  148 passing (3s)
+  150 passing (3s)
 

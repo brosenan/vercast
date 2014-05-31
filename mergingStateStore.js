@@ -4,10 +4,15 @@ module.exports = function(stateStore, versionGraph) {
     this.init = function(className, args, cb) {
 	stateStore.init(className, args, cb);
     };
-    this.trans = function(v1, p, cb) {
+    this.trans = function(v1, p, simulate, cb) {
+	if(typeof simulate == 'function') {
+	    cb = simulate;
+	    simulate = false;
+	}
 	util.seq([
 	    function(_) { stateStore.trans(v1, [p], _.to('v2', 'r', 'c', 'w')); },
-	    function(_) { versionGraph.recordTrans(v1, p, this.w, this.v2, _); },
+	    function(_) { if(!simulate) versionGraph.recordTrans(v1, p, this.w, this.v2, _);
+			  else _();},
 	    function(_) { cb(undefined, this.v2, this.r, this.c, this.w); },
 	], cb)();
     };

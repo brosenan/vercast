@@ -152,7 +152,17 @@ describe('BranchStore', function(){
 		function(_) { assert.equal(this.r, 'BARFOOD'); _(); },
 	    ], done)();
 	});
-
     });
-
+    describe('.beginTransaction(v0)', function(){
+	it('should return a transaction object for which both baseline version and current version are v0', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { var trans = branchStore.beginTransaction(this.v0); 
+			      assert.equal(trans.baseline.$, this.v0.$);
+			      assert.equal(trans.curr.$, this.v0.$);
+			      _();
+			    },
+	    ], done)();
+	});
+    });
 });
