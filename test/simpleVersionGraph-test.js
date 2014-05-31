@@ -173,7 +173,7 @@ describe('SimpleVersionGraph', function(){
 		// The path from v2 to new should be like the one from x to v1, followed by the conflicting patches, inversed, in reverse order.
 		function(_) { versionGraph.getPatches(this.x, v1, _.to('patches_x_v1')); },
 		function(_) { versionGraph.getPatches(v2, {$:'newVersion'}, _.to('patches_v2_new')); },
-		function(_) { assert.deepEqual(this.patches_v2_new, this.patches_x_v1.concat(invertPatches(this.patches_x_v2.slice(1)))); _(); },
+		function(_) { assert.deepEqual(this.patches_v2_new, invertPatches(this.patches_x_v2.slice(1)).concat(this.patches_x_v1)); _(); },
 	    ], done)();
 
 	    function invertPatches(patches) {

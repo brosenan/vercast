@@ -51,10 +51,10 @@ module.exports = function(graphDB) {
 	} else {
 	    p1 = JSON.stringify({p: {_type: '_seq', patches: p},
 				 w: mergeInfo.w1});
-	    p2 = JSON.stringify({p: {_type: '_seq', patches: [{_type: '_reapply', 
+	    p2 = JSON.stringify({p: {_type: '_seq', patches: invertPatches(pconf).concat([{_type: '_reapply', 
 							       from: mergeInfo.x, 
 							       to: mergeInfo.V1},
-							     ].concat(invertPatches(pconf))},
+							     ])},
 				 w: mergeInfo.w2});
 	}
 	util.seq([

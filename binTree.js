@@ -17,10 +17,10 @@ exports.fetch = function(ctx, p, u) {
 
 exports.add = function(ctx, p, u) {
     if(u) {
-	p._type = 'remove';
-	return exports.remove.call(this, ctx, p, !u);
+	return exports.remove.call(this, ctx, {_type: 'remove',
+					       key: p.key,
+					       value: p.value}, !u);
     }
-
     if(p.key == this.key) {
 	ctx.conflict();
     } else if(p.key < this.key) {
@@ -45,8 +45,9 @@ exports.getMin = function(ctx, p, u) {
 
 exports.remove = function(ctx, p, u) {
     if(u) {
-	p._type = 'add';
-	return exports.add.call(this, ctx, p, !u);
+	return exports.add.call(this, ctx, {_type: 'add',
+					       key: p.key,
+					       value: p.value}, !u);
     }
     if(p.key == this.key) {
 	// Remove this node
