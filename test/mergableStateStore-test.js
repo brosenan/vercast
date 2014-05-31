@@ -139,6 +139,5 @@ describe('MergingStateStore', function(){
 		function(_) { assert.equal(this.r, 'BAT'); _(); },
 	    ], done)();
 	});
-
     });
 });
