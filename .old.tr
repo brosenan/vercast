@@ -38,6 +38,7 @@
     BranchStore .commit(tranaction, cb(err, v)) should record the transaction in the version graph:   ․ BranchStore .commit(tranaction, cb(err, v)) should record the transaction in the version graph
     BranchStore .commit(tranaction, cb(err, v)) should keep transactions together when conflicts occur:   ․ BranchStore .commit(tranaction, cb(err, v)) should keep transactions together when conflicts occur
     BranchStore .commit(tranaction, cb(err, v)) should record losing transactions such that they are canceled:   ․ BranchStore .commit(tranaction, cb(err, v)) should record losing transactions such that they are canceled
+  - BranchStore .commit(tranaction, cb(err, v)) should work even if all changes conflict
     BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter:   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object:   ․ BucketObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
     BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result:   ․ BucketObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
@@ -58,7 +59,7 @@
     BucketObjectStore .trans(ctx, v1, p) should support recursive transitions:   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions
     BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly):   ․ BucketObjectStore .trans(ctx, v1, p) should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly)
     BucketObjectStore A 1000 element tree should recall any number:   ․ BucketObjectStore A 1000 element tree should recall any number
-    BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store:   ․ BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
+    BucketObjectStore A 1000 element tree should call make a reasonable number of calls to the bucket store
     counter init should create a counter with value = 0:   ․ counter init should create a counter with value = 0
     counter add should add the given ammount to the counter value:   ․ counter add should add the given ammount to the counter value
     counter add should subtract the given amount when unapplied:   ․ counter add should subtract the given amount when unapplied
@@ -78,6 +79,8 @@
     DummyGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ DummyGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
     DummyGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ DummyGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
     DummyGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ DummyGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+    DummyGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ DummyGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
+    DummyGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ DummyGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
     DummyObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter:   ․ DummyObjectStore as ObjectStore .init(ctx, className, args) should call the init() method of the relevant class with args as a parameter
     DummyObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object:   ․ DummyObjectStore as ObjectStore .init(ctx, className, args) should return an ID (an object with a "$" attribute containing a string) of the newly created object
     DummyObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result:   ․ DummyObjectStore as ObjectStore .trans(ctx, v1, p) should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result
@@ -156,5 +159,6 @@
     vercast .randomByKey(key, prob) should return true in probability prob:   ․ vercast .randomByKey(key, prob) should return true in probability prob
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys:   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  156 passing (3s)
+  157 passing (3s)
+  1 pending
 

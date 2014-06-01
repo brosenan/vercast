@@ -244,6 +244,23 @@ describe('BranchStore', function(){
 		function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // the transaction is still canceled.
 	    ], done)();
 	});
-
+	it.skip('should work even if all changes conflict', function(done){
+	    util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.trans(this.v2, {_type: 'add', key: 'foo', value: 'FOO3'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'somethingElse', value: 3}, _.to('v3')); },
+		function(_) { branchStore.pull(this.vm, this.v3, _.to('vm2')); }, // v3, that contains the transaction, should win
+		function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo'}, _.to('vm2', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO3'); _(); }, // but vm won
+		function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo2'}, _.to('vm2', 'r')); },
+		function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // the transaction is still canceled.
+	    ], done)();
+	});
     });
 });

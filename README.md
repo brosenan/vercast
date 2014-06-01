@@ -1315,6 +1315,31 @@ util.seq([
     ], done)();
 ```
 
+should always take the shortest path.
+
+```js
+util.seq([
+	function(_) { graphDB.addEdge('a', 'wrong1', 'b', _); },
+	function(_) { graphDB.addEdge('b', 'wrong2', 'c', _); },
+	function(_) { graphDB.addEdge('a', 'right', 'c', _); },
+	function(_) { graphDB.findPath('a', 'c', _.to('path')); },
+	function(_) { assert.deepEqual(this.path, ['right']); _() },
+    ], done)();
+```
+
+should handle directed cycles correctly.
+
+```js
+util.seq([
+	function(_) { graphDB.addEdge('a', 'right1', 'b', _); },
+	function(_) { graphDB.addEdge('b', 'right2', 'c', _); },
+	function(_) { graphDB.addEdge('c', 'wrong', 'b', _); },
+	function(_) { graphDB.addEdge('c', 'right3', 'd', _); },
+	function(_) { graphDB.findPath('a', 'd', _.to('path')); },
+	function(_) { assert.deepEqual(this.path, ['right1', 'right2', 'right3']); _() },
+    ], done)();
+```
+
 <a name="dummyobjectstore"></a>
 # DummyObjectStore
 <a name="dummyobjectstore-as-objectstore"></a>
