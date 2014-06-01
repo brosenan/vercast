@@ -650,6 +650,47 @@ util.seq([
     ], done)();
 ```
 
+should keep transactions together when conflicts occur.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+	function(_) { this.t = branchStore.beginTransaction(this.v0);
+		      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+	function(_) { branchStore.commit(this.t, _); },
+	function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+	function(_) { branchStore.trans(this.v2, {_type: 'add', key: 'foo', value: 'FOO3'}, _.to('v2')); }, // conflicting with our transaction
+	function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+	function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+	function(_) { assert.equal(this.r, 'FOO3'); _(); }, // v2 wins
+	function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo2'}, _.to('vm', 'r')); },
+	function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // even the non-conflicting changes in the transaction are rolled back
+    ], done)();
+```
+
+should record losing transactions such that they are canceled.
+
+```js
+util.seq([
+	function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+	function(_) { this.t = branchStore.beginTransaction(this.v0);
+		      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+	function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+	function(_) { branchStore.commit(this.t, _); },
+	function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'otherThing', value: 4}, _.to('v1')); },
+	function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+	function(_) { branchStore.trans(this.v2, {_type: 'add', key: 'foo', value: 'FOO3'}, _.to('v2')); },
+	function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+	function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'somethingElse', value: 3}, _.to('v3')); },
+	function(_) { branchStore.pull(this.vm, this.v3, _.to('vm2')); }, // v3, that contains the transaction, should win
+	function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo'}, _.to('vm2', 'r')); },
+	function(_) { assert.equal(this.r, 'FOO3'); _(); }, // but vm won
+	function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo2'}, _.to('vm2', 'r')); },
+	function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // the transaction is still canceled.
+    ], done)();
+```
+
 <a name="bucketobjectstore"></a>
 # BucketObjectStore
 <a name="bucketobjectstore-as-objectstore"></a>

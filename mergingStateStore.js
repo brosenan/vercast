@@ -13,7 +13,7 @@ module.exports = function(stateStore, versionGraph) {
 	    function(_) { stateStore.trans(v1, [p], _.to('v2', 'r', 'c', 'w')); },
 	    function(_) { if(!simulate) versionGraph.recordTrans(v1, p, this.w, this.v2, _);
 			  else _();},
-	    function(_) { cb(undefined, this.v2, this.r, this.c, this.w); },
+	    function(_) { cb(undefined, this.v2, this.r[0], this.c, this.w); },
 	], cb)();
     };
     this.merge = function(v1, v2, resolve, cb) {
@@ -34,12 +34,11 @@ module.exports = function(stateStore, versionGraph) {
 	_p = _p || [];
 	_pconf = _pconf || [];
 	if(patches.length == 0) return cb(undefined, v1, _p, _pconf);
-	
 	util.seq([
 	    function(_) { stateStore.trans(v1, [patches[0]], _.to('v2', 'r', 'conf', 'w')); },
 	    function(_) { if(this.conf) {
 		if(allowConf) {
-		    doTrans(this.v2, patches.slice(1), allowConf, cb, _p, _pconf.concat([patches[0]]));
+		    doTrans(v1, patches.slice(1), allowConf, cb, _p, _pconf.concat([patches[0]]));
 		} else {
 		    var err = new Error('Merge Conflict');
 		    err.conflict = {p: patches[0], v: v1};
