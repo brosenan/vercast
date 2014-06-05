@@ -22,11 +22,12 @@ module.exports = function(sched) {
     };
     this.fetch = function(id, callback) {
 	tracer.trace({fetch: id});
-	if(this.locked) {
+	/*if(this.locked) {
 	    var err = new Error('Attempt to fetch while openning bucket ' + id);
 	    err.bucketLocked = true;
+	    console.log(23);
 	    throw err;
-	}
+	}*/
 	var self = this;
 	this.callCount++;
 	var bucket = this.buckets[id]

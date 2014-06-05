@@ -12,6 +12,7 @@ var DummyGraphDB = require('../dummyGraphDB.js');
 var util = require('../util.js');
 var BranchStore = require('../branchStore.js');
 var AtomicKVS = require('../dummyAtomicKVS.js');
+var PatchStore = require('../patchStore.js');
 
 
 var sched = new Scheduler();
@@ -21,12 +22,13 @@ bucketStore.async = true;
 var graphDB = new DummyGraphDB();
 var versionGraph = new SimpleVersionGraph(graphDB);
 var atomicStore = new AtomicKVS();
+var patchStore = new PatchStore(bucketStore, cache, sched);
 
 function createBranchStore(handlers) {
     var disp = new ObjectDisp(handlers);
     var ostore = new BucketObjectStore(disp, cache, bucketStore);
     var stateStore = new AsyncObjectStore(ostore, sched);
-    var mergingStateStore = new MergingStateStore(stateStore, versionGraph);
+    var mergingStateStore = new MergingStateStore(stateStore, versionGraph, patchStore);
     return new BranchStore(mergingStateStore, atomicStore);
 }
 
@@ -244,7 +246,7 @@ describe('BranchStore', function(){
 		function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // the transaction is still canceled.
 	    ], done)();
 	});
-	it.skip('should work even if all changes conflict', function(done){
+	it('should work even if all changes conflict', function(done){
 	    util.seq([
 		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
 		function(_) { this.t = branchStore.beginTransaction(this.v0);

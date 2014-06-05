@@ -51,13 +51,13 @@ module.exports = function() {
 	    var i = 0;
 	    var p1 = [];
 	    while(i < path.length && !path[i].d) {
-		p1.unshift(path[i].l);
+		p1.unshift({l: path[i].l, n: node});
 		node = G[node].i[path[i].l];
 		i++;
 	    }
 	    var p2 = [];
 	    while(i < path.length) {
-		p2.push(path[i].l);
+		p2.push({l: path[i].l, n: path[i].n});
 		i++;
 	    }
 	    cb(undefined, node, p1, p2);
@@ -76,10 +76,10 @@ module.exports = function() {
 	    if(res.prune) continue;
 	    if(res.done) break;
 	    for(var l in G[curr.n].o) {
-		q.push({n: G[curr.n].o[l], p: curr.p.concat([{l:l, d:true}])});
+		q.push({n: G[curr.n].o[l], p: curr.p.concat([{l:l, n:G[curr.n].o[l], d:true}])});
 	    }
 	    for(var l in G[curr.n].i) {
-		q.push({n: G[curr.n].i[l], p: curr.p.concat([{l:l, d:false}])});
+		q.push({n: G[curr.n].i[l], p: curr.p.concat([{l:l, n:G[curr.n].i[l], d:false}])});
 	    }
 	}
 	return results;

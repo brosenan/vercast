@@ -93,44 +93,6 @@ describe('SimpleVersionGraph', function(){
 	});
 
     });
-    describe('.getPatches(v1, v2, cb(err, patches))', function(){
-	beforeEach(function(done) {
-	    createGraph(1, 1, 30, done);
-	});
-	it('should return the patches along the path between v1 and v2 (here, v1 is an ancestor of v2)', function(done){
-	    util.seq([
-		function(_) { versionGraph.getPatches({$:2}, {$:18}, _.to('patches')); },
-		function(_) { 
-		    var m = 1;
-		    for(var i = 0; i < this.patches.length; i++) {
-			assert.equal(this.patches[i]._type, 'mult');
-			m *= this.patches[i].amount;
-		    }
-		    assert.equal(m, 9);
-		    _();
-		},
-	    ], done)();
-	});
-	it('should expand patches that result from previous merges', function(done){
-	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
-	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    util.seq([
-		function(_) { versionGraph.getMergeStrategy(v1, v2, false, _.to('V1', 'x', 'V2', 'mergeInfo')); },
-		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, [], [], _); },
-		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _.to('patches')); },
-		function(_) { 
-		    var m = 1;
-		    for(var i = 0; i < this.patches.length; i++) {
-			assert.equal(this.patches[i]._type, 'mult');
-			m *= this.patches[i].amount;
-		    }
-		    assert.equal(m, v2.$/this.x.$);
-		    _();
-		},
-	    ], done)();
-	});
-
-    });
     describe('.recordMerge(mergeInfo, newV, patches, confPatches, cb(err))', function(){
 	beforeEach(function(done) {
 	    createGraph(1, 1, 30, done);
@@ -141,7 +103,7 @@ describe('SimpleVersionGraph', function(){
 	    util.seq([
 		function(_) { versionGraph.getMergeStrategy(v1, v2, false, _.to('V1', 'x', 'V2', 'mergeInfo')); },
 		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, [], [], _); },
-		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _); }, // The new version should be in the graph
+		function(_) { versionGraph.getMergeStrategy(v1, {$:'newVersion'}, false, _); }, // The new version should be in the graph
 	    ], done)();
 	});
 	it('should record the overall weight on each new edge', function(done){
@@ -160,27 +122,5 @@ describe('SimpleVersionGraph', function(){
 		function(_) { assert(this.V6.$ <= this.V5.$, 'V6 should be lower'); _(); },
 	    ], done)();
 	});
-	it('should not record conflicting patches if such exist', function(done){
-	    var v1 = {$: 10};
-	    var v2 = {$: 24};
-	    
-	    util.seq([
-		function(_) { versionGraph.getMergeStrategy(v1, v2, true, _.to('V1', 'x', 'V2', 'mergeInfo')); },
-		function(_) { versionGraph.getPatches(this.x, v2, _.to('patches_x_v2')); },
-		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, [this.patches_x_v2[0]], this.patches_x_v2.slice(1), _); },
-		function(_) { versionGraph.getPatches(v1, {$:'newVersion'}, _.to('patches_v1_new')); },
-		function(_) { assert.deepEqual(this.patches_v1_new, [this.patches_x_v2[0]]); _(); },
-		// The path from v2 to new should be like the one from x to v1, followed by the conflicting patches, inversed, in reverse order.
-		function(_) { versionGraph.getPatches(this.x, v1, _.to('patches_x_v1')); },
-		function(_) { versionGraph.getPatches(v2, {$:'newVersion'}, _.to('patches_v2_new')); },
-		function(_) { assert.deepEqual(this.patches_v2_new, invertPatches(this.patches_x_v2.slice(1)).concat(this.patches_x_v1)); _(); },
-	    ], done)();
-
-	    function invertPatches(patches) {
-		var inv = patches.map(function(p) { return {_type: 'inv', patch: p}; });
-		return inv.reverse();
-	    }
-	});
-
     });
 });

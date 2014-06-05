@@ -10,6 +10,7 @@ var MergingStateStore = require('../mergingStateStore.js');
 var SimpleVersionGraph = require('../simpleVersionGraph.js');
 var DummyGraphDB = require('../dummyGraphDB.js');
 var util = require('../util.js');
+var PatchStore = require('../patchStore.js');
 
 var sched = new Scheduler();
 var cache = new SimpleCache(sched);
@@ -17,12 +18,13 @@ var bucketStore = new DummyBucketStore(sched);
 bucketStore.async = true;
 var graphDB = new DummyGraphDB();
 var versionGraph = new SimpleVersionGraph(graphDB);
+var patchStore = new PatchStore(bucketStore, cache, sched);
 
 function createMergingStateStore(handlers) {
     var disp = new ObjectDisp(handlers);
     var ostore = new BucketObjectStore(disp, cache, bucketStore);
     var stateStore = new AsyncObjectStore(ostore, sched);
-    return new MergingStateStore(stateStore, versionGraph);
+    return new MergingStateStore(stateStore, versionGraph, patchStore);
 }
 
 var stateStore = createMergingStateStore({
@@ -117,26 +119,6 @@ describe('MergingStateStore', function(){
 		function(_) { assert.equal(this.r, 'BAR'); _(); },
 		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'baz'}, _.to('vm', 'r')); },
 		function(_) { assert.equal(this.r, 'BAZ'); _(); },
-	    ], done)();
-	});
-	it('should record conflict resolutions by undoing the conflicting patches', function(done){
-	    util.seq([
-		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
-		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
-		function(_) { stateStore.trans(this.v1, {_type: 'add', key: 'baz', value: 'BAZ'}, _.to('v1')); },
-		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO2'}, _.to('v2')); }, // The conflict
-		function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
-		function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm')); }, // like before, vm should have foo->FOO and not FOO2.
-		function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'bat', value: 'BAT'}, _.to('v3')); },
-		function(_) { stateStore.merge(this.v3, this.vm, true, _.to('vm2')); }, // Should apply patches to v3
-		function(_) { stateStore.trans(this.vm2, {_type: 'fetch', key: 'foo'}, _.to('vm2', 'r')); },
-		function(_) { assert.equal(this.r, 'FOO'); _(); }, // and not FOO2
-		function(_) { stateStore.trans(this.vm2, {_type: 'fetch', key: 'bar'}, _.to('vm2', 'r')); },
-		function(_) { assert.equal(this.r, 'BAR'); _(); },
-		function(_) { stateStore.trans(this.vm2, {_type: 'fetch', key: 'baz'}, _.to('vm2', 'r')); },
-		function(_) { assert.equal(this.r, 'BAZ'); _(); },
-		function(_) { stateStore.trans(this.vm2, {_type: 'fetch', key: 'bat'}, _.to('vm2', 'r')); },
-		function(_) { assert.equal(this.r, 'BAT'); _(); },
 	    ], done)();
 	});
     });

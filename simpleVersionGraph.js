@@ -14,6 +14,7 @@ module.exports = function(graphDB) {
 	    function(_) { 
 		var w1 = pathWeight(this.path1);
 		var w2 = pathWeight(this.path2);
+		var pathToFollow, pathNotToFollow;
 		var mergeInfo = {x: {$:this.x},
 				 V1: v1,
 				 V2: v2,
@@ -23,15 +24,28 @@ module.exports = function(graphDB) {
 		    var tmp = mergeInfo.V1;
 		    mergeInfo.V1 = mergeInfo.V2;
 		    mergeInfo.V2 = tmp;
+		    pathToFollow = toPatches({$:this.x}, this.path1);
+		    pathNotToFollow = toPatches({$:this.x}, this.path2);
 		} else {
 		    var tmp = mergeInfo.w1;
 		    mergeInfo.w1 = mergeInfo.w2;
 		    mergeInfo.w2 = tmp;
+		    pathToFollow = toPatches({$:this.x}, this.path2);
+		    pathNotToFollow = toPatches({$:this.x}, this.path1);
 		}
-		cb(undefined, mergeInfo.V1, mergeInfo.x, mergeInfo.V2, mergeInfo); 
+		cb(undefined, mergeInfo.V1, mergeInfo.x, mergeInfo.V2, mergeInfo, pathToFollow, pathNotToFollow); 
 	    },
 	], cb)();
     };
+    function toPatches(v0, path) {
+	var patches = [];
+	for(var i = 0; i < path.length; i++) {
+	    var next = {$: path[i].n};
+	    patches.push({_type: '_range', from: v0, to: next});
+	    v0 = next;
+	}
+	return patches;
+    }
     this.getPatches = function(v1, v2, cb) {
 	getPatches([], [{_type: '_reapply', from: v1, to: v2}], cb);
     }
@@ -88,7 +102,7 @@ module.exports = function(graphDB) {
 function pathWeight(path) {
     var s = 0;
     for(var i = 0; i < path.length; i++) {
-	var entry = JSON.parse(path[i]);
+	var entry = JSON.parse(path[i].l);
 	s += entry.w;
     }
     return s;
@@ -97,7 +111,7 @@ function pathWeight(path) {
 function pathPatches(path) {
     var patches = [];
     for(var i = 0; i < path.length; i++) {
-	var item = JSON.parse(path[i]);
+	var item = JSON.parse(path[i].l);
 	patches.push(item.p);
     }
     return patches;
