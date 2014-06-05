@@ -1,78 +1,80 @@
 # TOC
-   - [application](#application)
-     - [initialState](#application-initialstate)
-     - [apply](#application-apply)
-     - [inv](#application-inv)
-   - [AppBase](#appbase)
-     - [.trans(branch, patch, options, cb(err))](#appbase-transbranch-patch-options-cberr)
-     - [.merge(dest, source, options, cb(err))](#appbase-mergedest-source-options-cberr)
-   - [atom](#atom)
-     - [get](#atom-get)
-     - [set](#atom-set)
-     - [get_all](#atom-get_all)
-   - [BranchBase](#branchbase)
-     - [.newBranch(branchName, s0, cb(err))](#branchbase-newbranchbranchname-s0-cberr)
-     - [.query(branchName, state, cb(err, res))](#branchbase-querybranchname-state-cberr-res)
-     - [.init(branchName, evaluator, args, cb(err))](#branchbase-initbranchname-evaluator-args-cberr)
-     - [.trans(branch, patch, options, cb(err))](#branchbase-transbranch-patch-options-cberr)
-     - [.merge(dest, source, options, cb(err))](#branchbase-mergedest-source-options-cberr)
-   - [collection](#collection)
-     - [init](#collection-init)
-     - [add](#collection-add)
-   - [composite patch](#composite-patch)
-     - [apply](#composite-patch-apply)
-       - [weak](#composite-patch-apply-weak)
-     - [unapply](#composite-patch-unapply)
+   - [Array](#array)
+     - [init](#array-init)
+     - [apply](#array-apply)
+     - [apply_range](#array-apply_range)
+   - [AsyncObjectStore](#asyncobjectstore)
+     - [.init(className, args, cb(err, v0))](#asyncobjectstore-initclassname-args-cberr-v0)
+     - [.transRaw(v1, p, cb(err, v2, r, conf, eff))](#asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff)
+     - [.trans(v1, ps, cb(err, v2, r, conf, w))](#asyncobjectstore-transv1-ps-cberr-v2-r-conf-w)
+   - [BinTree](#bintree)
+     - [init](#bintree-init)
+     - [fetch](#bintree-fetch)
+     - [add](#bintree-add)
+     - [getMin](#bintree-getmin)
+     - [remove](#bintree-remove)
+   - [BranchStore](#branchstore)
+     - [.init(className, args, cb(err, v0))](#branchstore-initclassname-args-cberr-v0)
+     - [.trans(v1, p, cb(err, v2, r, c))](#branchstore-transv1-p-cberr-v2-r-c)
+     - [.fork(name, v0, cb(err))](#branchstore-forkname-v0-cberr)
+     - [.head(branchName)](#branchstore-headbranchname)
+     - [.push(branchName, v2, cb(err))](#branchstore-pushbranchname-v2-cberr)
+     - [.pull(v1, versionOrBranch, cb(err, vm))](#branchstore-pullv1-versionorbranch-cberr-vm)
+     - [.beginTransaction(v0)](#branchstore-begintransactionv0)
+     - [.commit(tranaction, cb(err, v))](#branchstore-committranaction-cberr-v)
+   - [BucketObjectStore](#bucketobjectstore)
+     - [as ObjectStore](#bucketobjectstore-as-objectstore)
+       - [.init(ctx, className, args)](#bucketobjectstore-as-objectstore-initctx-classname-args)
+       - [.trans(ctx, v1, p)](#bucketobjectstore-as-objectstore-transctx-v1-p)
+       - [context](#bucketobjectstore-as-objectstore-context)
+         - [.conflict()](#bucketobjectstore-as-objectstore-context-conflict)
+         - [.effect(patch)](#bucketobjectstore-as-objectstore-context-effectpatch)
+     - [.hash(bucket, obj)](#bucketobjectstore-hashbucket-obj)
+     - [.unhash(id)](#bucketobjectstore-unhashid)
+     - [.trans(ctx, v1, p)](#bucketobjectstore-transctx-v1-p)
+     - [A 1000 element tree](#bucketobjectstore-a-1000-element-tree)
    - [counter](#counter)
-     - [get](#counter-get)
+     - [init](#counter-init)
      - [add](#counter-add)
-   - [directory](#directory)
-     - [create](#directory-create)
-     - [delete](#directory-delete)
-     - [get_hash](#directory-get_hash)
-     - [add_mapping](#directory-add_mapping)
+     - [get](#counter-get)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
        - [.retrieve(key, cb(err, val))](#dummyatomickvs-as-atomickeyvalue-retrievekey-cberr-val)
        - [.modify(key, oldVal, newVal, cb(err, valAfterMod))](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval-cberr-valaftermod)
-   - [DummyBranch](#dummybranch)
-     - [as Branch](#dummybranch-as-branch)
-       - [checkedUpdate](#dummybranch-as-branch-checkedupdate)
-   - [DummyVersionGraph](#dummyversiongraph)
-     - [as VersionGraph](#dummyversiongraph-as-versiongraph)
-       - [addEdge](#dummyversiongraph-as-versiongraph-addedge)
-       - [findCommonAncestor](#dummyversiongraph-as-versiongraph-findcommonancestor)
-   - [EvalEnv](#evalenv)
-     - [init(evaluator, args, cb(err, h0))](#evalenv-initevaluator-args-cberr-h0)
-     - [apply(s1, patch, unapply, cb(err, s2, res, eff, conf))](#evalenv-applys1-patch-unapply-cberr-s2-res-eff-conf)
-     - [trans(h1, patch, cb(err, h2, res, eff, conf))](#evalenv-transh1-patch-cberr-h2-res-eff-conf)
-     - [query(s, q, cb(err, res))](#evalenv-querys-q-cberr-res)
-   - [HashDB](#hashdb)
-     - [hash(obj, cb(err, hash))](#hashdb-hashobj-cberr-hash)
-     - [unhash(hash, cb(err, obj))](#hashdb-unhashhash-cberr-obj)
-   - [HashedApp](#hashedapp)
-     - [initialState](#hashedapp-initialstate)
-     - [apply](#hashedapp-apply)
-       - [_inv](#hashedapp-apply-_inv)
-       - [_comp](#hashedapp-apply-_comp)
-       - [_hashed](#hashedapp-apply-_hashed)
-     - [trans](#hashedapp-trans)
-     - [query](#hashedapp-query)
-     - [branchQuery](#hashedapp-branchquery)
-     - [branchTrans](#hashedapp-branchtrans)
-   - [inverse patch](#inverse-patch)
-     - [patch](#inverse-patch-patch)
-     - [unpatch](#inverse-patch-unpatch)
-   - [jsMapper](#jsmapper)
-     - [init](#jsmapper-init)
-     - [map](#jsmapper-map)
-   - [logicBase](#logicbase)
-     - [query](#logicbase-query)
-   - [logicBase Implementation](#logicbase-implementation)
-     - [init](#logicbase-implementation-init)
-     - [update](#logicbase-implementation-update)
-       - [assert](#logicbase-implementation-update-assert)
+   - [DummyBucketStore](#dummybucketstore)
+     - [async mode](#dummybucketstore-async-mode)
+   - [DummyGraphDB](#dummygraphdb)
+     - [as GraphDB](#dummygraphdb-as-graphdb)
+       - [addEdge](#dummygraphdb-as-graphdb-addedge)
+       - [findCommonAncestor](#dummygraphdb-as-graphdb-findcommonancestor)
+     - [.findPath(x, y, cb(err, path))](#dummygraphdb-findpathx-y-cberr-path)
+   - [DummyObjectStore](#dummyobjectstore)
+     - [as ObjectStore](#dummyobjectstore-as-objectstore)
+       - [.init(ctx, className, args)](#dummyobjectstore-as-objectstore-initctx-classname-args)
+       - [.trans(ctx, v1, p)](#dummyobjectstore-as-objectstore-transctx-v1-p)
+       - [context](#dummyobjectstore-as-objectstore-context)
+         - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
+         - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
+   - [MergingStateStore](#mergingstatestore)
+     - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
+     - [.trans(v1, p,[ simulate,] cb(v2, r, c))](#mergingstatestore-transv1-p-simulate-cbv2-r-c)
+     - [.merge(v1, v2[, resolve], cb(err, vm))](#mergingstatestore-mergev1-v2-resolve-cberr-vm)
+   - [ObjectDisp](#objectdisp)
+     - [.init(ctx, className, args)](#objectdisp-initctx-classname-args)
+     - [.apply(ctx, obj, patch, unapply)](#objectdisp-applyctx-obj-patch-unapply)
+   - [PatchStore](#patchstore)
+   - [Scheduler](#scheduler)
+   - [SimpleCache](#simplecache)
+     - [.store(id, obj[, json])](#simplecache-storeid-obj-json)
+     - [.fetch(id)](#simplecache-fetchid)
+     - [.abolish()](#simplecache-abolish)
+     - [.waitFor(keys, callback)](#simplecache-waitforkeys-callback)
+     - [.check(key)](#simplecache-checkkey)
+   - [SimpleVersionGraph](#simpleversiongraph)
+     - [.recordTrans(v1, p, w, v2, cb(err))](#simpleversiongraph-recordtransv1-p-w-v2-cberr)
+     - [.getMergeStrategy(v1, v2, resolve, cb(err, V1, x, V2, mergeInfo))](#simpleversiongraph-getmergestrategyv1-v2-resolve-cberr-v1-x-v2-mergeinfo)
+     - [.recordMerge(mergeInfo, newV, patches, confPatches, cb(err))](#simpleversiongraph-recordmergemergeinfo-newv-patches-confpatches-cberr)
    - [util](#util)
      - [seq(funcs, done)](#util-seqfuncs-done)
        - [_.to(names...)](#util-seqfuncs-done-_tonames)
@@ -85,865 +87,1031 @@
      - [GrowingInterval](#util-growinginterval)
      - [repeat](#util-repeat)
      - [depend](#util-depend)
-   - [VCObj](#vcobj)
-     - [createObject(cls, s0, cb(err, h0))](#vcobj-createobjectcls-s0-cberr-h0)
-     - [apply(h1, patch, cb(err, h2, res, effect, conflict))](#vcobj-applyh1-patch-cberr-h2-res-effect-conflict)
-     - [invert(patch, cb(err, invPatch))](#vcobj-invertpatch-cberr-invpatch)
-     - [createChainPatch(patches, cb(err, patch))](#vcobj-createchainpatchpatches-cberr-patch)
-     - [trans(h1, patch, cb(h2, res, effect, conflict))](#vcobj-transh1-patch-cbh2-res-effect-conflict)
-     - [query(h1, patch, cb(err, ret))](#vcobj-queryh1-patch-cberr-ret)
+   - [vercast](#vercast)
+     - [.hash(obj)](#vercast-hashobj)
+     - [.genID(bucketID, hash)](#vercast-genidbucketid-hash)
+     - [.bucketID(id)](#vercast-bucketidid)
+     - [.objID(id)](#vercast-objidid)
+     - [.childObjects(obj)](#vercast-childobjectsobj)
+     - [.randomByKey(key, prob)](#vercast-randombykeykey-prob)
 <a name=""></a>
  
-<a name="application"></a>
-# application
-<a name="application-initialstate"></a>
-## initialState
-should properly create an initial state.
-
-```js
-var app = new App(hash);
-util.seq([
-		function(_) { app.initialState(appHashDB, _.to('s0')); },
-		function(_) { assert.equal(this.s0.val, 0); _(); },
-], done)();
-```
-
-<a name="application-apply"></a>
-## apply
-should return the query result based on the state.
-
-```js
-util.seq([
-		function(_) { app.apply(state, {type: 'get'}, _.to('val', 'sf')); },
-		function(_) { assert.equal(this.val, 0); _(); },
-], done)();
-```
-
-should apply the patch to the state.
-
-```js
-util.seq([
-		function(_) { app.apply(state, {type: 'add', amount:2}, _); },
-		function(_) { app.apply(state, {type: 'get'}, _.to('val')); },
-		function(_) { assert.equal(this.val, 2); _(); },
-], done)();
-```
-
-<a name="application-inv"></a>
-## inv
-should invert patches.
-
-```js
-var app = new App(hash);
-util.seq([
-		function(_) { app.inv(appHashDB, {type: 'add', amount: 2}, _.to('inv')); },
-		function(_) { assert.equal(this.inv.type, 'add');
-			      assert.equal(this.inv.amount, -2); 
-			      _();},
-], done)();
-```
-
-<a name="appbase"></a>
-# AppBase
-<a name="appbase-transbranch-patch-options-cberr"></a>
-## .trans(branch, patch, options, cb(err))
-should apply the given patch on the tip of the given branch.
-
-```js
-var compPatch = {_type: 'comp', patches: [
-		{_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
-		{_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
-		{_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
-		{_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
-]};
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
-		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['a']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bat'); _(); },
-], done)();
-```
-
-should report conflicts.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {}, _.to('state', 'conf')); },
-		function(_) { assert(this.conf, 'Should conflict'); _(); },
-		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['a']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); }, // The conflicting value
-], done)();
-```
-
-should force the change if the strong option is used.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _.to('state')); },
-		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['a']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-should apply effect patches as part of the transition.
-
-```js
-var mapper = fun2str({
-		map_set: function(patch) {
-		    emit({_type: 'create', 
-			  _path: [patch.to], 
-			  evalType: 'atom', 
-			  args: {val: patch._at_path[0]}});
-		},
-});
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, compPatch, {}, _.to('state')); },
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
-		function(_) { appBase.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, {}, _.to('state')); },
-		function(_) { appBase.trans(this.state, {_type: 'set', _path: ['a'], from: 'bat', to: 'bar'}, {}, _.to('state')); },
-		function(_) { evalEnv.query(this.state, {_type: 'get', _path: ['bar']}, _.to('a')); },
-		function(_) { assert.equal(this.a, 'a'); _(); },
-], done)();
-```
-
-<a name="appbase-mergedest-source-options-cberr"></a>
-## .merge(dest, source, options, cb(err))
-should apply the patches contributing to source to the tip of branch.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
-		function(_) { this.state2 = this.state1; _(); },
-		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _.to('state2')); },
-		function(_) { appBase.merge(this.state1, this.state2, {}, _.to('state1')); },
-		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz2'); _(); },
-		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar2'); _(); },
-], done)();
-```
-
-should report conflicts if they occur.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
-		function(_) { this.state2 = this.state1; _(); },
-		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _.to('state2')); },
-		function(_) { appBase.merge(this.state1, this.state2, {}, _.to('state1', 'conf')); },
-		function(_) { assert(this.conf, 'A conflict must be reported'); _(); },
-		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar3'); _(); }, // Should take the merged value
-], done)();
-```
-
-should accept a "weak" option, by which it would apply only non-conflicting changes.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
-		function(_) { this.state2 = this.state1; _(); },
-		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
-		// Conflicting change
-		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _.to('state2')); },
-		// Unconflicting change
-		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _.to('state2')); },
-		function(_) { appBase.merge(this.state1, this.state2, {weak: true}, _.to('state1', 'conf')); },
-		function(_) { assert(!this.conf, 'A conflict should not be reported'); _(); },
-		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz3'); _(); },
-		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar2'); _(); }, // The value on the destination branch
-], done)();
-```
-
-should apply a back-merge correctly.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state1, compPatch, {}, _.to('state1')); },
-		function(_) { this.state2 = this.state1; _(); },
-		function(_) { appBase.trans(this.state1, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _.to('state1')); },
-		function(_) { appBase.trans(this.state2, {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _.to('state2')); },
-		function(_) { appBase.merge(this.state1, this.state2, {}, _.to('state1')); },
-		function(_) { appBase.merge(this.state2, this.state1, {}, _.to('state2')); }, // merge back
-		// Check that br1 got the data from br2
-		function(_) { evalEnv.query(this.state1, {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz2'); _(); },
-		// Check that br2 got the data from br1
-		function(_) { evalEnv.query(this.state2, {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar2'); _(); },
-], done)();
-```
-
-<a name="atom"></a>
-# atom
-<a name="atom-get"></a>
-## get
-should return the atom's value.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.query(this.s0, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'foo'); _(); },
-], done)();
-```
-
-should return the last set value even at the event of a conflict.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
-		function(_) { evalEnv.trans(this.s1, {_type: 'set', from: 'foo', to: 'baz'}, _.to('s2')); },
-		function(_) { evalEnv.query(this.s2, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'baz'); _(); },
-], done)();
-```
-
-<a name="atom-set"></a>
-## set
-should change the state to contain the "to" value, given that the "from" value matches the current state.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-should report a conflict if the "from" value does not match.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'bar', to: 'baz'}, _.to('s1', 'res', 'eff', 'conf')); },
-		function(_) { assert(this.conf, 'A conflict should be reported'); _(); },
-], done)();
-```
-
-should invert patches correctly.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'set', from: 'bar', to: 'foo'}, true, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-<a name="atom-get_all"></a>
-## get_all
-should return all possible values.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'set', from: 'foo', to: 'bar'}, _.to('s1')); },
-		function(_) { evalEnv.trans(this.s1, {_type: 'set', from: 'foo', to: 'baz'}, _.to('s2')); },
-		function(_) { evalEnv.query(this.s2, {_type: 'get_all'}, _.to('res')); },
-		function(_) { assert.deepEqual(this.res, ['baz', 'bar']); _(); },
-], done)();
-```
-
-<a name="branchbase"></a>
-# BranchBase
-<a name="branchbase-newbranchbranchname-s0-cberr"></a>
-## .newBranch(branchName, s0, cb(err))
-should create a new branch with the given branchName, with the initial state s0.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('s0')); },
-		function(_) { branchBase.newBranch('foo', this.s0, _);  },
-		function(_) { branchBase.query('foo', {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-<a name="branchbase-initbranchname-evaluator-args-cberr"></a>
-## .init(branchName, evaluator, args, cb(err))
-should create a new branch with the given evaluator and arguments.
-
-```js
-util.seq([
-		function(_) { branchBase.init('foo', 'atom', {val: 'bar'}, _); },
-		function(_) { branchBase.query('foo', {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-<a name="branchbase-transbranch-patch-options-cberr"></a>
-## .trans(branch, patch, options, cb(err))
-should apply the given patch on the tip of the given branch.
-
-```js
-var compPatch = {_type: 'comp', patches: [
-		{_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'foo'}},
-		{_type: 'create', _path: ['b'], evalType: 'atom', args: {val: 'bar'}},
-		{_type: 'create', _path: ['c'], evalType: 'atom', args: {val: 'baz'}},
-		{_type: 'set', _path: ['a'], from: 'foo', to: 'bat'},
-]};
-util.seq([
-		function(_) { branchBase.init('br', 'dir', {}, _); },
-		function(_) { branchBase.trans('br', compPatch, {}, _); },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bat'); _(); },
-], done)();
-```
-
-should retry and reapply the patch over the new tip if the tip moves during the transition.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br', 'dir', {}, _); },
-		function(_) { branchBase.trans('br', compPatch, {}, _); },
-		function(_) { tipDB.retrieve('br', _.to('tip')); },
-		function(_) { evalEnv.trans(this.tip, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, _.to('s1')); },
-		function(_) { var p = util.parallel(2, _);
-			      branchBase.trans('br', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, p);
-			      tipDB.modify('br', this.tip, this.s1, p); // This will be done before the transition on c completes
-			    },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.b, 'bar2'); // Both changes apply
-			      assert.equal(this.c, 'baz2'); _(); },
-], done)();
-```
-
-should retry the given number of times.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br', 'dir', {}, _); },
-		function(_) { branchBase.trans('br', compPatch, {}, _); },
-		function(_) { tipDB.retrieve('br', _.to('tip')); },
-		function(_) { evalEnv.trans(this.tip, {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, _.to('s1')); },
-		function(_) { var p = util.parallel(2, _);
-			      branchBase.trans('br', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {retries: 1}, p);
-			      tipDB.modify('br', this.tip, this.s1, p); // This will be done before the transition on c completes
-			    },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.b, 'bar2'); // Both changes apply
-			      assert.equal(this.c, 'baz2'); _(); },
-], function(err) {
-		assert(err, 'An error needs to be emitted');
-		done(err.message == 'Retries exhasted trying to modify state of branch br' ? undefined : err);
-})();
-```
-
-should emit an error by default if the patch conflicts.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br', 'dir', {}, _); },
-		function(_) { branchBase.trans('br', compPatch, {}, _); },
-		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {}, _); },
-], function(err) {
-		assert(err, 'There should be an error');
-		done(err.message == 'Conflicting change in transition on branch br' ? undefined : err);
-})();
-```
-
-should force the change if the strong option is used.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br', 'dir', {}, _); },
-		function(_) { branchBase.trans('br', compPatch, {}, _); },
-		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'foo', to: 'bar'}, {strong: true}, _); },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['a']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-should apply effect patches as part of the transition.
-
-```js
-var mapper = fun2str({
-		map_set: function(patch) {
-		    emit({_type: 'create', 
-			  _path: [patch.to], 
-			  evalType: 'atom', 
-			  args: {val: patch._at_path[0]}});
-		},
-});
-util.seq([
-		function(_) { branchBase.init('br', 'dir', {}, _); },
-		function(_) { branchBase.trans('br', compPatch, {}, _); },
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
-		function(_) { branchBase.trans('br', {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, {}, _); },
-		function(_) { branchBase.trans('br', {_type: 'set', _path: ['a'], from: 'bat', to: 'bar'}, {}, _); },
-		function(_) { branchBase.query('br', {_type: 'get', _path: ['bar']}, _.to('a')); },
-		function(_) { assert.equal(this.a, 'a'); _(); },
-], done)();
-```
-
-<a name="branchbase-mergedest-source-options-cberr"></a>
-## .merge(dest, source, options, cb(err))
-should apply the patches contributing to source to the tip of branch.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br1', 'dir', {}, _); },
-		function(_) { branchBase.trans('br1', compPatch, {}, _); },
-		function(_) { branchBase.fork('br1', 'br2', _); },
-		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _); },
-		function(_) { branchBase.merge('br1', 'br2', {}, _); },
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz2'); _(); },
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar2'); _(); },
-], done)();
-```
-
-should emit an error by default if a merge conflict is found.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br1', 'dir', {}, _); },
-		function(_) { branchBase.trans('br1', compPatch, {}, _); },
-		function(_) { branchBase.fork('br1', 'br2', _); },
-		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _); },
-		function(_) { branchBase.merge('br1', 'br2', {}, _); },
-], function(err) {
-		assert(err, 'An error must be emitted');
-		done(err.message == 'Conflicting change in transition on branch br1' ? undefined : err);
-})();
-```
-
-should accept a "weak" option, by which it would apply only non-conflicting changes.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br1', 'dir', {}, _); },
-		function(_) { branchBase.trans('br1', compPatch, {}, _); },
-		function(_) { branchBase.fork('br1', 'br2', _); },
-		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'baz3'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _); },
-		function(_) { branchBase.merge('br1', 'br2', {weak: true}, _); },
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz3'); _(); },
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar2'); _(); }, // The value on the destination branch
-], done)();
-```
-
-should accept a "strong" option, by which it will force the change in case of a conflict.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br1', 'dir', {}, _); },
-		function(_) { branchBase.trans('br1', compPatch, {}, _); },
-		function(_) { branchBase.fork('br1', 'br2', _); },
-		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar3'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz3'}, {}, _); },
-		function(_) { branchBase.merge('br1', 'br2', {strong: true}, _); },
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz3'); _(); },
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar3'); _(); }, // The value on the source branch
-], done)();
-```
-
-should apply a back-merge correctly.
-
-```js
-util.seq([
-		function(_) { branchBase.init('br1', 'dir', {}, _); },
-		function(_) { branchBase.trans('br1', compPatch, {}, _); },
-		function(_) { branchBase.fork('br1', 'br2', _); },
-		function(_) { branchBase.trans('br1', {_type: 'set', _path: ['b'], from: 'bar', to: 'bar2'}, {}, _); },
-		function(_) { branchBase.trans('br2', {_type: 'set', _path: ['c'], from: 'baz', to: 'baz2'}, {}, _); },
-		function(_) { branchBase.merge('br1', 'br2', {}, _); },
-		function(_) { branchBase.merge('br2', 'br1', {}, _); }, // merge back
-		// Check that br1 got the data from br2
-		function(_) { branchBase.query('br1', {_type: 'get', _path: ['c']}, _.to('c')); },
-		function(_) { assert.equal(this.c, 'baz2'); _(); },
-		// Check that br2 got the data from br1
-		function(_) { branchBase.query('br2', {_type: 'get', _path: ['b']}, _.to('b')); },
-		function(_) { assert.equal(this.b, 'bar2'); _(); },
-], done)();
-```
-
-<a name="collection"></a>
-# collection
-<a name="collection-init"></a>
+<a name="array"></a>
+# Array
+<a name="array-init"></a>
 ## init
-should create an empty collection.
+should create an array containing objects in their initial version.
 
 ```js
-util.seq([
-		function(_) { evalEnv.init('coll', {}, _.to('s0')); },
-		function(_) { evalEnv.query(this.s0, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.deepEqual(this.res, {}); _(); },
-], done)();
+var ctx = {};
+var v = ostore.init(ctx, 'Array', {size: 10, className: 'Counter'});
+var counter = ostore.trans(ctx, v, {_type: 'get', index: 2})[1];
+var zero = ostore.trans(ctx, counter, {_type: 'get'})[1];
+assert.equal(zero, 0);
 ```
 
-<a name="collection-add"></a>
-## add
-should add a key/value pair to the collection.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('coll', {}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'add', key: 'foo', val: 'bar'}, _.to('state')); },
-		function(_) { evalEnv.query(this.state, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.deepEqual(this.res, {foo: 'bar'}); _(); },
-], done)();
-```
-
-<a name="composite-patch"></a>
-# composite patch
-<a name="composite-patch-apply"></a>
+<a name="array-apply"></a>
 ## apply
-should apply the given patches one by one.
+should relay a patch to an array entry corresponding to the given index.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'Array', {size: 6, className: 'Counter'});
+v = ostore.trans(ctx, v, {_type: 'apply', index: 3, patch: {_type: 'add', amount: 4}})[0];
+var counter = ostore.trans(ctx, v, {_type: 'get', index: 3})[1];
+var four = ostore.trans(ctx, counter, {_type: 'get'})[1];
+assert.equal(four, 4);
+```
+
+should return the underlying patch's return value.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'Array', {size: 10, className: 'Counter'});
+v = ostore.trans(ctx, v, {_type: 'apply', index: 3, patch: {_type: 'add', amount: 5}})[0];
+var five = ostore.trans(ctx, v, {_type: 'apply', index: 3, patch: {_type: 'get'}})[1];
+assert.ifError(ctx.error);
+assert.equal(five, 5);
+```
+
+<a name="array-apply_range"></a>
+## apply_range
+should apply a patch to a given range in the array.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'Array', {size: 10, className: 'Counter'});
+v = ostore.trans(ctx, v, {_type: 'apply_range', from: 2, to: 8, patch: {_type: 'add', amount: 3}})[0];
+assert.ifError(ctx.error);
+assert.equal(ostore.trans(ctx, v, {_type: 'apply', index: 1, patch: {_type: 'get'}})[1], 0);
+assert.equal(ostore.trans(ctx, v, {_type: 'apply', index: 2, patch: {_type: 'get'}})[1], 3);
+assert.equal(ostore.trans(ctx, v, {_type: 'apply', index: 5, patch: {_type: 'get'}})[1], 3);
+assert.equal(ostore.trans(ctx, v, {_type: 'apply', index: 7, patch: {_type: 'get'}})[1], 3);
+assert.equal(ostore.trans(ctx, v, {_type: 'apply', index: 8, patch: {_type: 'get'}})[1], 0);
+```
+
+<a name="asyncobjectstore"></a>
+# AsyncObjectStore
+<a name="asyncobjectstore-initclassname-args-cberr-v0"></a>
+## .init(className, args, cb(err, v0))
+should initialize an object of class className with arguments args and return the ID.
+
+```js
+var called = false;
+var disp = new ObjectDisp({
+		Class1: {
+		    init: function(ctx, args) {
+			called = true;
+			this.foo = args.bar;
+		    }
+		},
+		Class2: {
+		    init: function(ctx, args) {
+			assert(false, 'Class2\'s constructor should not be called');
+		    }
+		}
+});
+var ostore = createOstore(disp);
+ostore.init('Class1', {bar: 12}, function(err, v0) {
+		assert.ifError(err);
+		assert(called, 'Constructor should have been called');
+		var obj = cache.fetch(v0.$);
+		assert.equal(obj.foo, 12);
+		done();
+});
+```
+
+<a name="asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff"></a>
+## .transRaw(v1, p, cb(err, v2, r, conf, eff))
+should apply patch p to v1, to receive v2.
+
+```js
+ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2, r, conf) {
+		var obj = cache.fetch(v2.$);
+		assert.ifError(err);
+		assert(!conf, 'should not conflict');
+		assert.equal(obj.value, 2);
+		done();
+});
+```
+
+should return the result r of the patch.
+
+```js
+ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
+		assert.equal(r, 0);
+		done();
+});
+```
+
+should return the result version even if the source version is not in the cache.
+
+```js
+cache.abolish();
+ostore.transRaw(counterVersion, {_type: 'add', amount: 2}, function(err, v2, r, conf) {
+		var obj = cache.fetch(v2.$);
+		assert.ifError(err);
+		assert(!conf, 'should not conflict');
+		assert.equal(obj.value, 2);
+		done();
+});
+```
+
+should return the result r even if the source version is not in the cache.
+
+```js
+cache.abolish();
+ostore.transRaw(counterVersion, {_type: 'get'}, function(err, v2, r) {
+		assert.equal(r, 0);
+		done();
+});
+```
+
+should return the conflict flag (in cache).
+
+```js
+ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}}, function(err, v2, r, conf) {
+		assert.ifError(err);
+		assert(conf, 'should be conflicting');
+		done();
+});
+```
+
+should return the conflict flag (out of cache).
+
+```js
+cache.abolish();
+ostore.transRaw(myObjVersion, {_type: 'patch', patch: {_type: 'raiseConflict'}}, function(err, v2, r, conf) {
+		assert.ifError(err);
+		assert(conf, 'should be conflicting');
+		done();
+});
+```
+
+should return all effect patches (in cache).
+
+```js
+ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, conf, eff) {
+		assert.ifError(err);
+		assert.equal(eff.length, 6);
+		done();
+});
+```
+
+should return all effect patches (out of cache).
+
+```js
+cache.abolish();
+ostore.transRaw(myObjVersion, {_type: 'patchWithEffect'}, function(err, v2, r, conf, eff) {
+		assert.ifError(err);
+		assert.equal(eff.length, 6);
+		done();
+});
+```
+
+<a name="asyncobjectstore-transv1-ps-cberr-v2-r-conf-w"></a>
+## .trans(v1, ps, cb(err, v2, r, conf, w))
+should perform transitions and return the result version and result.
+
+```js
+ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}}], function(err, v2) {
+		if(err) return done(err);
+		ostore.trans(v2, [{_type: 'counterPatch', patch: {_type: 'get'}}], function(err, v3, r) {
+		    if(err) return done(err);
+		    assert.equal(r[0], 4);
+		    done();
+		});
+});
+```
+
+should perform a sequence of transitions, returning the result of each.
+
+```js
+ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'counterPatch', patch: {_type: 'add', amount: 2}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs, conf, w) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[3], 6);
+			     assert(!conf, 'should not be conflicting');
+			     assert.equal(w, 4); // w should capture the overall number of patches applied
+			     done();
+			 });
+```
+
+should update the conflict flag appropriately.
+
+```js
+ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'raiseConflict'},
+					{_type: 'counterPatch', patch: {_type: 'add', amount: 2}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs, conf) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[4], 6);
+			     assert(conf, 'should be conflicting');
+			     done();
+			 });
+```
+
+should apply effect patches resulting from previous patches, automatically.
+
+```js
+ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount: 4}},
+					{_type: 'counterPatch', patch: {_type: 'get'}},
+					{_type: 'hasEffect',
+					 eff: {_type: 'counterPatch', patch: {_type: 'add', amount: 3}}},
+					{_type: 'counterPatch', patch: {_type: 'get'}}],
+			 function(err, v2, rs, conf, w) {
+			     if(err) return done(err);
+			     assert.equal(rs[1], 4);
+			     assert.equal(rs[3], 4); // The effect has not been encountered yet
+			     assert(!conf, 'should not be conflicting');
+			     assert.equal(w, 5); // w captures the number of patches, including effect patches
+			     ostore.trans(v2, [{_type: 'counterPatch', patch: {_type: 'get'}}], function(err, v3, rs) {
+				 assert.equal(rs[0], 7);
+				 done();
+			     });
+			 });
+```
+
+<a name="bintree"></a>
+# BinTree
+<a name="bintree-init"></a>
+## init
+should initialize a binary tree with a single element.
+
+```js
+var tree = disp.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+assert.equal(tree.key, 'foo');
+assert.equal(tree.value, 'bar');
+assert.equal(tree.left, null);
+assert.equal(tree.right, null);
+done();
+```
+
+<a name="bintree-fetch"></a>
+## fetch
+should return the value associated with a key.
+
+```js
+var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+var pair = ostore.trans({}, v, {_type: 'fetch', key: 'foo'});
+assert.equal(pair[1], 'bar');
+done();
+```
+
+should return undefined if the key is not in the tree.
+
+```js
+var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+var pair = ostore.trans({}, v, {_type: 'fetch', key: 'FOO'});
+assert.equal(typeof pair[1], 'undefined');
+done();
+```
+
+<a name="bintree-add"></a>
+## add
+should add a leaf to the tree, based on key comparison.
+
+```js
+var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+v = ostore.trans({}, v, {_type: 'add', key: 'bar', value: 'baz'})[0];
+v = ostore.trans({}, v, {_type: 'add', key: 'kar', value: 'fuzz'})[0];
+assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'foo'})[1], 'bar');
+assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'bar'})[1], 'baz');
+assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'kar'})[1], 'fuzz');
+done();
+```
+
+should report a conflict and not change the state if the the key already exists.
+
+```js
+var v0 = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
+var ctx = {foo: 123};
+var v1 = ostore.trans(ctx, v0, {_type: 'add', key: 'foo', value: 'baz'})[0];
+assert(ctx.conf, 'Should be conflicting');
+assert.equal(v0.$, v1.$);
+done();
+```
+
+<a name="bintree-getmin"></a>
+## getMin
+should retrieve the the minimum key, with its associated value.
+
+```js
+function createTree(list) {
+		var v = ostore.init({}, 'BinTree', {key: list[0][0], value: list[0][1]});
+		for(var i = 1; i < list.length; i++) {
+		    v = ostore.trans({}, v, {_type: 'add', key: list[i][0], value: list[i][1]})[0];
+		}
+		return v;
+}
+
+var v = createTree([[4, 8], [2, 4], [5, 10], [3, 6]]);
+var r = ostore.trans({}, v, {_type: 'getMin'})[1];
+assert.equal(r.key, 2);
+assert.equal(r.value, 4);
+done();
+```
+
+<a name="bintree-remove"></a>
+## remove
+should remove the element with the given key and value.
+
+```js
+function allInTree(v, list) {
+		for(var i = 0; i < list.length; i++) {
+		    if(!ostore.trans({}, v, {_type: 'fetch', key: list[i]})[1]) return false;
+		}
+		return true;
+}
+// Remove a node that has one child
+var v = createTree([[4, 8], [2, 4], [5, 10], [3, 6]]);
+var removed2 = ostore.trans({}, v, {_type: 'remove', key: 2, value: 4})[0];
+var r = ostore.trans({}, removed2, {_type: 'fetch', key: 2})[1];
+assert(!r, 'key 2 should be removed');
+assert(allInTree(removed2, [4, 5, 3]), '4, 5, and 3 should remain in the tree');
+// Remove a node with two children
+var removed4 = ostore.trans({}, v, {_type: 'remove', key: 4, value: 8})[0];
+var r = ostore.trans({}, removed4, {_type: 'fetch', key: 4})[1];
+assert(!r, 'key 4 should be removed');
+assert(allInTree(removed4, [2, 5, 3]), '2, 5, and 3 should remain in the tree');
+done();
+```
+
+<a name="branchstore"></a>
+# BranchStore
+<a name="branchstore-transv1-p-cberr-v2-r-c"></a>
+## .trans(v1, p, cb(err, v2, r, c))
+should accept a transaction object in place of v1, and update it.
 
 ```js
 util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-		    {_type: 'add', amount: 2},
-		    {_type: 'add', amount: 2},
-		    {_type: 'add', amount: 2},
-		    {_type: 'add', amount: 2},
-		]}, false, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 8); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1'));},
+		function(_) { branchStore.trans(this.t, {_type: 'fetch', key: 'foo'}, _.to('v1', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); 
+			      assert.equal(this.t.curr.$, this.v1.$); _(); },
 ], done)();
 ```
 
-should return an array of the underlying results.
+should not record transitions based on transactions in the version graph.
 
 ```js
 util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-		    {_type: 'add', amount: 2},
-		    {_type: 'get'},
-		    {_type: 'add', amount: 2},
-		    {_type: 'get'},
-		]}, false, _.to('s1', 'res')); },
-		function(_) { assert.deepEqual(this.res, [undefined, 2, undefined, 4]); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Pull should throw an exception'); _(); },
+], function(err) {
+		var prefix = 'No path found from'
+		if(err.message.substr(0, prefix.length) == prefix) done();
+		else done(err);
+})();
+```
+
+<a name="branchstore-forkname-v0-cberr"></a>
+## .fork(name, v0, cb(err))
+should create a new branch of the given name, and set its head version to v0.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
 ], done)();
 ```
 
-should return no result if none of the underlying patches return result.
+<a name="branchstore-headbranchname"></a>
+## .head(branchName)
+should return the last known version of the given branch.
 
 ```js
 util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-		    {_type: 'add', amount: 1},
-		    {_type: 'add', amount: 2},
-		    {_type: 'add', amount: 3},
-		    {_type: 'add', amount: 4},
-		    {_type: 'add', amount: 5},
-		]}, false, _.to('s1', 'res')); },
-		function(_) { assert.equal(typeof this.res, 'undefined'); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { assert.deepEqual(branchStore.head('b1'), this.v); _(); },
 ], done)();
 ```
 
-<a name="composite-patch-apply-weak"></a>
-### weak
-should not apply conflicting patches.
+<a name="branchstore-pushbranchname-v2-cberr"></a>
+## .push(branchName, v2, cb(err))
+should assign v2 to the head of the branch, if v2 is a descendant of the current head.
 
 ```js
 util.seq([
-    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
-	{_type: 'set', from: 'foo', to: 'bar'},
-	{_type: 'set', from: 'foo', to: 'baz'},
-    ]}, _.to('s1', 'res', 'eff', 'conf')); },
-    function(_) { assert(!this.conf, 'A weak patch should not be reported as conflicting'); _(); },
-    function(_) { evalEnv.query(this.s1, {_type: 'get_all'}, _.to('res')); },
-    // Only the non-conflicting change should be performed
-    function(_) { assert.deepEqual(this.res, ['bar']); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v2')); },
+		function(_) { branchStore.push('b1', this.v2, _); },
+		function(_) { assert.deepEqual(branchStore.head('b1'), this.v2); _(); },
 ], done)();
 ```
 
-should report the conflicting patch in the results.
+should merge the head version and v2 if not a direct descendant.
 
 ```js
-var confPatch = {_type: 'set', from: 'foo', to: 'baz'};
 util.seq([
-    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
-	{_type: 'set', from: 'foo', to: 'bar'},
-	confPatch,
-    ]}, _.to('s1', 'res')); },
-    function(_) { assert.deepEqual(this.res, [undefined, {$badPatch: confPatch}]); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.push('b1', this.v1, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.push('b1', this.v2, _); },
+		function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
 ], done)();
 ```
 
-should provide $badPatch in nested patches.
+should fail if a conflict is encountered.
 
 ```js
-var confPatch = {_type: 'set', from: 'foo', to: 'baz'};
-var confPatchWrapper = {_type: 'comp', weak: true, patches: [confPatch]};
 util.seq([
-    function(_) { evalEnv.init('atom', {val: 'foo'}, _.to('s0')); },
-    function(_) { evalEnv.trans(this.s0, {_type: 'comp', weak: true, patches: [
-	{_type: 'set', from: 'foo', to: 'bar'},
-	confPatchWrapper,
-    ]}, _.to('s1', 'res')); },
-    function(_) { assert.deepEqual(this.res, [undefined, [{$badPatch: confPatch}]]); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.push('b1', this.v1, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO2'}, _.to('v2')); },
+		function(_) { branchStore.push('b1', this.v2, _); },
+		function(_) { assert(false, 'push() should fail'); _(); },
+], function(err) {
+		if(err.conflict) done();
+		else done(err);
+})();
+```
+
+should handle cases where two pushes are done in parallel. If no conflicts occur, the resulting head should include all contributions.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.fork('b1', this.v, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { var para = util.parallel(2, _); 
+			      branchStore.push('b1', this.v1, para);
+			      branchStore.push('b1', this.v2, para); },
+		function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(branchStore.head('b1'), {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
 ], done)();
 ```
 
-<a name="composite-patch-unapply"></a>
-## unapply
-should unapply the given patches in reverse order.
+<a name="branchstore-pullv1-versionorbranch-cberr-vm"></a>
+## .pull(v1, versionOrBranch, cb(err, vm))
+should merge between the two versions (if so given).
 
 ```js
 util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-		    {_type: 'add', amount: 2},
-		    {_type: 'get'},
-		    {_type: 'add', amount: 3},
-		    {_type: 'get'},
-		]}, true, _.to('s1', 'res')); },
-		function(_) { assert.deepEqual(this.res, [0, undefined, -3, undefined]); _(); },
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
 ], done)();
+```
+
+should merge between the given version and the given branch (if so given).
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.fork('b1', this.v1, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v2, 'b1', _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+], done)();
+```
+
+should resolve conflicts, should they occur, by preferring the second argument.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'bar', value: 'BARFOOD'}, _.to('v1')); },
+		function(_) { branchStore.fork('b1', this.v1, _); },
+		function(_) { branchStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v2, 'b1', _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v3', 'r')); },
+		function(_) { assert.equal(this.r, 'BARFOOD'); _(); },
+], done)();
+```
+
+<a name="branchstore-begintransactionv0"></a>
+## .beginTransaction(v0)
+should return a transaction object for which both baseline version and current version are v0.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { var trans = branchStore.beginTransaction(this.v0); 
+			      assert.equal(trans.baseline.$, this.v0.$);
+			      assert.equal(trans.curr.$, this.v0.$);
+			      _();
+			    },
+], done)();
+```
+
+<a name="branchstore-committranaction-cberr-v"></a>
+## .commit(tranaction, cb(err, v))
+should record the transaction in the version graph.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+], done)();
+```
+
+should keep transactions together when conflicts occur.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.trans(this.v2, {_type: 'add', key: 'foo', value: 'FOO3'}, _.to('v2')); }, // conflicting with our transaction
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO3'); _(); }, // v2 wins
+		function(_) { branchStore.trans(this.vm, {_type: 'fetch', key: 'foo2'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // even the non-conflicting changes in the transaction are rolled back
+], done)();
+```
+
+should record losing transactions such that they are canceled.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'otherThing', value: 4}, _.to('v1')); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.trans(this.v2, {_type: 'add', key: 'foo', value: 'FOO3'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'somethingElse', value: 3}, _.to('v3')); },
+		function(_) { branchStore.pull(this.vm, this.v3, _.to('vm2')); }, // v3, that contains the transaction, should win
+		function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo'}, _.to('vm2', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO3'); _(); }, // but vm won
+		function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo2'}, _.to('vm2', 'r')); },
+		function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // the transaction is still canceled.
+], done)();
+```
+
+should work even if all changes conflict.
+
+```js
+util.seq([
+		function(_) { branchStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { this.t = branchStore.beginTransaction(this.v0);
+			      branchStore.trans(this.t, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { branchStore.trans(this.t, {_type: 'add', key: 'foo2', value: 'FOO2'}, _.to('v1')); },
+		function(_) { branchStore.commit(this.t, _); },
+		function(_) { branchStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { branchStore.trans(this.v2, {_type: 'add', key: 'foo', value: 'FOO3'}, _.to('v2')); },
+		function(_) { branchStore.pull(this.v1, this.v2, _.to('vm')); },
+		function(_) { branchStore.trans(this.v1, {_type: 'add', key: 'somethingElse', value: 3}, _.to('v3')); },
+		function(_) { branchStore.pull(this.vm, this.v3, _.to('vm2')); }, // v3, that contains the transaction, should win
+		function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo'}, _.to('vm2', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO3'); _(); }, // but vm won
+		function(_) { branchStore.trans(this.vm2, {_type: 'fetch', key: 'foo2'}, _.to('vm2', 'r')); },
+		function(_) { assert.equal(typeof this.r, 'undefined'); _(); }, // the transaction is still canceled.
+], done)();
+```
+
+<a name="bucketobjectstore"></a>
+# BucketObjectStore
+<a name="bucketobjectstore-as-objectstore"></a>
+## as ObjectStore
+<a name="bucketobjectstore-as-objectstore-initctx-classname-args"></a>
+### .init(ctx, className, args)
+should call the init() method of the relevant class with args as a parameter.
+
+```js
+var called = false;
+var disp = new ObjectDisp({
+    MyClass: {
+	init: function(ctx, args) {
+	    assert.equal(args.foo, 2);
+	    called = true;
+	}
+    }
+});
+var ostore = new createOstore(disp);
+ostore.init('bar', 'MyClass', {foo: 2});
+assert(called, 'MyClass.init() should have been called');
+done();
+```
+
+should return an ID (an object with a "$" attribute containing a string) of the newly created object.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+assert.equal(typeof id.$, 'string');
+done();
+```
+
+<a name="bucketobjectstore-as-objectstore-transctx-v1-p"></a>
+### .trans(ctx, v1, p)
+should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result.
+
+```js
+var v0 = ostore.init({}, 'Counter', {});
+var pair = ostore.trans({}, v0, {_type: 'add', amount: 10});
+var v1 = pair[0];
+pair = ostore.trans({}, v1, {_type: 'get'});
+var res = pair[1];
+assert.equal(res, 10);
+done();
+```
+
+should replace the object if a _replaceWith field is added to the object.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'MyClass', {});
+var rep = ostore.init(ctx, 'Counter', {});
+v = ostore.trans(ctx, v, {_type: 'patch1', rep: rep})[0];
+v = ostore.trans(ctx, v, {_type: 'add', amount: 5})[0];
+var r = ostore.trans(ctx, v, {_type: 'get'})[1];
+assert.equal(r, 5);
+done();
+```
+
+should pass exceptions thrown by patch methods as the error field of the context.
+
+```js
+var disp = new ObjectDisp({
+    Class1: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    }
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'emitError'})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
+should propagate exceptions thrown by underlying invocations.
+
+```js
+var disp = new ObjectDisp({
+    Child: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    },
+    Parent: {
+	init: function(ctx, args) {
+	    this.foo = ctx.init('Child', args);
+	},
+	patch: function(ctx, p) {
+	    this.foo = ctx.trans(this.foo, p.patch);
+	},
+    },
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Parent', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'emitError'}})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
+<a name="bucketobjectstore-as-objectstore-context"></a>
+### context
+should allow underlying initializations and transitions to perform initializations and transitions.
+
+```js
+var disp = new ObjectDisp({
+    MyClass: {
+	init: function(ctx, args) {
+	    this.counter = ctx.init('Counter', {});
+	},
+	patchCounter: function(ctx, p) {
+	    var pair = ctx.transQuery(this.counter, p.p)
+	    this.counter = pair[0];
+	    return pair[1];
+	},
+    },
+    Counter: require('../counter.js'),
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'MyClass', {});
+v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 12}})[0];
+r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
+assert.equal(r, 12);
+done();
+```
+
+<a name="bucketobjectstore-as-objectstore-context-conflict"></a>
+#### .conflict()
+should set the context's confclit flag to true.
+
+```js
+var disp = new ObjectDisp({
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class2', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'raiseConflict'})[0];
+assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+should propagate conflicts to calling transitions.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+				this.foo = ctx.init('Class2', args);
+			    },
+			    patch: function(ctx, p) {
+				this.foo = ctx.trans(this.foo, p.patch);
+			    },
+			    query: function(ctx, q) {
+				return ctx.query(this.foo, q.query);
+			    },
+			},
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class1', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
+assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+<a name="bucketobjectstore-as-objectstore-context-effectpatch"></a>
+#### .effect(patch)
+should add a patch to the effect set held by the context.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+			    },
+			    addEffectPatch: function(ctx, patch) {
+				ctx.effect(patch.patch);
+			    },
+			}
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
+assert(!ctx.error, 'No error should occur');
+assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
+done();
+```
+
+<a name="bucketobjectstore-hashbucket-obj"></a>
+## .hash(bucket, obj)
+should return a unique ID for each given object and bucket ID.
+
+```js
+var id1 = ostore.hash('foo', {bar: 1});
+var id2 = ostore.hash('foo', {bar: 2});
+var id3 = ostore.hash('food', {bar: 1});
+assert(id1.$ != id2.$, 'Object should matter');
+assert(id1.$ != id3.$, 'Bucket should matter');
+done();
+```
+
+should cache the object under its ID.
+
+```js
+var id2 = ostore.hash('foo', {bar: 2});
+assert.equal(cache.fetch(id2.$).bar, 2);
+done();
+```
+
+<a name="bucketobjectstore-unhashid"></a>
+## .unhash(id)
+should return the object corresponding to id, if in the cache.
+
+```js
+var id = ostore.hash('foo', {bar: 2});
+assert.equal(ostore.unhash(id).bar, 2);
+done();
+```
+
+should return the contents of an object given its ID, if in the cache.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+assert.equal(ostore.unhash(id).value, 0);
+done();
+```
+
+should put things in motion to retrieve the value of the ID, if not in the cache.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+cache.abolish();
+var id2 = ostore.unhash(id);
+assert.equal(typeof id2, 'undefined');
+cache.waitFor([id.$], done);
+```
+
+<a name="bucketobjectstore-transctx-v1-p"></a>
+## .trans(ctx, v1, p)
+should return v2=undefined if v1 is not in cache.
+
+```js
+var ctx = {};
+var v1 = ostore.init(ctx, 'Counter', {});
+cache.abolish();
+var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+assert.equal(typeof pair[0], 'undefined');
+done();
+```
+
+should add a field named "waitFor" to the context, containing a list of cache entries.  Waiting on them assures .trans() returns value.
+
+```js
+var ctx = {};
+var v1 = ostore.init(ctx, 'Counter', {});
+cache.abolish();
+var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+assert.equal(typeof pair[0], 'undefined');
+cache.waitFor(ctx.waitFor, function() {
+		var pair = ostore.trans(ctx, v1, {_type: 'add', amount: 10});
+		assert(pair[0], 'Should return value');
+		done();
+});
+```
+
+should support recursive transitions.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
+v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
+v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
+assert.equal(r, 3);
+done();
+```
+
+should support recursive transitions even at the event of not having items in the cache (waitFor should be filled accordingly).
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'BinTree', {key: 'a', value: 1});
+v = ostore.trans(ctx, v, {_type: 'add', key: 'b', value: 2})[0];
+cache.abolish();
+ctx = {};
+var v1 = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+assert.equal(typeof v1, "undefined");
+cache.waitFor(ctx.waitFor, function() {
+		v = ostore.trans(ctx, v, {_type: 'add', key: 'c', value: 3})[0];
+		var r = ostore.trans(ctx, v, {_type: 'fetch', key: 'c'})[1];
+		assert.equal(r, 3);
+		done();
+});
+```
+
+<a name="bucketobjectstore-a-1000-element-tree"></a>
+## A 1000 element tree
+should recall any number.
+
+```js
+//console.log('=============');
+var ctx = {};
+var numToFetch = Math.floor(Math.random() * thousand);
+var p = {_type: 'fetch', key: numToFetch};
+ostore.trans(ctx, v, p);
+cache.waitFor(ctx.waitFor, function() {
+		//console.log('-------------');
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		//console.log('=============');
+		done();
+});
+```
+
+should call make a reasonable number of calls to the bucket store.
+
+```js
+var baseline = bucketStore.callCount;
+var ctx = {};
+var numToFetch = Math.floor(Math.random() * thousand);
+var p = {_type: 'fetch', key: numToFetch};
+//console.log('================');
+ostore.trans(ctx, v, p);
+cache.waitFor(ctx.waitFor, function() {
+		var ctx = {};
+		var res = ostore.trans(ctx, v, p)[1];
+		assert.equal(res, numToFetch * 2);
+		var accessCount = bucketStore.callCount - baseline;
+		assert(accessCount < 6, 'Bucket store was consulted ' + accessCount + ' times');
+		done();
+});
 ```
 
 <a name="counter"></a>
 # counter
-<a name="counter-get"></a>
-## get
-should initially return 0.
+<a name="counter-init"></a>
+## init
+should create a counter with value = 0.
 
 ```js
-util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'get'}, false, _.to('s1', 'val')); },
-		function(_) { hashDB.hash(this.s0, _.to('h0')); },
-		function(_) { hashDB.hash(this.s1, _.to('h1')); },
-		function(_) {
-		    assert.deepEqual(this.h1, this.h0, 'get should not change the state');
-		    assert.equal(this.val, 0);
-		    _();
-		},
-], done)();
+var initial = disp.init({}, 'counter', {});
+assert.equal(initial.value, 0);
+done();
 ```
 
 <a name="counter-add"></a>
 ## add
-should increase the counter value by the given amount.
+should add the given ammount to the counter value.
 
 ```js
-util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'add', amount: 2}, false, _.to('s1')); },
-		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, false, _.to('s2', 'val')); },
-		function(_) {
-		    assert.equal(this.val, 2);
-		    _();
-		},
-], done)();
+var c = disp.init({}, 'counter', {});
+c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
+assert.equal(c.value, 2);
+done();
 ```
 
-should be reversible.
+should subtract the given amount when unapplied.
 
 ```js
-util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'add', amount: 2}, true, _.to('s1')); },
-		function(_) { evalEnv.apply(this.s1, {_type: 'get'}, false, _.to('s2', 'res')); },
-		function(_) { assert.equal(this.res, -2); _(); },
-], done)();
+var c = disp.init({}, 'counter', {});
+c = disp.apply({}, c, {_type: 'add', amount: 2}, -1)[0];
+assert.equal(c.value, -2);
+done();
 ```
 
-<a name="directory"></a>
-# directory
-should propagate any patches it does not handle itself to child objects.
+<a name="counter-get"></a>
+## get
+should return the counter value.
 
 ```js
-util.seq([
-    function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-    function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-    function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
-    function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
-    function(_) { assert.equal(this.res, 'baz'); _(); },
-], done)();
-```
-
-should propagate unapplied patches as well as applied.
-
-```js
-util.seq([
-    function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-    function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'baz'}}, _.to('s1')); },
-    function(_) { evalEnv.apply(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, true, _.to('s2')); },
-    function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
-    function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-<a name="directory-create"></a>
-## create
-should create a child node using the given evaluator type and arguments.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get', _path: ['foo']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-should delete a child when unapplied.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.apply(this.s1, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, true, _.to('s2', 'res', 'eff', 'conf')); },
-		function(_) { assert(!this.conf, 'should not be conflicting'); _(); },
-		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _); },
-], function(err) {
-		assert(err, 'an error should be emitted');
-		done((err.message != 'Invalid path: foo' && err) || undefined);
-})();
-```
-
-should report a conflict when unpatched if the child state does not match the construction parameters.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
-		function(_) { evalEnv.apply(this.s2, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, true, _.to('s3', 'res', 'eff', 'conf')); },
-		function(_) { assert(this.conf, 'should be conflicting'); _(); },
-], done)();
-```
-
-<a name="directory-delete"></a>
-## delete
-should remove the object at the given path from the directory.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('childHash')); },
-		function(_) { evalEnv.trans(this.s1, {_type: 'delete', _path: ['foo'], hash: this.childHash}, _.to('s2')); },
-		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _); },
-], function(err) {
-		assert(err, 'an error should be emitted');
-		done((err.message != 'Invalid path: foo' && err) || undefined);
-})();
-```
-
-should report a conflic if the removed child state does not match the given hash.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('beforeChange')); },
-		function(_) { evalEnv.trans(this.s1, {_type: 'set', _path: ['foo'], from: 'bar', to: 'baz'}, _.to('s2')); },
-		function(_) { evalEnv.trans(this.s2, {_type: 'delete', _path: ['foo'], hash: this.beforeChange}, _.to('s3', 'res', 'eff', 'conf')); },
-		function(_) { assert(this.conf, 'should be conflicting'); _(); },
-], done)();
-```
-
-should re-create a child if unapplied.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('child')); },
-		function(_) { hashDB.hash(this.child, _.to('child')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'delete', _path: ['foo'], hash: this.child}, true, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get', _path: ['foo']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-should conflict when unapplied if the child already exists.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.init('atom', {val: 'bar'}, _.to('child')); },
-		function(_) { hashDB.hash(this.child, _.to('child')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: '!@#!@#'}}, _.to('s1')); },
-		function(_) { evalEnv.apply(this.s1, {_type: 'delete', _path: ['foo'], hash: this.child}, true, _.to('s2', 'res', 'eff', 'conf')); },
-		function(_) { assert(this.conf, 'should be conflicting'); _(); },
-		function(_) { evalEnv.query(this.s2, {_type: 'get', _path: ['foo']}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-<a name="directory-get_hash"></a>
-## get_hash
-should return the hash of the child at the given path.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}}, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get_hash', _path: ['foo']}, _.to('child')); },
-		function(_) { evalEnv.query(this.child, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 'bar'); _(); },
-], done)();
-```
-
-<a name="directory-add_mapping"></a>
-## add_mapping
-should add a mapping to a child, so that every patch applied to that child is also applied to the mapper.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state')); },
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'x'}}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{_type: 'received', patch: {_type: 'set', _path: [], _at_path: ['a'], from: 'x', to: 'y'}}]); _(); },
-], done)();
-```
-
-should remove a mapping to a child, when unapplied.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('state')); },
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('mapper')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'create', _path: ['a'], evalType: 'atom', args: {val: 'x'}}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{_type: 'received', patch: {_type: 'set', _path: [], _at_path: ['a'], from: 'x', to: 'y'}}]); _(); },
-		// Unapply
-		function(_) { evalEnv.trans(this.state, {_type: 'inv', patch: {_type: 'add_mapping', _path: ['a'], mapper: this.mapper}}, _.to('state')); },
-		// Send the patch again
-		function(_) { evalEnv.trans(this.state, {_type: 'set', _path: ['a'], from: 'x', to: 'y'}, _.to('state', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, []); _(); },
-], done)();
+var c = disp.init({}, 'counter', {});
+c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
+res = disp.apply({}, c, {_type: 'get'})[1];
+assert.equal(res, 2);
+done();
 ```
 
 <a name="dummyatomickvs"></a>
@@ -1014,55 +1182,90 @@ util.seq([
 ], done)();
 ```
 
-<a name="dummybranch"></a>
-# DummyBranch
-<a name="dummybranch-as-branch"></a>
-## as Branch
-<a name="dummybranch-as-branch-checkedupdate"></a>
-### checkedUpdate
-should update the branch state if given that the state condition is met.
+<a name="dummybucketstore"></a>
+# DummyBucketStore
+should accumulate all added items and replay them when fetched.
 
 ```js
-util.seq([
-    function(_) { branch.checkedUpdate('root', 's1', _); },
-    function(_) { branch.tip(_.to('tip')); },
-    function(_) { assert.equal(this.tip, 's1'); _(); },
-], done)();
+var bucketStore = new DummyBucketStore(sched);
+// Add values to the bucket
+var values = {one: 1, two: 2, three: 3};
+for(var key in values) {
+    bucketStore.add('myBucket', {key: key, value: values[key]});
+}
+// Trigger a fetch
+bucketStore.fetch('myBucket', function(err, item) {
+    assert(item.key in values, 'the  bucket should only contain the added keys');
+    delete values[item.key];
+    if(isEmpty(values)) done();
+});
 ```
 
-should return the tip state before modification.
+should store each bucket individually.
 
 ```js
-util.seq([
-    function(_) { branch.checkedUpdate('root', 's1', _.to('shouldBeRoot')); },
-    function(_) { assert.equal(this.shouldBeRoot, 'root'); _(); },
-    function(_) { branch.tip(_.to('tip')); },
-    function(_) { assert.equal(this.tip, 's1'); _(); },
-], done)();
+var bucketStore = new DummyBucketStore(sched);
+var values = {one: 1, two: 2, three: 3};
+for(var key in values) {
+    bucketStore.add('myBucket', {key: key, value: values[key]});
+    bucketStore.add('myOtherBucket', {key: 'other_' + key, value: values[key] + 2});
+}
+bucketStore.fetch('myBucket', function(err, item) {
+    assert(item.key in values, 'item ' + JSON.stringify(item) + ' should not be in bucket');
+    delete values[item.key];
+    if(isEmpty(values)) done();
+});
 ```
 
-should not update the branch state if the first argument does not match the current tip value.
+<a name="dummybucketstore-async-mode"></a>
+## async mode
+should return a unique ID when adding to a bucket, such that registering to that ID guarantees the data has been saved.
 
 ```js
-util.seq([
-    function(_) { branch.checkedUpdate('foo', 's1', _); },
-    function(_) { branch.tip(_.to('tip')); },
-    function(_) { assert.equal(this.tip, 'root'); _(); },
-], done)();
+var bucketStore = new DummyBucketStore(sched);
+bucketStore.async = true; // async mode on
+// Add values to the bucket
+var values = {one: 1, two: 2, three: 3};
+var IDs = [];
+for(var key in values) {
+		var ID = bucketStore.add('myBucket', {key: key, value: values[key]});
+		IDs.push(ID);
+}
+// Wait until all is written
+sched.register(IDs, function() {
+		// Trigger a fetch
+		bucketStore.fetch('myBucket', function(err, item) {
+		    assert(item.key in values, 'the  bucket should only contain the added keys');
+		    delete values[item.key];
+		    if(isEmpty(values)) done();
+		});
+});
 ```
 
-<a name="dummyversiongraph"></a>
-# DummyVersionGraph
-<a name="dummyversiongraph-as-versiongraph"></a>
-## as VersionGraph
-<a name="dummyversiongraph-as-versiongraph-addedge"></a>
+should not apply changes immediately.
+
+```js
+var bucketStore = new DummyBucketStore(sched);
+bucketStore.async = true; // async mode on
+bucketStore.add('myBucket', {foo: 'bar'});
+bucketStore.fetch('myBucket', function(err) {
+		assert.equal(err.message, 'Bucket myBucket not found');
+		done();
+});
+```
+
+<a name="dummygraphdb"></a>
+# DummyGraphDB
+<a name="dummygraphdb-as-graphdb"></a>
+## as GraphDB
+<a name="dummygraphdb-as-graphdb-addedge"></a>
 ### addEdge
 should accept an edge and add it to the graph.
 
 ```js
 util.seq([
-    function(_) { versionGraph.addEdge("foo", "likes", "bar", _); },
-    function(_) { versionGraph.queryEdge("foo", "likes", _.to('shouldBeBar')); },
+    function(_) { graphDB.addEdge("foo", "likes", "bar", _); },
+    function(_) { graphDB.queryEdge("foo", "likes", _.to('shouldBeBar')); },
     function(_) { assert.equal(this.shouldBeBar, 'bar'); _(); },
 ], done)();
 ```
@@ -1071,26 +1274,26 @@ should create a dual mapping, mapping also the destination to the source.
 
 ```js
 util.seq([
-    function(_) { versionGraph.addEdge("foo", "likes", "bar", _); },
-    function(_) { versionGraph.queryBackEdge("bar", "likes", _.to('shouldBeFoo')); },
+    function(_) { graphDB.addEdge("foo", "likes", "bar", _); },
+    function(_) { graphDB.queryBackEdge("bar", "likes", _.to('shouldBeFoo')); },
     function(_) { assert.equal(this.shouldBeFoo, 'foo'); _(); },
 ], done)();
 ```
 
-<a name="dummyversiongraph-as-versiongraph-findcommonancestor"></a>
+<a name="dummygraphdb-as-graphdb-findcommonancestor"></a>
 ### findCommonAncestor
 should find the common ancestor of two nodes, and the path to each of them.
 
 ```js
 util.seq([
-    function(_) { versionGraph.addEdge('terah', 'p1', 'abraham', _); },
-    function(_) { versionGraph.addEdge('abraham', 'p2', 'isaac', _); },
-    function(_) { versionGraph.addEdge('isaac', 'p3', 'jacob', _); },
-    function(_) { versionGraph.addEdge('jacob', 'p4', 'joseph', _); },
-    function(_) { versionGraph.addEdge('abraham', 'p5', 'ismael', _); },
-    function(_) { versionGraph.addEdge('isaac', 'p6', 'esaw', _); },
-    function(_) { versionGraph.addEdge('jacob', 'p7', 'simon', _); },
-    function(_) { versionGraph.findCommonAncestor('simon', 'ismael', _.to('ancestor', 'path1', 'path2')); },
+    function(_) { graphDB.addEdge('terah', 'p1', 'abraham', _); },
+    function(_) { graphDB.addEdge('abraham', 'p2', 'isaac', _); },
+    function(_) { graphDB.addEdge('isaac', 'p3', 'jacob', _); },
+    function(_) { graphDB.addEdge('jacob', 'p4', 'joseph', _); },
+    function(_) { graphDB.addEdge('abraham', 'p5', 'ismael', _); },
+    function(_) { graphDB.addEdge('isaac', 'p6', 'esaw', _); },
+    function(_) { graphDB.addEdge('jacob', 'p7', 'simon', _); },
+    function(_) { graphDB.findCommonAncestor('simon', 'ismael', _.to('ancestor', 'path1', 'path2')); },
     function(_) { assert.equal(this.ancestor, 'abraham'); _(); },
 ], done)();
 ```
@@ -1100,7 +1303,7 @@ should handle the case where there are also common descendants.
 ```js
 util.seq([
     function(_) { createGraph(1, 1, 30, _); },
-    function(_) { versionGraph.findCommonAncestor(4, 6, _.to('ancestor', 'p1', 'p2')); },
+    function(_) { graphDB.findCommonAncestor(4, 6, _.to('ancestor', 'p1', 'p2')); },
     function(_) { assert.equal(this.ancestor, 2); _(); },
 ], done)();
 ```
@@ -1110,917 +1313,924 @@ should return the path from the common ancestor to both nodes.
 ```js
 util.seq([
     function(_) { createGraph(1, 1, 30, _); },
-    function(_) { versionGraph.findCommonAncestor(8, 10, _.to('ancestor', 'p1', 'p2')); },
+    function(_) { graphDB.findCommonAncestor(8, 10, _.to('ancestor', 'p1', 'p2')); },
     function(_) { assert.equal(this.ancestor, 2); _(); },
-    function(_) { assert.deepEqual(this.p1, ['2', '2']); _(); },
-    function(_) { assert.deepEqual(this.p2, ['5']); _(); },
+    function(_) { assert.deepEqual(this.p1, [{l:'2', n:'4'}, {l:'2', n:'8'}]); _(); },
+    function(_) { assert.deepEqual(this.p2, [{l:'5', n:'10'}]); _(); },
 ], done)();
 ```
 
-<a name="evalenv"></a>
-# EvalEnv
-<a name="evalenv-initevaluator-args-cberr-h0"></a>
-## init(evaluator, args, cb(err, h0))
-should return a hash to an object constructed by the evaluator's init() method.
+<a name="dummygraphdb-findpathx-y-cberr-path"></a>
+## .findPath(x, y, cb(err, path))
+should return the labels along the edges from x to y.
 
 ```js
-var evaluators = {foo: {
-		init: function(args, ctx) {
-		    ctx.ret({bar: args.bar, baz: 2});
-		}
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
-		function(_) { evalEnv.init('foo', {bar: 3}, _.to('h0')); },
-		function(_) { assert(this.h0.$hash$, 'h0 must be a hash'); hashDB.unhash(this.h0, _.to('s0')); },
-		function(_) { assert.deepEqual(this.s0, {_type: 'foo', bar: 3, baz: 2}); _(); },
+		function(_) { createGraph(1, 1, 30, _); },
+		function(_) { graphDB.findPath(3, 24, _.to('path')); },
+		function(_) { var m = 1;
+			      for(var i = 0; i < this.path.length; i++) {
+				  m *= this.path[i];
+			      }
+			      assert.equal(m, 8); // 24 / 3
+			      _(); },
 ], done)();
 ```
 
-should pass the evaluator as the "this" of the called method.
+should always take the shortest path.
 
 ```js
-var evaluators = {
-		foo: {
-		    init: function(args, ctx) {
-			ctx.ret({val: this.def});
-		    },
-		    def: 100,
-		},
-};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
-		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
-		function(_) { assert.equal(this.s0.val, 100); _(); },
+		function(_) { graphDB.addEdge('a', 'wrong1', 'b', _); },
+		function(_) { graphDB.addEdge('b', 'wrong2', 'c', _); },
+		function(_) { graphDB.addEdge('a', 'right', 'c', _); },
+		function(_) { graphDB.findPath('a', 'c', _.to('path')); },
+		function(_) { assert.deepEqual(this.path, ['right']); _() },
 ], done)();
 ```
 
-<a name="evalenv-applys1-patch-unapply-cberr-s2-res-eff-conf"></a>
-## apply(s1, patch, unapply, cb(err, s2, res, eff, conf))
-should apply patch to s1 by invoking the evaluator's apply method, to retrieve s2 and res.
+should handle directed cycles correctly.
 
 ```js
-var evaluators = { foo: {
-		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, unapply, ctx) { assert.equal(patch._type, 'bar');
-							   var old = s1.val;
-							   s1.val += patch.amount; 
-							   ctx.ret(s1, old); },
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, false, _.to('h1', 'res')); },
-		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
-		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: 2});
-			      assert.equal(this.res, 0); _();},
+		function(_) { graphDB.addEdge('a', 'right1', 'b', _); },
+		function(_) { graphDB.addEdge('b', 'right2', 'c', _); },
+		function(_) { graphDB.addEdge('c', 'wrong', 'b', _); },
+		function(_) { graphDB.addEdge('c', 'right3', 'd', _); },
+		function(_) { graphDB.findPath('a', 'd', _.to('path')); },
+		function(_) { assert.deepEqual(this.path, ['right1', 'right2', 'right3']); _() },
 ], done)();
 ```
 
-should use the patch evaluator if one exists for the patch type.
+<a name="dummyobjectstore"></a>
+# DummyObjectStore
+<a name="dummyobjectstore-as-objectstore"></a>
+## as ObjectStore
+<a name="dummyobjectstore-as-objectstore-initctx-classname-args"></a>
+### .init(ctx, className, args)
+should call the init() method of the relevant class with args as a parameter.
 
 ```js
-var evaluators = { 
-		foo: {
-		    init: function(args, ctx) { ctx.ret({val:0}); },
-		    apply: function(s1, patch, unapply, ctx) { var old = s1.val;
-							       s1.val += patch.amount; 
-							       ctx.ret(s1, old); },
-		},
-		bar: { 
-		    apply: function(s1, patch, unapply, ctx) {
-			var old = s1.val;
-			s1.val -= patch.amount; // Does the opposite
-			ctx.ret(s1, old); 
-		    }
-		},
-};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
+var called = false;
+var disp = new ObjectDisp({
+    MyClass: {
+	init: function(ctx, args) {
+	    assert.equal(args.foo, 2);
+	    called = true;
+	}
+    }
+});
+var ostore = new createOstore(disp);
+ostore.init('bar', 'MyClass', {foo: 2});
+assert(called, 'MyClass.init() should have been called');
+done();
+```
+
+should return an ID (an object with a "$" attribute containing a string) of the newly created object.
+
+```js
+var id = ostore.init({}, 'Counter', {});
+assert.equal(typeof id.$, 'string');
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-transctx-v1-p"></a>
+### .trans(ctx, v1, p)
+should apply patch p to version v1 (v1 is a version ID), returning pair [v2, res] where v2 is the new version ID, and res is the result.
+
+```js
+var v0 = ostore.init({}, 'Counter', {});
+var pair = ostore.trans({}, v0, {_type: 'add', amount: 10});
+var v1 = pair[0];
+pair = ostore.trans({}, v1, {_type: 'get'});
+var res = pair[1];
+assert.equal(res, 10);
+done();
+```
+
+should replace the object if a _replaceWith field is added to the object.
+
+```js
+var ctx = {};
+var v = ostore.init(ctx, 'MyClass', {});
+var rep = ostore.init(ctx, 'Counter', {});
+v = ostore.trans(ctx, v, {_type: 'patch1', rep: rep})[0];
+v = ostore.trans(ctx, v, {_type: 'add', amount: 5})[0];
+var r = ostore.trans(ctx, v, {_type: 'get'})[1];
+assert.equal(r, 5);
+done();
+```
+
+should pass exceptions thrown by patch methods as the error field of the context.
+
+```js
+var disp = new ObjectDisp({
+    Class1: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    }
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'emitError'})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
+should propagate exceptions thrown by underlying invocations.
+
+```js
+var disp = new ObjectDisp({
+    Child: {
+	init: function(ctx, args) {
+	},
+	emitError: function(ctx, patch) {
+	    throw new Error('This is an error');
+	},
+    },
+    Parent: {
+	init: function(ctx, args) {
+	    this.foo = ctx.init('Child', args);
+	},
+	patch: function(ctx, p) {
+	    this.foo = ctx.trans(this.foo, p.patch);
+	},
+    },
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Parent', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'emitError'}})[1];
+assert.equal(ctx.error.message, 'This is an error');
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-context"></a>
+### context
+should allow underlying initializations and transitions to perform initializations and transitions.
+
+```js
+var disp = new ObjectDisp({
+    MyClass: {
+	init: function(ctx, args) {
+	    this.counter = ctx.init('Counter', {});
+	},
+	patchCounter: function(ctx, p) {
+	    var pair = ctx.transQuery(this.counter, p.p)
+	    this.counter = pair[0];
+	    return pair[1];
+	},
+    },
+    Counter: require('../counter.js'),
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'MyClass', {});
+v = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'add', amount: 12}})[0];
+r = ostore.trans({}, v, {_type: 'patchCounter', p: {_type: 'get'}})[1];
+assert.equal(r, 12);
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-context-conflict"></a>
+#### .conflict()
+should set the context's confclit flag to true.
+
+```js
+var disp = new ObjectDisp({
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class2', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'raiseConflict'})[0];
+assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+should propagate conflicts to calling transitions.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+				this.foo = ctx.init('Class2', args);
+			    },
+			    patch: function(ctx, p) {
+				this.foo = ctx.trans(this.foo, p.patch);
+			    },
+			    query: function(ctx, q) {
+				return ctx.query(this.foo, q.query);
+			    },
+			},
+			Class2: {
+			    init: function(ctx, args) {
+				this.bar = args.val;
+			    },
+			    raiseConflict: function(ctx, p) {
+				ctx.conflict();
+			    },
+			}
+});
+var ostore = new createOstore(disp);
+var v = ostore.init({}, 'Class1', {val:2});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'patch', patch: {_type: 'raiseConflict'}})[0];
+assert(ctx.conf, 'Conflict flag should be true');
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-context-effectpatch"></a>
+#### .effect(patch)
+should add a patch to the effect set held by the context.
+
+```js
+var disp = new ObjectDisp({
+			Class1: {
+			    init: function(ctx, args) {
+			    },
+			    addEffectPatch: function(ctx, patch) {
+				ctx.effect(patch.patch);
+			    },
+			}
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
+assert(!ctx.error, 'No error should occur');
+assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
+done();
+```
+
+<a name="mergingstatestore"></a>
+# MergingStateStore
+<a name="mergingstatestore-transv1-p-simulate-cbv2-r-c"></a>
+## .trans(v1, p,[ simulate,] cb(v2, r, c))
+should apply p to v1 to receive v2.
+
+```js
 util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.apply(this.h0, {_type: 'bar', amount: 2}, false, _.to('h1', 'res')); },
-		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
-		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: -2});
-			      assert.equal(this.res, 0); _();},
+		function(_) { stateStore.init('BinTree', {}, _.to('v')); },
+		function(_) { stateStore.trans(this.v, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v')); },
+		function(_) { stateStore.trans(this.v, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v')); },
+		function(_) { stateStore.trans(this.v, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
 ], done)();
 ```
 
-should pass the evaluator as the "this" of the called method.
+should not record the transition if simulate is true.
 
 ```js
-var evaluators = {
-		foo: {
-		    init: function(args, ctx) {
-			ctx.ret({val: 0});
-		    },
-		    apply: function(s1, patch, unapply, ctx) {
-			s1.val += this.amount;
-			ctx.ret(s1);
-		    },
-		    amount: 50,
-		},
-};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
 util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {}, false, _.to('s1')); },
-		function(_) { hashDB.unhash(this.s1, _.to('s1')); },
-		function(_) { assert.equal(this.s1.val, 50); _(); },
-], done)();
-```
-
-should report a conflict if a propagated patch conflicted.
-
-```js
-var evaluators = {
-		atom: require('../atom.js'),
-		dir: require('../dir.js'),
-		comp: require('../composite.js'),
-};
-
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'comp', patches: [
-		    {_type: 'create', _path: ['foo'], evalType: 'atom', args: {val: 'bar'}},
-		    {_type: 'set', _path: ['foo'], from: 'baz', to: 'bat'}, // This is conflicting
-		]}, _.to('s1', 'res', 'eff', 'conf')); },
-		function(_) { assert(this.conf, 'should be conflicting'); _(); },
-], done)();
-```
-
-should collect effect patches from the application of the given patch.
-
-```js
-var evaluators = {
-		foo: {
-		    init: function(args, ctx) {
-			ctx.ret({val: 0});
-		    },
-		    apply: function(s1, patch, unapply, ctx) {
-			s1.val += patch.amount * (unapply ? -1 : 1);
-			ctx.effect({_type: 'bar', val: s1.val});
-			ctx.ret(s1);
-		    },
-		},
-};
-
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'baz', amount: 10}, false, _.to('s1', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{_type: 'bar', val: 10}]); _(); },
-], done)();
-```
-
-should accumulate effects of underlying patches.
-
-```js
-var evaluators = {
-		dir: require('../dir.js'),
-		comp: require('../composite.js'),
-		foo: {
-		    init: function(args, ctx) {
-			ctx.ret({val: 0});
-		    },
-		    apply: function(s1, patch, unapply, ctx) {
-			s1.val += patch.amount * (unapply ? -1 : 1);
-			ctx.effect({_type: 'bar', val: s1.val});
-			ctx.ret(s1);
-		    },
-		},
-};
-
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('dir', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'comp', patches: [
-		    {_type: 'create', _path: ['a'], evalType: 'foo', args: {}},
-		    {_type: 'create', _path: ['b'], evalType: 'foo', args: {}},
-		    {_type: 'baz', _path: ['a'], amount: 5},
-		    {_type: 'baz', _path: ['b'], amount: 7},
-		]}, false, _.to('s1', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{_type: 'bar', val: 5}, {_type: 'bar', val: 7}]); _(); },
-], done)();
-```
-
-<a name="evalenv-transh1-patch-cberr-h2-res-eff-conf"></a>
-## trans(h1, patch, cb(err, h2, res, eff, conf))
-should apply the patch.
-
-```js
-var evaluators = { foo: {
-		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, unapply, ctx) { var old = s1.val;
-							   s1.val += patch.amount; 
-							   ctx.ret(s1, old); },
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.trans(this.h0, {_type: 'bar', amount: 2}, _.to('h1', 'res')); },
-		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
-		function(_) { assert.deepEqual(this.s1, {_type: 'foo', val: 2});
-			      assert.equal(this.res, 0); _();},
-], done)();
-```
-
-should avoid repeating calculations already done.
-
-```js
-var count = 0;
-var evaluators = { foo: {
-		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, unapply, ctx) { s1.val += patch.amount;
-							   count++; // Side effect: count the number of calls
-							   ctx.ret(s1); },
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.trans(this.h0, {_type: 'bar', amount: 2}, _.to('h1')); },
-		function(_) { evalEnv.trans(this.h1, {_type: 'bar', amount: -2}, _.to('h2')); },
-		function(_) { evalEnv.trans(this.h2, {_type: 'bar', amount: 2}, _.to('h3')); },
-		function(_) { evalEnv.trans(this.h3, {_type: 'bar', amount: -2}, _.to('h4')); },
-		function(_) { evalEnv.trans(this.h4, {_type: 'bar', amount: 2}, _.to('h5')); },
-		function(_) { evalEnv.trans(this.h5, {_type: 'bar', amount: -2}, _.to('h6')); },
-		function(_) { evalEnv.trans(this.h6, {_type: 'bar', amount: 2}, _.to('h7')); },
-		function(_) { evalEnv.trans(this.h7, {_type: 'bar', amount: -2}, _.to('h8')); },
-		function(_) { assert.equal(count, 2); _(); },
-], done)();
-```
-
-<a name="evalenv-querys-q-cberr-res"></a>
-## query(s, q, cb(err, res))
-should apply query patch q to object with state s, emitting res.
-
-```js
-var evaluators = { foo: {
-		init: function(args, ctx) { ctx.ret({val:args.val}); },
-		apply: function(s, query, unapply, ctx) { if(query._type == 'get') { ctx.ret(s, s.val); } },
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('foo', {val:7}, _.to('h0')); },
-		function(_) { evalEnv.query(this.h0, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 7); _();},
-], done)();
-```
-
-should emit an error if the query changes the state.
-
-```js
-var evaluators = { foo: {
-		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, unapply, ctx) { var old = s1.val;
-							   s1.val += patch.amount; 
-							   ctx.ret(s1, old); },
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.query(this.h0, {_type: 'bar', amount: 2}, _); },
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, true, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Merge should throw an exception'); _(); },
 ], function(err) {
-		if(!err) {
-		    done(new Error('Error not emitted'));
-		} else if(err.message == 'Query patch bar changed object state') {
-		    done();
-		} else {
-		    done(err);
-		}
+		var prefix = 'No path found from'
+		if(err.message.substr(0, prefix.length) == prefix) done();
+		else done(err);
 })();
 ```
 
-should do the opposite of applying patch to s1. Applying patch to s2 should result in s1, given that conf is false.
-
-```js
-var evaluators = { foo: {
-		init: function(args, ctx) { ctx.ret({val:0}); },
-		apply: function(s1, patch, unapply, ctx) { 
-		    var old = s1.val;
-		    if(!unapply) {
-			s1.val += patch.amount; 
-		    } else {
-			s1.val -= patch.amount;
-		    }
-			ctx.ret(s1, old); 
-		},
-}};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-var patch = {_type: 'bar', amount: 2};
-util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); },
-		function(_) { evalEnv.apply(this.h0, patch, false, _.to('h1')); },
-		function(_) { evalEnv.apply(this.h1, patch, true, _.to('h2')); },
-		function(_) { hashDB.hash(this.h2, _.to('h2')); },
-		function(_) { assert.equal(this.h2.$hash$, this.h0.$hash$); _(); },
-], done)();
-```
-
-should use the unpatch evaluator if one exists for the patch type.
-
-```js
-var evaluators = { 
-		foo: {
-		    init: function(args, ctx) { ctx.ret({val:0}); },
-		    apply: function(s1, patch, unapply, ctx) { 
-			var old = s1.val;
-			if(!unapply) {
-			    s1.val += patch.amount; 
-			} else {
-			    s1.val -= patch.amount; 
-			}
-			ctx.ret(s1, old); 
-		    }
-		},
-		bar: {
-		    apply: function(s1, patch, unapply, ctx) { 
-			var old = s1.val;
-			if(!unapply) {
-			    s1.val += patch.amount * 2; 
-			} else {
-			    s1.val -= patch.amount * 2;
-			}
-			ctx.ret(s1, old); 
-		    }
-		},
-};
-var evalEnv = new EvalEnv(hashDB, kvs, evaluators);
-var patch = {_type: 'bar', amount: 2};
-util.seq([
-		function(_) { evalEnv.init('foo', {}, _.to('h0')); }, // 0
-		function(_) { evalEnv.apply(this.h0, patch, true, _.to('h1')); }, // -4
-		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
-		function(_) { assert.equal(this.s1.val, -4); _(); },
-], done)();
-```
-
-<a name="hashdb"></a>
-# HashDB
-should store its own copy of the object.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = {foo: 'bar', count: [1, 2, 3]};
-util.seq([
-    function(_) { hashDB.hash(obj, _.to('h')); },
-    function(_) { obj.foo = 'baz'; _(); },
-    function(_) { hashDB.unhash(this.h, _.to('obj')); },
-    function(_) { assert.equal(this.obj.foo, 'bar'); _(); },
-], done)();
-```
-
-<a name="hashdb-hashobj-cberr-hash"></a>
-## hash(obj, cb(err, hash))
-should give any two different JSONable objects a different hash code.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj1 = {foo: 'bar', count: [1, 2, 3]};
-var obj2 = {foo: 'bar', count: [1, 2, 4]};
-util.seq([
-		function(_) { hashDB.hash(obj1, _.to('h1')); },
-		function(_) { hashDB.hash(obj2, _.to('h2')); },
-		function(_) {
-		    assert.equal(typeof this.h1.$hash$, 'string');
-		    assert.equal(typeof this.h2.$hash$, 'string');
-		    assert(this.h1.$hash$ != this.h2.$hash$, 'hash objects should differ');
-		    _();
-		},
-], done)();
-```
-
-should act as an identity function when given a hash as input.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = {foo: 'bar', count: [1, 2, 3]};
-util.seq([
-		function(_) { hashDB.hash(obj, _.to('h1')); },
-		function(_) { hashDB.hash(this.h1, _.to('h2')); },
-		function(_) { assert.deepEqual(this.h1, this.h2); _(); },
-], done)();
-```
-
-<a name="hashdb-unhashhash-cberr-obj"></a>
-## unhash(hash, cb(err, obj))
-should reconstruct an object from the hash that is identical to the origianl object.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = {foo: 'bar', count: [1, 2, 3]};
-util.seq([
-		function(_) { hashDB.hash(obj, _.to('h')); },
-		function(_) { hashDB.unhash(this.h, _.to('obj')); },
-		function(_) { assert.deepEqual(this.obj, obj); _(); },
-], done)();
-```
-
-should act as an identity when given a non-hash object as input.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = {foo: 'bar', count: [1, 2, 3]};
-util.seq([
-		function(_) { hashDB.unhash(obj, _.to('obj')); },
-		function(_) { assert.deepEqual(obj, this.obj); _(); },
-], done)();
-```
-
-<a name="hashedapp"></a>
-# HashedApp
-<a name="hashedapp-initialstate"></a>
-## initialState
-should return the initial state's hash.
-
-```js
-var app = new HashedApp(new App(hash), hash);
-util.seq([
-		function(_) { app.initialState(appHash, _.to('h0')); },
-		function(_) { assert.equal(typeof this.h0.$hash$, 'string'); _(); },
-		function(_) { hash.unhash(this.h0, _.to('s0')); },
-		function(_) { assert.equal(this.s0.val, 0); _(); },
-], done)();
-```
-
-<a name="hashedapp-apply"></a>
-## apply
-should calculate the hash of the new state, the computation result and the safety flag, based on an original state and a patch.
+<a name="mergingstatestore-mergev1-v2-resolve-cberr-vm"></a>
+## .merge(v1, v2[, resolve], cb(err, vm))
+should return version vm which is a merge of both versions v1 and v2.
 
 ```js
 util.seq([
-		function(_) { app.apply(h0, {type: 'add', amount: 2}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'sf must be true'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert(this.sf2, 'sf must be true');
-			      assert.equal(this.r2, 2);
-			      assert.equal(this.h2.$hash$, this.h1.$hash$);
-			      _();},
-		function(_) { app.apply(this.h2, {type: 'add', amount: -2}, _.to('h3', 'r3', 'sf3')); },
-		function(_) { assert.equal(this.h3.$hash$, h0.$hash$); _(); },
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
 ], done)();
 ```
 
-<a name="hashedapp-apply-_inv"></a>
-### _inv
-should handle _inv patches.
+should record the merge so that further merges would work.
 
 ```js
 util.seq([
-    function(_) { app.apply(h0, {type: '_inv', patch: {type: 'add', amount: 2}}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { assert(this.sf1, 'inverted operation should be safe'); _(); },
-    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-    function(_) { assert.equal(this.r2, -2); _(); },
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('v1')); }, // merge once
+		function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'baz', value: 'BAZ'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('v1')); }, // merge twice
+		function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'foo'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'bar'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+		function(_) { stateStore.trans(this.v1, {_type: 'fetch', key: 'baz'}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'BAZ'); _(); },
 ], done)();
 ```
 
-should support _inv of _inv patches.
+should report a conflict as an error, when one occurs.
 
 ```js
 util.seq([
-    function(_) { app.apply(h0, {type: '_inv', patch: 
-				 {type: '_inv', patch: 
-				  {type: 'add', amount: 2}}}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-    function(_) { 
-	assert(this.sf1, 'sf1');
-	assert(this.sf2, 'sf2');
-	assert.equal(this.r2, 2); 
-	_(); 
-    },
-], done)();
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'BAR'}, _.to('v2')); }, // Notice the "foo"
+		function(_) { stateStore.merge(this.v1, this.v2, _.to('vm')); },
+		function(_) { assert(false, 'Last step should have raised a conflict exception'); _(); },
+], function(err) {
+		if(!err.conflict) done(err);
+		else done();
+})();
 ```
 
-<a name="hashedapp-apply-_comp"></a>
-### _comp
-should handle _comp patches.
+should resolve conflicts if asked to, by prioritizing v1 over v2.
 
 ```js
 util.seq([
-    function(_) { app.apply(h0, {type: '_comp', patches: [{type: 'add', amount: 1}, 
-							  {type: 'add', amount: 2}, 
-							  {type: 'add', amount: 3}]}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
-    // The result should be an array of the same size as the patches array.
-    // The values in the arrays may either be the results of the applied patches, or undefined.
-    function(_) { assert.equal(this.r1.length, 3); _(); },
-    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-    function(_) { assert.equal(this.r2, 6); _(); },
+		function(_) { stateStore.init('BinTree', {}, _.to('v0')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v1, {_type: 'add', key: 'baz', value: 'BAZ'}, _.to('v1')); },
+		function(_) { stateStore.trans(this.v0, {_type: 'add', key: 'foo', value: 'FOO2'}, _.to('v2')); }, // Note the same key
+		function(_) { stateStore.trans(this.v2, {_type: 'add', key: 'bar', value: 'BAR'}, _.to('v2')); },
+		function(_) { stateStore.merge(this.v1, this.v2, true, _.to('vm')); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'foo'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'FOO'); _(); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'bar'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'BAR'); _(); },
+		function(_) { stateStore.trans(this.vm, {_type: 'fetch', key: 'baz'}, _.to('vm', 'r')); },
+		function(_) { assert.equal(this.r, 'BAZ'); _(); },
 ], done)();
 ```
 
-should support _inv of _comp patches.
+<a name="objectdisp"></a>
+# ObjectDisp
+<a name="objectdisp-initctx-classname-args"></a>
+## .init(ctx, className, args)
+should call the init() function associated with the class.
 
 ```js
-util.seq([
-    function(_) { app.apply(h0, {type: '_inv', patch: 
-				 {type: '_comp', patches: [
-				     {type: 'add', amount: 1}, 
-				     {type: 'add', amount: 2}, 
-				     {type: 'add', amount: 3}]}}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { assert(this.sf1, 'composite operation should be safe'); _(); },
-    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-    function(_) { assert.equal(this.r2, -6); _(); },
-], done)();
+var called = false;
+disp = {
+		'MyClass': {init: function() { called = true; }}
+}
+objDisp = new ObjectDisp(disp);
+objDisp.init({}, 'MyClass', {});
+assert(called, 'Function should have been called');
+done();
 ```
 
-should replace the output from patches that were not safely applied with an object containing a $badPatch field, containing the patch.
+should throw an exception if the class does not exist.
 
 ```js
-util.seq([
-    function(_) { app.apply(h0, {type: '_comp', patches: [
-	{type: 'set', from: 0, to: 2},
-	{type: 'set', from: 100, to: 101}, // This cannot be safely applied
-	{type: 'add', amount: 2}
-    ]}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { assert(!this.sf1, 'applied patch should not be reported safe'); _(); },
-    function(_) { assert.deepEqual(this.r1[1].$badPatch, {type: 'set', from: 100, to: 101}); _(); },
-    function(_) { assert.equal(this.r1[1].res, 2); _(); }, // The original result
-    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
-    function(_) { assert.equal(this.result, 103); _(); },
-], done)();
+var objDisp = new ObjectDisp({});
+try {
+		objDisp.init({}, 'MyClass', {});
+		assert(false, 'Exception should have been thrown');
+} catch(e) {
+		assert.equal(e.message, "Class MyClass not defined");
+}
+done();
 ```
 
-should support a "weak" flag, which when exists and true, avoids execution of unsafe sub-patches.
+should pass the given context and args to the class's init() function.
 
 ```js
-util.seq([
-    function(_) { app.apply(h0, {type: '_comp', weak: true, patches: [
-	{type: 'set', from: 0, to: 2},
-	{type: 'set', from: 100, to: 101}, // This should not take effect
-	{type: 'add', amount: 2}
-    ]}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { assert(this.sf1, 'applied patch should be safe'); _(); },
-    function(_) { assert.deepEqual(this.r1[1].$badPatch, {type: 'set', from: 100, to: 101}); _(); },
-    function(_) { app.query(this.h1, {type: 'get'}, _.to('result')); },
-    function(_) { assert.equal(this.result, 4); _(); },
-], done)();
+var called = false;
+disp = {
+		'MyClass': {init: function(ctx, args) {
+		    assert.equal(ctx, 'foo');
+		    assert.equal(args, 'bar');
+		    called = true; 
+		}}
+}
+objDisp = new ObjectDisp(disp);
+objDisp.init('foo', 'MyClass', 'bar');
+assert(called, 'Function should have been called');
+done();
 ```
 
-<a name="hashedapp-apply-_hashed"></a>
-### _hashed
-should handle _hashed patches.
+should return the value of the "this" object in the context of the class's init() function.
 
 ```js
-util.seq([
-    function(_) { hash.hash({type: 'add', amount: 3}, _.to('ph')); },
-    function(_) { app.apply(h0, {type: '_hashed', hash: this.ph}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-    function(_) { assert.equal(this.r2, 3); _(); },
-], done)();
+disp = {
+		'MyClass': {init: function(ctx, args) { this.name = "foobar" }}
+}
+objDisp = new ObjectDisp(disp);
+var ret = objDisp.init({}, 'MyClass', {});
+assert.equal(ret.name, 'foobar');
+done();
 ```
 
-should support _inv of _hashed.
+should add a _type field to the returned object, containing the class name.
 
 ```js
-var patch = {type: 'add', amount: 5};
-util.seq([
-    function(_) { hash.hash(patch, _.to('hp')); },
-    function(_) { app.apply(h0, {type: '_inv', patch: {type: '_hashed', hash: this.hp}}, _.to('h1', 'r1', 'sf1')); },
-    function(_) { app.apply(this.h1, {type: 'get'}, _.to('h2', 'r2', 'sf2')); },
-    function(_) { assert.equal(this.r2, -5); _(); },
-], done)();
+disp = {
+		'MyClass': {init: function(ctx, args) { this.name = 'foobar'; }}
+}
+objDisp = new ObjectDisp(disp);
+var ret = objDisp.init({}, 'MyClass', {});
+assert.equal(ret._type, 'MyClass');
+done();
 ```
 
-<a name="hashedapp-trans"></a>
-## trans
-should return the hash of the target state when given a source state and a patch.
+<a name="objectdisp-applyctx-obj-patch-unapply"></a>
+## .apply(ctx, obj, patch, unapply)
+should call the function with name matches the _type field of the patch, in the class associated with the object..
 
 ```js
-util.seq([
-		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { assert(this.sf1, 'add operation should be safe'); _(); },
-		function(_) { app.apply(this.h1, {type: 'get'}, _.to('h1', 'r1')); },
-		function(_) { assert.equal(this.r1, 3); _(); },
-		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { assert.equal(this.h2.$hash$, h0.$hash$); _(); },
-], done)();
-```
-
-should cache previous calls and only invoke the actual method if the combination of input state and patch have not yet been encountered.
-
-```js
-process._counter = 0; // The counter's 'add' method increments this counter as a side effect.
-util.seq([
-		function(_) { app.trans(h0, {type: 'add', amount: 3}, _.to('h1', 'r1', 'sf1')); },
-		function(_) { app.trans(this.h1, {type: 'add', amount: -3}, _.to('h2', 'r2', 'sf2')); },
-		function(_) { app.trans(this.h2, {type: 'add', amount: 3}, _.to('h3', 'r3', 'sf3')); },
-		function(_) { app.trans(this.h3, {type: 'add', amount: -3}, _.to('h4', 'r4', 'sf4')); },
-		function(_) { app.trans(this.h4, {type: 'add', amount: 3}, _.to('h5', 'r5', 'sf5')); },
-		function(_) { app.trans(this.h5, {type: 'add', amount: -3}, _.to('h6', 'r6', 'sf6')); },
-		function(_) { assert(this.sf6, 'all operations should be safe'); _(); },
-		function(_) { assert.equal(process._counter, 2); _(); }, // We expect only two invocations. The rest should be cached.
-], done)();
-```
-
-should avoid hashing _hashed patches, and should used the undelying hash instead.
-
-```js
-var newHash = new HashDB(new DummyKVS());
-var patch = {type: 'add', amount: 2};
-util.seq([
-		function(_) { hash.hash(patch, _.to('patchHash')); },
-		function(_) { app.trans(h0, patch, _.to('h1')); },
-		function(_) { this.newApp = new HashedApp(new App(newHash), newHash, kvs); _(); },
-		function(_) { this.newApp.trans(h0, {type: '_hashed', hash: this.patchHash}, _.to('alt_h1')); },
-		function(_) { assert.equal(this.h1.$hash$, this.alt_h1.$hash$); _(); },
-], done)();
-```
-
-<a name="hashedapp-query"></a>
-## query
-should return the result of applying a patch.
-
-```js
-util.seq([
-		function(_) { app.query(h0, {type: 'get'}, _.to('result')); },
-		function(_) { assert.equal(this.result, 0); _(); },
-], done)();
-```
-
-should fail when given a patch that modifies the state.
-
-```js
-app.query(h0, {type: 'add', amount: 2}, function(err) {
-		if(!err) {
-		    done(new Error('No error emitted'));
-		} else if(err.message != 'Attempted query changed state') {
-		    done(new Error('Wrong error received: ' + err.message));
-		} else {
-		    done();
+var called = false;
+disp = {
+		'MyClass': {
+		    init: function() {},
+		    patch1: function () { called = true; },
 		}
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+objDisp.apply(ctx, obj, {_type: 'patch1'});
+assert(called, 'Function should have been called');
+done();
+```
+
+should throw an exception if the patch function is not defined.
+
+```js
+var called = false;
+disp = {
+		'MyClass': {
+		    init: function() {},
+		    patch1: function () { called = true; },
+		}
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+try {
+		objDisp.apply(ctx, obj, {_type: 'patch2'});
+		assert(false, 'Exception should have been raised');
+} catch(e) {
+		assert.equal(e.message, 'Patch method patch2 is not defined in class MyClass');
+}
+done();
+```
+
+should pass the object as the "this" parameter to the patch function.
+
+```js
+var called = false;
+disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function () {
+			assert.equal(this.name, 'foo');
+			called = true;
+		    },
+		}
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+objDisp.apply(ctx, obj, {_type: 'patch1'});
+assert(called, 'Function should have been called');
+done();
+```
+
+should pass the context, the patch and the unapply flag as parameters to the patch function.
+
+```js
+disp = {
+		'MyClass': {
+		    init: function() { },
+		    patch1: function (ctx, patch, unapply) {
+			assert.equal(ctx.foo, 'bar');
+			assert.equal(patch.bar, 'baz');
+			assert(unapply, 'The unapply flag should have been set');
+		    },
+		}
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {foo: 'bar'};
+var obj = objDisp.init(ctx, 'MyClass', {});
+objDisp.apply(ctx, obj, {_type: 'patch1', bar: 'baz'}, true);
+done();
+```
+
+should return a pair [obj, res], containing the patch function's "this" object, and its return value.
+
+```js
+disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function (ctx, patch) {
+			var old = this.name;
+			this.name = patch.name;
+			return old;
+		    },
+		}
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+res = objDisp.apply(ctx, obj, {_type: 'patch1', name: 'bar'});
+assert.equal(res[0].name, 'bar');
+assert.equal(res[1], 'foo');
+done();
+```
+
+should use patch handlers if defined (prfixed with ":").
+
+```js
+var called = false;
+disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    get: function(ctx, patch) {
+			return this.name;
+		    },
+		},
+		':patch1': function(ctx, obj, patch) {
+		    called = true;
+		    // We get the patch from the caller
+		    assert.equal(patch.name, 'bar');
+		    // and the object
+		    assert.equal(obj.name, 'foo');
+		    // "this" is the object dispatcher
+		    var pair = this.apply(ctx, obj, {_type: 'get'});
+		    assert(pair[1], 'foo');
+		    
+		    obj.name = 'bazz';
+		    return 2;
+		},
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+res = objDisp.apply(ctx, obj, {_type: 'patch1', name: 'bar'});
+assert(called, 'patch function should have been called');
+assert.equal(res[0].name, 'bazz');
+assert.equal(res[1], 2);
+done();
+```
+
+should prefer a method defined in a class over a generic patch function if both are defined.
+
+```js
+var called = false;
+disp = {
+		'MyClass': {
+		    init: function() { this.name = 'foo'; },
+		    patch1: function() {
+			called = true;
+		    },
+		    get: function(ctx, patch) {
+			return this.name;
+		    },
+		},
+		':patch1': function(ctx, obj, patch) {
+		    assert(false, 'Patch function should not have been called');
+		},
+}
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+res = objDisp.apply(ctx, obj, {_type: 'patch1'});
+assert(called, 'patch function should have been called');
+done();
+```
+
+<a name="patchstore"></a>
+# PatchStore
+should store arrays of patches keyed by a source and target version IDs.
+
+```js
+util.seq([
+    function(_) { patchStore.store({$:'src'}, {$:'dest'}, [{_type: 'patch1'}, {_type: 'patch2'}], _); },
+    function(_) { patchStore.fetch({$:'src'}, {$:'dest'}, _.to('patches')); },
+    function(_) { assert.deepEqual(this.patches, [{_type: 'patch1'}, {_type: 'patch2'}]); _(); },
+], done)();
+```
+
+should treat patches of type _range by concatenating the underlying patches in place of the _range.
+
+```js
+util.seq([
+    function(_) { patchStore.store({$:'src1'}, {$:'dest1'}, [{_type: 'patch2'}, {_type: 'patch3'}], _); },
+    function(_) { patchStore.store({$:'src2'}, {$:'dest2'}, [{_type: 'patch1'}, 
+							     {_type: '_range', from: {$:'src1'}, to: {$:'dest1'}},
+							     {_type: 'patch4'}], _); },
+    function(_) { patchStore.fetch({$:'src2'}, {$:'dest2'}, _.to('patches')); },
+    function(_) { assert.deepEqual(this.patches, [{_type: 'patch1'},
+						  {_type: 'patch2'},
+						  {_type: 'patch3'},
+						  {_type: 'patch4'}]); _(); },
+], done)();
+```
+
+<a name="scheduler"></a>
+# Scheduler
+allows users to register a callback to a condition. Once the condition is met, the callback is called.
+
+```js
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo'], function() {
+    called = true;
+    done();
 });
+assert(!called, 'Callback should not have been called yet');
+sched.notify('foo');
 ```
 
-<a name="hashedapp-branchquery"></a>
-## branchQuery
-should perform a query on the tip of the given branch.
+should not call a callback unless the condition has been met.
 
 ```js
-util.seq([
-		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 0); _(); },
-], done)();
-```
-
-<a name="hashedapp-branchtrans"></a>
-## branchTrans
-should perform a transition, updating the tip of the branch.
-
-```js
-util.seq([
-		function(_) { app.branchTrans(branch, {type: 'add', amount: 2}, 3, _); },
-		function(_) { app.branchQuery(branch, {type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 2); _(); },
-], done)();
-```
-
-<a name="inverse-patch"></a>
-# inverse patch
-<a name="inverse-patch-patch"></a>
-## patch
-should unapply the underlying patch.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, -2); _(); },
-], done)();
-```
-
-<a name="inverse-patch-unpatch"></a>
-## unpatch
-should apply the undelying patch.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('counter', {}, _.to('s0')); },
-		function(_) { evalEnv.apply(this.s0, {_type: 'inv', patch: {_type: 'add', amount: 2}}, true, _.to('s1')); },
-		function(_) { evalEnv.query(this.s1, {_type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 2); _(); },
-], done)();
-```
-
-<a name="jsmapper"></a>
-# jsMapper
-<a name="jsmapper-init"></a>
-## init
-should take the args as state.
-
-```js
-util.seq([
-		function(_) { evalEnv.init('jsMapper', {foo: 'bar'}, _.to('s0')); },
-		function(_) { hashDB.unhash(this.s0, _.to('s0')); },
-		function(_) { assert.deepEqual(this.s0, {_type: 'jsMapper', foo: 'bar'}); _(); },
-], done)();
-```
-
-<a name="jsmapper-map"></a>
-## map
-should invoke the map() function defined in the state, with the patch as parameter when applied.
-
-```js
-process.__foo__ = 'bar';
-var mapper = fun2str({
-		map: function(patch) {
-		    process.__foo__ = patch;
-		},
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo'], function() {
+    called = true;
 });
-util.seq([
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _); },
-		function(_) { assert.deepEqual(process.__foo__, {_type: 'foo', bar: 'baz'}); _(); },
-], done)();
+assert(!called, 'Callback should not have been called yet');
+sched.notify('bar');
+assert(!called, 'Callback should not have been called');
+done();
 ```
 
-should pass the state as the map function's "this" argument.
+should allow multiple registrations on the same condition.
 
 ```js
-process.__foo__ = 'bar';
-var mapper = fun2str({
-		map: function(patch) {
-		    process.__foo__ = this.foo;
-		},
-		foo: 'baz',
+var sched = new Scheduler();
+var called1 = false;
+sched.register(['foo'], function() {
+    called1 = true;
+    if(called1 && called2 && called3) done();
 });
-util.seq([
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _); },
-		function(_) { assert.equal(process.__foo__, 'baz'); _(); },
-], done)();
-```
-
-should interpret invocations of the "emit" function as effect.
-
-```js
-var mapper = fun2str({
-		map: function(patch) {
-		    emit({_type: 'bar', baz: 'bat'});
-		},
+var called2 = false;
+sched.register(['foo'], function() {
+    called2 = true;
+    if(called1 && called2 && called3) done();
 });
-util.seq([
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _.to('s1', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{_type: 'bar', baz: 'bat'}]); _(); },
-], done)();
-```
-
-should invoke unmap() when unapplied.
-
-```js
-var mapper = fun2str({
-		map: function(patch) {
-		    throw new Error('map() should not be called');
-		},
-		unmap: function(patch) {
-		    emit({foo: 'bar'});
-		},
+var called3 = false;
+sched.register(['foo'], function() {
+    called3 = true;
+    if(called1 && called2 && called3) done();
 });
-util.seq([
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'inv', patch: {_type: 'foo', bar: 'baz'}}, _.to('s1', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{foo: 'bar'}]); _(); },
-], done)();
+assert(!called1, 'Callback 1 should not have been called yet');
+assert(!called2, 'Callback 2 should not have been called yet');
+assert(!called3, 'Callback 3 should not have been called yet');
+sched.notify('foo');
 ```
 
-should call a method named map_foo() for patch where _type="foo", if such a method exists.
+should call each callback only once even if notified multiple times.
 
 ```js
-var mapper = fun2str({
-		map: function(patch) {
-		    throw new Error('map() should not be called');
-		},
-		map_foo: function(patch) {
-		    emit({foo: 'bar1'});
-		    emit({foo: 'bar2'});
-		},
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo'], function() {
+    assert(!called, 'Callback should have been called only once');
+    called = true;
 });
-util.seq([
-		function(_) { evalEnv.init('jsMapper', mapper, _.to('s0')); },
-		function(_) { evalEnv.trans(this.s0, {_type: 'foo', bar: 'baz'}, _.to('s1', 'res', 'eff')); },
-		function(_) { assert.deepEqual(this.eff, [{foo: 'bar1'}, {foo: 'bar2'}]); _(); },
-], done)();
+sched.notify('foo');
+sched.notify('foo');
+sched.notify('foo');
+sched.notify('foo');
+done();
 ```
 
-<a name="logicbase"></a>
-# logicBase
-<a name="logicbase-query"></a>
-## query
-should provide a matching statement, if one exists.
+should call a callback only when all conditions are met.
+
+```js
+var sched = new Scheduler();
+var called = false;
+sched.register(['foo', 'bar', 'baz', 'bat'], function() {
+    called = true;
+    done();
+});
+sched.notify('bar');
+sched.notify('foo');
+sched.notify('bat');
+assert(!called, 'Callback should not have been called yet');
+sched.notify('baz');
+```
+
+<a name="simplecache"></a>
+# SimpleCache
+<a name="simplecache-storeid-obj-json"></a>
+## .store(id, obj[, json])
+should store an object in the cache under the given ID.
+
+```js
+var cache = new SimpleCache(sched);
+cache.store('one', {value: 1});
+cache.store('two', {value: 2});
+cache.store('three', {value: 3});
+assert.equal(cache.fetch('one').value, 1);
+assert.equal(cache.fetch('two').value, 2);
+assert.equal(cache.fetch('three').value, 3);
+done();
+```
+
+should retrieve the same instance on a first fetch.
+
+```js
+var cache = new SimpleCache(sched);
+var one = {value: 1};
+cache.store('one', one);
+one.value = 2;
+assert.equal(cache.fetch('one').value, 2);
+done();
+```
+
+should retrieve the same object once and again, even if it was modified on the outside.
+
+```js
+var cache = new SimpleCache(sched);
+cache.store('one', {value: 1});
+var one = cache.fetch('one');
+one.value = 2;
+assert.equal(cache.fetch('one').value, 1);
+done();
+```
+
+should use the json argument, if supplied, as the JSON representation of the object to be used when the instance is no longer available.
+
+```js
+var cache = new SimpleCache(sched);
+cache.store('one', {value: 1}, JSON.stringify({value: 2}));
+assert.equal(cache.fetch('one').value, 1); // first time
+assert.equal(cache.fetch('one').value, 2); // second time
+assert.equal(cache.fetch('one').value, 2); // third time
+done();
+```
+
+<a name="simplecache-abolish"></a>
+## .abolish()
+should remove all elements from the cache.
+
+```js
+var cache = new SimpleCache(sched);
+cache.store('one', {value: 1});
+cache.store('two', {value: 2});
+cache.store('three', {value: 3});
+cache.abolish();
+assert.equal(typeof cache.fetch('one'), 'undefined');
+assert.equal(typeof cache.fetch('two'), 'undefined');
+assert.equal(typeof cache.fetch('three'), 'undefined');
+done();
+```
+
+<a name="simplecache-waitforkeys-callback"></a>
+## .waitFor(keys, callback)
+should call the given callback once all keys are in the cache.
+
+```js
+var cache = new SimpleCache(sched);
+var called = false;
+cache.waitFor(['foo', 'bar'], function() {
+		called = true;
+		done();
+});
+cache.store('foo', 12);
+assert(!called, 'Callback should not have been called yet');
+cache.store('bar', 21);
+```
+
+should throw an exception if one of the keys is already in the cache.
+
+```js
+var cache = new SimpleCache(sched);
+cache.store('foo', 12);
+try {
+		cache.waitFor(['foo', 'bar'], function() {
+		    assert(false, 'Callback should not have been called');
+		});
+		assert(false, 'An exception should have been thrown');
+} catch(e) {
+		assert.equal(e.message, 'Key foo already in cache');
+}
+done();
+```
+
+<a name="simplecache-checkkey"></a>
+## .check(key)
+should return true if key exists in the cache.
+
+```js
+var cache = new SimpleCache(sched);
+cache.store('foo', 14);
+assert(cache.check('foo'), 'foo is in the cache');
+assert(!cache.check('bar'), 'bar is not in the cache');
+done();
+```
+
+<a name="simpleversiongraph"></a>
+# SimpleVersionGraph
+<a name="simpleversiongraph-recordtransv1-p-w-v2-cberr"></a>
+## .recordTrans(v1, p, w, v2, cb(err))
+should return a callback with no error if all is OK.
+
+```js
+versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, 1, {$:'bar'}, done);
+```
+
+<a name="simpleversiongraph-getmergestrategyv1-v2-resolve-cberr-v1-x-v2-mergeinfo"></a>
+## .getMergeStrategy(v1, v2, resolve, cb(err, V1, x, V2, mergeInfo))
+should return x as the common ancestor of v1 and v2.
 
 ```js
 util.seq([
-		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-		function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
-		function(_) { evalEnv.query(this.state, {_type: 'query', query: ['a', {v: 0}, {v:1}]}, _.to('res')); },
-		function(_) { assert.deepEqual(this.res, [[1, 2]]); _()},
+		function(_) { versionGraph.getMergeStrategy({$:18}, {$:14}, false, _.to('V1', 'x', 'V2')); },
+		function(_) { assert.equal(this.x.$, 2); _(); }, // x here represents the GCD of v1 and v2
 ], done)();
 ```
 
-<a name="logicbase-implementation"></a>
-# logicBase Implementation
-<a name="logicbase-implementation-init"></a>
-## init
-should create a node of the given depth with no value and no children.
+should return either v1 or v2 as V1, and the other as V2.
 
 ```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
 util.seq([
-		function(_) { evalEnv.init('logicBase', {depth: 7}, _.to('state')); },
-		function(_) { hashDB.unhash(this.state, _.to('content')); },
-		function(_) { assert.equal(this.content.d, 7);
-			      assert(!this.content.v, 'Node should not have a value');
-			      assert(!this.content.c, 'Node should not have children'); _();},
+		function(_) { versionGraph.getMergeStrategy(v1, v2, false, _.to('V1', 'x', 'V2')); },
+		function(_) { assert(this.V1.$ == v1.$ || this.V1.$ == v2.$, 'V1 should be either v1 or v2: ' + this.V1.$);
+			      assert(this.V2.$ == v1.$ || this.V2.$ == v2.$, 'V2 should be either v1 or v2: ' + this.V2.$);
+			      assert(this.V1.$ != this.V2.$ || v1.$ == v2.$, 'V1 and V2 should not be the same one');
+			      _();},
 ], done)();
 ```
 
-should set depth to zero if not given.
+should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false.
 
 ```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
 util.seq([
-		function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-		function(_) { hashDB.unhash(this.state, _.to('content')); },
-		function(_) { assert.equal(this.content.d, 0); _();},
+		function(_) { versionGraph.getMergeStrategy(v1, v2, false, _.to('V1', 'x', 'V2')); },
+		function(_) { assert((this.V1.$ * 1) >= (this.V2.$ * 1), 'V2 should be the lower of the two (closer to the GCD)');
+			      _();},
 ], done)();
 ```
 
-<a name="logicbase-implementation-update"></a>
-## update
-<a name="logicbase-implementation-update-assert"></a>
-### assert
-should add a value to a value-less/child-less node.
+should set V1 and V2 to be v1 and v2 respectively if resolve=true.
 
 ```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
+if((v1.$*1) > (v2.$*1)) {
+		var tmp = v1;
+		v1 = v2;
+		v2 = tmp;
+}
 util.seq([
-    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-    function(_) { hashDB.unhash(this.state, _.to('content')); },
-    function(_) { assert.deepEqual(this.content, {_type: 'logicBase', d:0, v:['a', 1, 2]}); _(); },
+		function(_) { versionGraph.getMergeStrategy(v1, v2, true, _.to('V1', 'x', 'V2')); },
+		function(_) { assert.equal(v1, this.V1);
+			      assert.equal(v2, this.V2);
+			      _();},
 ], done)();
 ```
 
-should create a child if a an assertion is made when a value is already given.
+<a name="simpleversiongraph-recordmergemergeinfo-newv-patches-confpatches-cberr"></a>
+## .recordMerge(mergeInfo, newV, patches, confPatches, cb(err))
+should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version.
 
 ```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
 util.seq([
-    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
-    function(_) { hashDB.unhash(this.state, _.to('content')); },
-    function(_) { assert.equal(this.content.v, undefined);
-		  hashDB.unhash(this.content.c['a/2'], _.to('a')); },
-    function(_) { hashDB.unhash(this.content.c['b/2'], _.to('b')); },
-    function(_) { assert.deepEqual(this.a, {_type: 'logicBase', d:1, v: ['a', 1, 2]});
-		  assert.deepEqual(this.b, {_type: 'logicBase', d:1, v: ['b', 3, 4]}); _(); },
+		function(_) { versionGraph.getMergeStrategy(v1, v2, false, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { versionGraph.recordMerge(this.mergeInfo, {$:'newVersion'}, [], [], _); },
+		function(_) { versionGraph.getMergeStrategy(v1, {$:'newVersion'}, false, _); }, // The new version should be in the graph
 ], done)();
 ```
 
-should index compound terms in the form name/arity.
+should record the overall weight on each new edge.
 
 ```js
+var v1 = {$:Math.floor(Math.random() * 29) + 1};
+var v2 = {$:Math.floor(Math.random() * 29) + 1};
+var v3 = {$:Math.floor(Math.random() * 29) + 1};
+var v4 = {$:Math.floor(Math.random() * 29) + 1};
 util.seq([
-    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4, 5]}, _.to('state')); },
-    function(_) { hashDB.unhash(this.state, _.to('content')); },
-    function(_) { assert('a/2' in this.content.c, 'the node should have a key a/2'); _(); },
-    function(_) { assert('b/3' in this.content.c, 'the node should have a key b/3'); _(); },
-], done)();
-```
-
-should place two children under a common child if they share the same top-level.
-
-```js
-util.seq([
-    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 3, 4]}, _.to('state')); },
-    function(_) { hashDB.unhash(this.state, _.to('content')); },
-    function(_) { assert('a/2' in this.content.c, 'the node should have a key a/2'); _(); },
-    function(_) { hashDB.unhash(this.content.c['a/2'], _.to('a')); },
-    function(_) { assert(this.a.c['1'], 'There should be an entry for a(1, 2)');
-		  assert(this.a.c['3'], 'There should be an entry for a(3, 4)'); _(); },
-], done)();
-```
-
-should allow any number (not limited to 2) of children to a node.
-
-```js
-util.seq([
-    function(_) { evalEnv.init('logicBase', {}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['a', 1, 2]}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['b', 3, 4]}, _.to('state')); },
-    function(_) { evalEnv.trans(this.state, {_type: 'update', assert: ['c', 5, 6]}, _.to('state')); },
-    function(_) { hashDB.unhash(this.state, _.to('content')); },
-    function(_) { hashDB.unhash(this.content.c['a/2'], _.to('a')); },
-    function(_) { hashDB.unhash(this.content.c['b/2'], _.to('b')); },
-    function(_) { hashDB.unhash(this.content.c['c/2'], _.to('c')); },
-    function(_) { assert.deepEqual(this.a, {_type: 'logicBase', d:1, v: ['a', 1, 2]});
-		  assert.deepEqual(this.b, {_type: 'logicBase', d:1, v: ['b', 3, 4]});
-		  assert.deepEqual(this.c, {_type: 'logicBase', d:1, v: ['c', 5, 6]}); _(); },
+		function(_) { versionGraph.getMergeStrategy(v1, v2, false, _.to('V1', 'x', 'V2', 'mergeInfo')); },
+		function(_) { this.v12 = {$:v1.$ * v2.$ / this.x.$};
+			      versionGraph.recordMerge(this.mergeInfo, this.v12, [], [], _); },
+		function(_) { versionGraph.getMergeStrategy(v3, v4, false, _.to('V3', 'x', 'V4', 'mergeInfo')); },
+		function(_) { this.v34 = {$:v3.$ * v4.$ / this.x.$};
+			      versionGraph.recordMerge(this.mergeInfo, this.v34, [], [], _); },
+		function(_) { versionGraph.getMergeStrategy(this.v12, this.v34, false, _.to('V5', 'x', 'V6')); },
+		function(_) { assert(this.V6.$ <= this.V5.$, 'V6 should be lower'); _(); },
 ], done)();
 ```
 
@@ -2244,347 +2454,117 @@ util.depend([
 });
 ```
 
-<a name="vcobj"></a>
-# VCObj
-<a name="vcobj-createobjectcls-s0-cberr-h0"></a>
-## createObject(cls, s0, cb(err, h0))
-should create an object state hash for the given class and initial state.
+<a name="vercast"></a>
+# vercast
+<a name="vercast-hashobj"></a>
+## .hash(obj)
+should return a SHA-256 digest of the given string.
 
 ```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-var cls = { foo: function() { console.log("bar"); }, 
-			bar: function() { console.log("baz"); } };
-util.seq([
-		function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
-		function(_) { hashDB.unhash(this.h0, _.to('s0')); },
-		function(_) { assert.equal(this.s0.val, 0);
-			      hashDB.unhash(this.s0._class, _.to('cls'));},
-		function(_) { assert.equal(this.cls.foo, 'function () { console.log("bar"); }'); _(); },
-], done)();
+var str = 'hello, there';
+var strHash = vercast.hash(str);
+
+var hash = crypto.createHash('sha256');
+hash.update(str);
+assert.equal(strHash, hash.digest('base64'));
+done();
 ```
 
-<a name="vcobj-applyh1-patch-cberr-h2-res-effect-conflict"></a>
-## apply(h1, patch, cb(err, h2, res, effect, conflict))
-should apply a patch to the given state, activating a class method.
+<a name="vercast-genidbucketid-hash"></a>
+## .genID(bucketID, hash)
+should create a version ID based on a bucket ID (string) and a hash (string).
 
 ```js
-var rand = Math.random();
-var cls = {
-		foo: function(p, ctx) { process._beenThere = p.rand; ctx.ret(); }
-};
-var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls, {}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo', rand: rand}, _); },
-		function(_) { assert.equal(process._beenThere, rand); _(); },
-], done)();
+var id = vercast.genID('bucket', 'hash');
+assert.equal(id.$, 'bucket-hash');
+done();
 ```
 
-should emit the new state hash, and the result emitted by the invoked method.
+<a name="vercast-bucketidid"></a>
+## .bucketID(id)
+should return the bucket ID associated with the given version ID.
 
 ```js
-var cls = {
-		foo: function(p, ctx) { ctx.ret('result'); }
-};
-var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls, {}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
-		function(_) { assert.deepEqual(this.h1, this.h0);
-			      assert.equal(this.res, 'result'); _();},
-], done)();
+var id = vercast.genID('bucket', 'hash');
+assert.equal(vercast.bucketID(id), 'bucket');
+done();
 ```
 
-should pass the invoked method the state as its this parameter.
+<a name="vercast-objidid"></a>
+## .objID(id)
+should return the object hash part of the given version ID.
 
 ```js
-var cls = {
-		foo: function(p, ctx) { ctx.ret(this.baz); }
-};
-var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls, {baz: 'bat'}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res')); },
-		function(_) { assert.deepEqual(this.h1, this.h0);
-			      assert.equal(this.res, 'bat'); _();},
-], done)();
+var id = vercast.genID('bucket', 'hash');
+assert.equal(vercast.objID(id), 'hash');
+done();
 ```
 
-should emit the new state based on the content of "this" when the method returns.
+<a name="vercast-childobjectsobj"></a>
+## .childObjects(obj)
+should return a list of sub-object IDs nested in obj.
 
 ```js
-var cls = {
-		foo: function(p, ctx) { this.bar = 'baz'; ctx.ret(); }
-};
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls, {}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1')); },
-		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
-		function(_) { assert.equal(this.s1.bar, 'baz'); _();},
-], done)();
+var obj = {left: vercast.genID('foo', 'bar'), right: vercast.genID('foo', 'baz'), value: 3};
+var children = vercast.childObjects(obj);
+assert.equal(children.length, 2);
+assert.equal(children[0].$, 'foo-bar');
+assert.equal(children[1].$, 'foo-baz');
+done();
 ```
 
-should allow objects to further call other objects by sending them patches.
+should recursively search for children in nested objects and arrays.
 
 ```js
-var cls1 = {
-		foo: function(p, ctx) {
-		    var state = this;
-		    util.seq([
-			function(_) { ctx.query(state.child, {type: 'bar'}, _.to('res')); },
-			function(_) { ctx.ret(this.res); },
-		    ], ctx.done)();
-		}
+var obj = {
+		subObj: {
+		    list: [vercast.genID('foo', 'bar'), vercast.genID('foo', 'baz')], 
+		    value: 3}
 };
-var cls2 = {
-		bar: function(p, ctx) {
-		    ctx.ret(this.val + 1);
+var children = vercast.childObjects(obj);
+assert.equal(children.length, 2);
+assert.equal(children[0].$, 'foo-bar');
+assert.equal(children[1].$, 'foo-baz');
+done();
+```
+
+<a name="vercast-randombykeykey-prob"></a>
+## .randomByKey(key, prob)
+should return true in probability prob.
+
+```js
+var numTrue = 0;
+var total = 1000;
+var prob = 0.2;
+for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		if(vercast.randomByKey(key, prob)) {
+		    numTrue++;
 		}
 }
-var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls2, {val:2}, _.to('child')); },
-		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res')); },
-		function(_) { assert.equal(this.res, 3); _(); },
-], done)();
+var mean = total * prob;
+var sigma = Math.sqrt(total * prob * (1 - prob));
+var USL = mean + 3*sigma;
+var LSL = mean - 3*sigma;
+assert(numTrue > LSL, 'numTrue must be more than ' + LSL);
+assert(numTrue < USL, 'numTrue must be less than ' + USL);
+done();
 ```
 
-should report conflict if the context conflict() method was called.
+should behave consistently given a constant sequence of keys.
 
 ```js
-var cls = {
-		foo: function(p, ctx) { ctx.conflict(); ctx.ret(); }
-};
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls, {}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
-		function(_) { assert(this.conflict, 'The conflict flag should be true'); _();},
-], done)();
-```
-
-should propagate conflicts reported in child objects.
-
-```js
-var cls1 = {
-		foo: function(p, ctx) {
-		    var state = this;
-		    util.seq([
-			function(_) { ctx.trans(state.child, {type: 'bar', val: 2}, _.to('child')); },
-			function(_) { state.child = this.child;
-				      ctx.ret(); },
-		    ], ctx.done)();
-		}
-};
-var cls2 = {
-		bar: function(p, ctx) {
-		    var state = this;
-		    state.val = p.val;
-		    ctx.conflict(); // The child conflicts
-		    ctx.ret();
-		}
+var history = [];
+var total = 1000;
+var prob = 0.2;
+for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		history.push(vercast.randomByKey(key, prob));
 }
-var obj = new VCObj(new HashDB(new DummyKVS()), new DummyKVS());
-util.seq([
-		function(_) { obj.createObject(cls2, {}, _.to('child')); },
-		function(_) { obj.createObject(cls1, {child: this.child}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {type: 'foo'}, _.to('h1', 'res', 'effect', 'conflict')); },
-		function(_) { assert(this.conflict, 'the conflict flag should be true'); _(); },
-], done)();
-```
-
-should accept patches that have a "code" field instead of "type".
-
-```js
-var code = function(patch, ctx) {
-		this.val += patch.amount;
-		ctx.ret();
+for(var i = 0; i < total; i++) {
+		var key = 'foo' + i;
+		assert.equal(vercast.randomByKey(key, prob), history[i]);
 }
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { hashDB.hash(code.toString(), _.to('code')); },
-		function(_) { obj.createObject({}, {val:0}, _.to('h0')); },
-		function(_) { obj.apply(this.h0, {code: this.code, amount: 3}, _.to('h1')); },
-		function(_) { hashDB.unhash(this.h1, _.to('s1')); },
-		function(_) { assert.equal(this.s1.val, 3); _(); },
-], done)();
-```
-
-<a name="vcobj-invertpatch-cberr-invpatch"></a>
-## invert(patch, cb(err, invPatch))
-should invert any patch that has an inv field specifying its inversion logic.
-
-```js
-var inv = function(patch, cb) {
-		patch.amount = -patch.amount;
-		cb(undefined, patch);
-}
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { hashDB.hash(inv.toString(), _.to('invHash')); },
-		function(_) { obj.invert({type: 'add', amount: 2, inv: this.invHash}, _.to('inv')); },
-		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: -2, inv: this.invHash}); _(); },
-], done)();
-```
-
-should return the patch unchanged in case an inv field does not exist.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { obj.invert({type: 'add', amount: 2}, _.to('inv')); },
-		function(_) { assert.deepEqual(this.inv, {type: 'add', amount: 2}); _(); },
-], done)();
-```
-
-<a name="vcobj-createchainpatchpatches-cberr-patch"></a>
-## createChainPatch(patches, cb(err, patch))
-should create a patch that applies all given patches one by one.
-
-```js
-function createCounter(obj, hashDB, cb) {
-		var cls = {
-		    add: function(patch, ctx) {
-			this.val += patch.amount;
-			ctx.ret();
-		    },
-		    get: function(patch, ctx) {
-			ctx.ret(this.val);
-		    },
-		};
-		var invAdd = function(patch, cb) {
-		    patch.amount = -patch.amount;
-		    cb(undefined, patch);
-		};
-		util.seq([
-		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
-		    function(_) { hashDB.hash(invAdd.toString(), _.to('invAdd')); },
-		    function(_) { cb(undefined, this.h0, this.invAdd); },
-		], cb)();
-}
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
-		function(_) { obj.createChainPatch([{type: 'add', amount: 2, inv: this.invAdd}, 
-						    {type: 'add', amount: 3, inv: this.invAdd}], _.to('p')); },
-		function(_) { obj.apply(this.h0, this.p, _.to('h1')); },
-		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
-		function(_) { assert.equal(this.res, 5); _(); },
-], done)();
-```
-
-should support correct inversion of the resulting patch.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
-		function(_) { obj.createChainPatch([{type: 'add', amount: 2, inv: this.invAdd}, 
-						    {type: 'add', amount: 3, inv: this.invAdd}], _.to('p')); },
-		function(_) { obj.invert(this.p, _.to('invP')); },
-		function(_) { obj.trans(this.h0, this.invP, _.to('h1')); },
-		function(_) { obj.query(this.h1, {type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, -5); _(); },
-], done)();
-```
-
-<a name="vcobj-transh1-patch-cbh2-res-effect-conflict"></a>
-## trans(h1, patch, cb(h2, res, effect, conflict))
-should apply the given patch on h1 to receive h2.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
-		function(_) { obj.trans(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h1')); },
-		function(_) { obj.apply(this.h1, {type: 'get'}, _.to('h2', 'res')); },
-		function(_) { assert.equal(this.res, 2); _(); },
-], done)();
-```
-
-should cache previous state/patch pairs and avoid re-calculation.
-
-```js
-function createCounter(obj, hashDB, cb) {
-		var cls = {
-		    add: function(patch, ctx) {
-			process._counterTest++; // Count the applications as a side-effect
-			this.val += patch.amount;
-			ctx.ret();
-		    },
-		    get: function(patch, ctx) {
-			ctx.ret(this.val);
-		    },
-		};
-		var invAdd = function(patch, cb) {
-		    patch.amount = -patch.amount;
-		    cb(undefined, patch);
-		};
-		util.seq([
-		    function(_) { obj.createObject(cls, {val:0}, _.to('h0')); },
-		    function(_) { hashDB.hash(invAdd.toString(), _.to('invAdd')); },
-		    function(_) { cb(undefined, this.h0, this.invAdd); },
-		], cb)();
-}
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-process._counterTest = 0;
-util.seq([
-		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
-		function(_) { obj.trans(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h1')); },
-		function(_) { obj.trans(this.h1, {type: 'add', inv: this.invAdd, amount: -2}, _.to('h2')); },
-		function(_) { obj.trans(this.h2, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h3')); },
-		function(_) { obj.trans(this.h3, {type: 'add', inv: this.invAdd, amount: -2}, _.to('h4')); },
-		function(_) { obj.trans(this.h4, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h5')); },
-		function(_) { obj.trans(this.h5, {type: 'add', inv: this.invAdd, amount: -2}, _.to('h6')); },
-		function(_) { obj.trans(this.h6, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h7')); },
-		function(_) { obj.trans(this.h7, {type: 'add', inv: this.invAdd, amount: -2}, _); },
-		function(_) { assert.equal(process._counterTest, 2); _(); },
-], done)();
-```
-
-<a name="vcobj-queryh1-patch-cberr-ret"></a>
-## query(h1, patch, cb(err, ret))
-should return the result of applying the patch on an object with the given state.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
-		function(_) { obj.trans(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _.to('h1')); },
-		function(_) { obj.query(this.h1, {type: 'get'}, _.to('res')); },
-		function(_) { assert.equal(this.res, 2); _(); },
-], done)();
-```
-
-should fail if the patch modifies the state.
-
-```js
-var hashDB = new HashDB(new DummyKVS());
-var obj = new VCObj(hashDB, new DummyKVS());
-util.seq([
-		function(_) { createCounter(obj, hashDB, _.to('h0', 'invAdd')); },
-		function(_) { obj.query(this.h0, {type: 'add', inv: this.invAdd, amount: 2}, _); },
-], function(err) {
-		if(!err) {
-		    done(new Error('Error not emitted'));
-		} else if(err.message == 'Query patches should not change object state') {
-		    done();
-		} else {
-		    done(err);
-		}
-})();
+done();
 ```
 
