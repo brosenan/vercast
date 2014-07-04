@@ -6,5 +6,5 @@ mocha -R markdown > README.md
 mv .new.tr .old.tr
 git add .
 git commit -a -m "$comment"
-git push origin sync
+git push origin master
 
