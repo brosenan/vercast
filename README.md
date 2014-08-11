@@ -1077,9 +1077,11 @@ cache.waitFor(ctx.waitFor, function() {
 should create a counter with value = 0.
 
 ```js
-var initial = disp.init({}, 'counter', {});
-assert.equal(initial.value, 0);
-done();
+init: {"_type":"counter"}
+patch: {"_type":"get"}
+function (value) {
+		assert.equal(value, 0);
+	    }
 ```
 
 <a name="counter-add"></a>
@@ -1087,19 +1089,23 @@ done();
 should add the given ammount to the counter value.
 
 ```js
-var c = disp.init({}, 'counter', {});
-c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
-assert.equal(c.value, 2);
-done();
+init: {"_type":"counter"}
+patch: {"_type":"add","amount":2}
+patch: {"_type":"get"}
+function (value) {
+		assert.equal(value, 2);
+	    }
 ```
 
 should subtract the given amount when unapplied.
 
 ```js
-var c = disp.init({}, 'counter', {});
-c = disp.apply({}, c, {_type: 'add', amount: 2}, -1)[0];
-assert.equal(c.value, -2);
-done();
+init: {"_type":"counter"}
+patch: {"_type":"inv","patch":{"_type":"add","amount":2}}
+patch: {"_type":"get"}
+function (value) {
+		assert.equal(value, -2);
+	    }
 ```
 
 <a name="counter-get"></a>
@@ -1107,11 +1113,12 @@ done();
 should return the counter value.
 
 ```js
-var c = disp.init({}, 'counter', {});
-c = disp.apply({}, c, {_type: 'add', amount: 2})[0];
-res = disp.apply({}, c, {_type: 'get'})[1];
-assert.equal(res, 2);
-done();
+init: {"_type":"counter"}
+patch: {"_type":"inv","patch":{"_type":"add","amount":2}}
+patch: {"_type":"get"}
+function (value) {
+		assert.equal(value, -2);
+	    }
 ```
 
 <a name="dummyatomickvs"></a>

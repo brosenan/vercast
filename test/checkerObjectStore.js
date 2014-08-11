@@ -35,6 +35,7 @@ function checkInvertibility(v1, p, v2, r, c) {
     
     var ctx = {};
     var pair = this.ostore.trans(ctx, v2, {_type: 'inv', patch: p});
+    if(ctx.error) throw ctx.error;
 
     if(JSON.stringify(pair[1]) != JSON.stringify(r)) {
 	console.error('Result on forward pass:', r);
