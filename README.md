@@ -346,12 +346,11 @@ ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount
 should initialize a binary tree with a single element.
 
 ```js
-var tree = disp.init({}, 'BinTree', {key: 'foo', value: 'bar'});
-assert.equal(tree.key, 'foo');
-assert.equal(tree.value, 'bar');
-assert.equal(tree.left, null);
-assert.equal(tree.right, null);
-done();
+init: {"_type":"BinTree","key":"foo","value":"bar"}
+patch: {"_type":"fetch","key":"foo"}
+function (value) {
+		assert.equal(value, 'bar');
+	    }
 ```
 
 <a name="bintree-fetch"></a>
@@ -359,19 +358,21 @@ done();
 should return the value associated with a key.
 
 ```js
-var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
-var pair = ostore.trans({}, v, {_type: 'fetch', key: 'foo'});
-assert.equal(pair[1], 'bar');
-done();
+init: {"_type":"BinTree","key":"foo","value":"bar"}
+patch: {"_type":"fetch","key":"foo"}
+function (value) {
+		assert.equal(value, 'bar');
+	    }
 ```
 
 should return undefined if the key is not in the tree.
 
 ```js
-var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
-var pair = ostore.trans({}, v, {_type: 'fetch', key: 'FOO'});
-assert.equal(typeof pair[1], 'undefined');
-done();
+init: {"_type":"BinTree","key":"foo","value":"bar"}
+patch: {"_type":"fetch","key":"FOO"}
+function (res) {
+		assert.equal(typeof res, 'undefined');
+	    }
 ```
 
 <a name="bintree-add"></a>
@@ -379,13 +380,15 @@ done();
 should add a leaf to the tree, based on key comparison.
 
 ```js
-var v = ostore.init({}, 'BinTree', {key: 'foo', value: 'bar'});
-v = ostore.trans({}, v, {_type: 'add', key: 'bar', value: 'baz'})[0];
-v = ostore.trans({}, v, {_type: 'add', key: 'kar', value: 'fuzz'})[0];
-assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'foo'})[1], 'bar');
-assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'bar'})[1], 'baz');
-assert.equal(ostore.trans({}, v, {_type: 'fetch', key: 'kar'})[1], 'fuzz');
-done();
+init: {"_type":"BinTree","key":"foo","value":"bar"}
+patch: {"_type":"add","key":"bar","value":"baz"}
+patch: {"_type":"add","key":"kar","value":"fuzz"}
+patch: {"_type":"fetch","key":"foo"}
+function (res) { assert.equal(res, 'bar'); }
+patch: {"_type":"fetch","key":"bar"}
+function (res) { assert.equal(res, 'baz'); }
+patch: {"_type":"fetch","key":"kar"}
+function (res) { assert.equal(res, 'fuzz'); }
 ```
 
 should report a conflict and not change the state if the the key already exists.
