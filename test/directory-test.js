@@ -63,4 +63,26 @@ describe('Directory', function(){
 	    {error: 'Patch method count is not defined in class counter'},
 	]));
     });
+    describe('_get_id', function(){
+	var x;
+	it('should return the version ID of the referenced object', scenario(disp, [
+	    {_type: 'directory'},
+	    {_type: 'put', _path: ['a', 'b1', 'c1'], content: {_type: 'counter'}},
+	    {_type: 'put', _path: ['a', 'b1', 'c2'], content: {_type: 'counter'}},
+	    {_type: 'put', _path: ['a', 'b2', 'c1'], content: {_type: 'counter'}},
+	    {_type: 'put', _path: ['a', 'b2', 'c2'], content: {_type: 'counter'}},
+	    {_type: 'add', _path: ['a', 'b1', 'c1'], amount: 1},
+	    {_type: 'add', _path: ['a', 'b1', 'c2'], amount: 2},
+	    {_type: 'add', _path: ['a', 'b2', 'c1'], amount: 2},
+	    {_type: 'add', _path: ['a', 'b2', 'c2'], amount: 1},
+	    {_type: '_get_id', _path: ['a', 'b1', 'c1']},
+	    function(y) { x = y; },
+	    {_type: '_get_id', _path: ['a', 'b2', 'c2']},
+	    function(y) { assert.equal(y.$, x.$); },
+	    {_type: '_get_id', _path: ['a', 'b1', 'c2']},
+	    function(y) { x = y; },
+	    {_type: '_get_id', _path: ['a', 'b2', 'c1']},
+	    function(y) { assert.equal(y.$, x.$); },
+	]));
+    });
 });

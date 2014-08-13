@@ -143,6 +143,8 @@
   ․ Directory count should return a count of the number of immediate children of a directory
     Directory count should be propagated to a child if the path so indicates
   ․ Directory count should be propagated to a child if the path so indicates
+    Directory _get_id should return the version ID of the referenced object
+  ․ Directory _get_id should return the version ID of the referenced object
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
@@ -330,5 +332,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  165 passing (3s)
+  166 passing (3s)
 

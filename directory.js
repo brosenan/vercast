@@ -56,3 +56,11 @@ exports.count = function(ctx, patch, u) {
     }
     return Object.keys(this.dir).length;
 }
+
+exports._get_id = function(ctx, patch, u) {
+    if(patch._path.length > this.depth + 1) {
+	return exports._default.call(this, ctx, patch, u);
+    }
+    var key = patch._path[this.depth];
+    return this.dir[key];
+}

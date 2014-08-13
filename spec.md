@@ -41,6 +41,7 @@
      - [put](#directory-put)
      - [_default](#directory-_default)
      - [count](#directory-count)
+     - [_get_id](#directory-_get_id)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
@@ -60,6 +61,7 @@
        - [context](#dummyobjectstore-as-objectstore-context)
          - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
          - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
+   - [JsClass](#jsclass)
    - [MergingStateStore](#mergingstatestore)
      - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
      - [.trans(v1, p,[ simulate,] cb(v2, r, c))](#mergingstatestore-transv1-p-simulate-cbv2-r-c)
@@ -1204,6 +1206,30 @@ init: {"_type":"directory"}
 patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
 patch: {"_type":"count","_path":["child1"]}
 [object Object]
+```
+
+<a name="directory-_get_id"></a>
+## _get_id
+should return the version ID of the referenced object.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["a","b1","c1"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["a","b1","c2"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["a","b2","c1"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["a","b2","c2"],"content":{"_type":"counter"}}
+patch: {"_type":"add","_path":["a","b1","c1"],"amount":1}
+patch: {"_type":"add","_path":["a","b1","c2"],"amount":2}
+patch: {"_type":"add","_path":["a","b2","c1"],"amount":2}
+patch: {"_type":"add","_path":["a","b2","c2"],"amount":1}
+patch: {"_type":"_get_id","_path":["a","b1","c1"]}
+function (y) { x = y; }
+patch: {"_type":"_get_id","_path":["a","b2","c2"]}
+function (y) { assert.equal(y.$, x.$); }
+patch: {"_type":"_get_id","_path":["a","b1","c2"]}
+function (y) { x = y; }
+patch: {"_type":"_get_id","_path":["a","b2","c1"]}
+function (y) { assert.equal(y.$, x.$); }
 ```
 
 <a name="dummyatomickvs"></a>
