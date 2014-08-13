@@ -1147,7 +1147,7 @@ should report a conflict if the child already exist.
 init: {"_type":"directory"}
 patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
 patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
-[object Object]
+Should conflict
 ```
 
 should create sub-directories if they do not exist.
@@ -1184,7 +1184,7 @@ should conflict when the child does not exist.
 ```js
 init: {"_type":"directory"}
 patch: {"_type":"get","_path":["child1"]}
-[object Object]
+Should conflict
 ```
 
 <a name="directory-count"></a>
@@ -1205,7 +1205,7 @@ should be propagated to a child if the path so indicates.
 init: {"_type":"directory"}
 patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
 patch: {"_type":"count","_path":["child1"]}
-[object Object]
+Should error: Patch method count is not defined in class counter
 ```
 
 <a name="directory-_get_id"></a>
