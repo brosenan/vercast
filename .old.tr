@@ -129,6 +129,10 @@
   ․ counter add should subtract the given amount when unapplied
     counter get should return the counter value
   ․ counter get should return the counter value
+    Directory put should construct a new object if the _path if of size 1 and the entry does not exist
+  ․ Directory put should construct a new object if the _path if of size 1 and the entry does not exist
+    Directory put should report a conflict if the child already exist
+  ․ Directory put should report a conflict if the child already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
@@ -316,5 +320,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  158 passing (3s)
+  160 passing (3s)
 

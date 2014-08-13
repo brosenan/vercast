@@ -12,7 +12,7 @@ module.exports = function(ostore) {
 	if(ctx.error) return pair;
 
 	for(var i = 0; i < this.transHooks.length; i++) {
-	    this.transHooks[i].call(this, v1, p, pair[0], pair[1], ctx.conf);
+	    this.transHooks[i].call(this, v1, p, pair[0], pair[1], ctx.conf, ctx);
 	}
 	return pair;
     }
@@ -29,13 +29,14 @@ module.exports = function(ostore) {
 }
 
 
-function checkInvertibility(v1, p, v2, r, c) {
+function checkInvertibility(v1, p, v2, r, c, ctx) {
     // A conflicting transition is not expected to be invertible.
     if(c) return;
     
-    var ctx = {};
     var pair = this.ostore.trans(ctx, v2, {_type: 'inv', patch: p});
-    if(ctx.error) throw ctx.error;
+    if(ctx.error) {
+	return pair;
+    }
 
     if(JSON.stringify(pair[1]) != JSON.stringify(r)) {
 	console.error('Result on forward pass:', r);

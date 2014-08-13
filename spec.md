@@ -38,6 +38,7 @@
      - [add](#counter-add)
      - [get](#counter-get)
    - [Directory](#directory)
+     - [put](#directory-put)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
@@ -1123,6 +1124,26 @@ patch: {"_type":"get"}
 function (value) {
 		assert.equal(value, -2);
 	    }
+```
+
+<a name="directory"></a>
+# Directory
+<a name="directory-put"></a>
+## put
+should construct a new object if the _path if of size 1 and the entry does not exist.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+```
+
+should report a conflict if the child already exist.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+[object Object]
 ```
 
 <a name="dummyatomickvs"></a>

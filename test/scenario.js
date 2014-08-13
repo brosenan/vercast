@@ -9,19 +9,19 @@ module.exports = function(disp, list) {
 	for(var i = 1; i < list.length; i++) {
 	    if(typeof list[i] === 'object' && '_type' in list[i]) {
 		pair = ostore.trans(ctx, pair[0], list[i]);
-		if(ctx.error) {
-		    throw ctx.error;
-		}
-		if(typeof pair[0] === 'undefined') {
-		    throw new Error('Unknown error');
-		}
+	    } else if(typeof list[i] === 'object' && 'error' in list[i]) {
+		assert(ctx.error, 'An error should be raised');
+		assert.equal(ctx.error.message, list[i].error);
+		delete ctx.error;
+	    } else if(typeof list[i] === 'object' && 'conflict' in list[i]) {
+		assert(ctx.conf, 'A conflict should be reported');
 	    } else if(typeof list[i] === 'function') {
 		list[i](pair[1]);
 	    } else {
 		throw new Error("Bad item in scenario");
 	    }
 	}
-	done();
+	done(ctx.error);
     };
     ret.toString = function() {
 	var str = 'function(){\ninit: ' + JSON.stringify(list[0]) + '\n';
