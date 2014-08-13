@@ -40,6 +40,7 @@
    - [Directory](#directory)
      - [put](#directory-put)
      - [_default](#directory-_default)
+     - [count](#directory-count)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
@@ -1147,6 +1148,20 @@ patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
 [object Object]
 ```
 
+should create sub-directories if they do not exist.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["foo","bar"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["foo","baz"],"content":{"_type":"counter"}}
+patch: {"_type":"add","_path":["foo","bar"],"amount":3}
+patch: {"_type":"add","_path":["foo","baz"],"amount":4}
+patch: {"_type":"get","_path":["foo","bar"]}
+function (v) { assert.equal(v, 3); }
+patch: {"_type":"get","_path":["foo","baz"]}
+function (v) { assert.equal(v, 4); }
+```
+
 <a name="directory-_default"></a>
 ## _default
 should propagate patches to the relevant child.
@@ -1167,6 +1182,27 @@ should conflict when the child does not exist.
 ```js
 init: {"_type":"directory"}
 patch: {"_type":"get","_path":["child1"]}
+[object Object]
+```
+
+<a name="directory-count"></a>
+## count
+should return a count of the number of immediate children of a directory.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["child2"],"content":{"_type":"counter"}}
+patch: {"_type":"count","_path":[]}
+function (c) { assert.equal(c, 2); }
+```
+
+should be propagated to a child if the path so indicates.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"count","_path":["child1"]}
 [object Object]
 ```
 

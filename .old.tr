@@ -133,10 +133,16 @@
   ․ Directory put should construct a new object if the _path if of size 1 and the entry does not exist
     Directory put should report a conflict if the child already exist
   ․ Directory put should report a conflict if the child already exist
+    Directory put should create sub-directories if they do not exist
+  ․ Directory put should create sub-directories if they do not exist
     Directory _default should propagate patches to the relevant child
   ․ Directory _default should propagate patches to the relevant child
     Directory _default should conflict when the child does not exist
   ․ Directory _default should conflict when the child does not exist
+    Directory count should return a count of the number of immediate children of a directory
+  ․ Directory count should return a count of the number of immediate children of a directory
+    Directory count should be propagated to a child if the path so indicates
+  ․ Directory count should be propagated to a child if the path so indicates
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val, cb(err)) should emit an error when the key already exists
@@ -324,5 +330,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  162 passing (3s)
+  165 passing (3s)
 
