@@ -36,7 +36,10 @@ Our aim is to provide a practical framework for applications.  For this, we use 
 Vercast is a work in progress.  We currently have a basic prototype that demonstrates the basic functionality.  One can define classes and send patches to them, use branches and merge the state.  We currently do not have real database drivers.  Instead, we have in-memory stubs that allow us to play around with it.
 
 ## Getting Started
+For reference on the Vercast API please see [the spec](spec.md).
+
 Pre-requisites:
+
 1. Install Node.js.
 2. We use [mocha](http://visionmedia.github.io/mocha/) for BDD, so you'll need it as well.
 
