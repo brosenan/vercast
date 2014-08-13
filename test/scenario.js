@@ -31,6 +31,10 @@ module.exports = function(disp, list) {
 	for(var i = 1; i < list.length; i++) {
 	    if(typeof list[i] == 'object' && '_type' in list[i]) {
 		str += 'patch: ' + JSON.stringify(list[i]) + '\n';
+	    } else if(typeof list[i] === 'object' && 'error' in list[i]) {
+		str += 'Should error: ' + list[i].error;
+	    } else if(typeof list[i] === 'object' && 'conflict' in list[i]) {
+		str += 'Should conflict';
 	    } else {
 		str += list[i].toString() + '\n';
 	    }
