@@ -219,6 +219,8 @@
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should use patch handlers if defined (prfixed with ":")
     ObjectDisp .apply(ctx, obj, patch, unapply) should prefer a method defined in a class over a generic patch function if both are defined
   ․ ObjectDisp .apply(ctx, obj, patch, unapply) should prefer a method defined in a class over a generic patch function if both are defined
+    ObjectDisp .apply(ctx, obj, patch, unapply) should default to calling the _default method when a method named after the patch _type does not exist
+  ․ ObjectDisp .apply(ctx, obj, patch, unapply) should default to calling the _default method when a method named after the patch _type does not exist
     PatchStore should store arrays of patches keyed by a source and target version IDs
   ․ PatchStore should store arrays of patches keyed by a source and target version IDs
     PatchStore should treat patches of type _range by concatenating the underlying patches in place of the _range
@@ -314,5 +316,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  157 passing (3s)
+  158 passing (3s)
 

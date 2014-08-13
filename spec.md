@@ -37,6 +37,7 @@
      - [init](#counter-init)
      - [add](#counter-add)
      - [get](#counter-get)
+   - [Directory](#directory)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
@@ -1920,6 +1921,24 @@ var obj = objDisp.init(ctx, 'MyClass', {});
 res = objDisp.apply(ctx, obj, {_type: 'patch1'});
 assert(called, 'patch function should have been called');
 done();
+```
+
+should default to calling the _default method when a method named after the patch _type does not exist.
+
+```js
+disp = {
+		'MyClass': {
+		    init: function() {},
+		    _default: function(ctx, patch) {
+			this.lastPatch = patch._type;
+		    },
+		}
+};
+objDisp = new ObjectDisp(disp);
+var ctx = {};
+var obj = objDisp.init(ctx, 'MyClass', {});
+var res = objDisp.apply(ctx, obj, {_type: 'foo', bar: 2});
+assert.equal(res[0].lastPatch, 'foo');
 ```
 
 <a name="patchstore"></a>

@@ -18,7 +18,12 @@ module.exports = function(disp) {
 	    if(func) {
 		res = func.call(this, ctx, obj, patch, unapply);
 	    } else {
-		throw new Error('Patch method ' + patch._type + ' is not defined in class ' + obj._type);
+		func = disp[obj._type]._default;
+		if(func) {
+		    res = func.call(obj, ctx, patch, unapply);
+		} else {
+		    throw new Error('Patch method ' + patch._type + ' is not defined in class ' + obj._type);
+		}
 	    }
 	}
 	return [obj, res];
