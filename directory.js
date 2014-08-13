@@ -17,3 +17,15 @@ exports.put = function(ctx, patch, u) {
 	delete this.dir[key];
     }
 }
+
+exports._default = function(ctx, patch, u) {
+    var key = patch._path[0];
+    if(!(key in this.dir)) {
+	ctx.conflict();
+	return;
+    }
+    if(u) patch = {_type: 'inv', patch: patch};
+    var pair = ctx.transQuery(this.dir[key], patch);
+    this.dir[key] = pair[0];
+    return pair[1];
+}

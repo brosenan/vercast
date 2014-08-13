@@ -39,6 +39,7 @@
      - [get](#counter-get)
    - [Directory](#directory)
      - [put](#directory-put)
+     - [_default](#directory-_default)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val, cb(err))](#dummyatomickvs-as-atomickeyvalue-newkeykey-val-cberr)
@@ -1143,6 +1144,29 @@ should report a conflict if the child already exist.
 init: {"_type":"directory"}
 patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
 patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+[object Object]
+```
+
+<a name="directory-_default"></a>
+## _default
+should propagate patches to the relevant child.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"put","_path":["child2"],"content":{"_type":"counter"}}
+patch: {"_type":"add","_path":["child1"],"amount":3}
+patch: {"_type":"get","_path":["child1"]}
+function (v) { assert.equal(v, 3); }
+patch: {"_type":"get","_path":["child2"]}
+function (v) { assert.equal(v, 0); }
+```
+
+should conflict when the child does not exist.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"get","_path":["child1"]}
 [object Object]
 ```
 

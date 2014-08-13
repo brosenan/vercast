@@ -8,6 +8,8 @@ module.exports = function(disp, list) {
 	var pair = [v];
 	for(var i = 1; i < list.length; i++) {
 	    if(typeof list[i] === 'object' && '_type' in list[i]) {
+		if(ctx.error) return done(ctx.error);
+		if(ctx.conf) return done(Error("A conflict was reported"));
 		pair = ostore.trans(ctx, pair[0], list[i]);
 	    } else if(typeof list[i] === 'object' && 'error' in list[i]) {
 		assert(ctx.error, 'An error should be raised');
@@ -15,13 +17,14 @@ module.exports = function(disp, list) {
 		delete ctx.error;
 	    } else if(typeof list[i] === 'object' && 'conflict' in list[i]) {
 		assert(ctx.conf, 'A conflict should be reported');
+		ctx.conf = false;
 	    } else if(typeof list[i] === 'function') {
 		list[i](pair[1]);
 	    } else {
 		throw new Error("Bad item in scenario");
 	    }
 	}
-	done(ctx.error);
+	done(ctx.conf ? new Error("A conflict was reported") : ctx.error);
     };
     ret.toString = function() {
 	var str = 'function(){\ninit: ' + JSON.stringify(list[0]) + '\n';
