@@ -33,6 +33,12 @@
   ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should update the conflict flag appropriately
     AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should apply effect patches resulting from previous patches, automatically
   ․ AsyncObjectStore .trans(v1, ps, cb(err, v2, r, conf, w)) should apply effect patches resulting from previous patches, automatically
+    Atom get should return the content of an atom
+  ․ Atom get should return the content of an atom
+    Atom change should replace one value with another
+  ․ Atom change should replace one value with another
+    Atom change should raise a conflict if the precondition is not met
+  ․ Atom change should raise a conflict if the precondition is not met
     BinTree init should initialize a binary tree with a single element
   ․ BinTree init should initialize a binary tree with a single element
     BinTree fetch should return the value associated with a key
@@ -207,6 +213,8 @@
   ․ DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
     DummyObjectStore as ObjectStore context .effect(patch) .self() should return the ID of the object version that received the patch being applied
   ․ DummyObjectStore as ObjectStore context .effect(patch) .self() should return the ID of the object version that received the patch being applied
+    js should handle relayPatch patches by calling a Javascript function
+  ․ js should handle relayPatch patches by calling a Javascript function
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
   ․ MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should not record the transition if simulate is true
@@ -340,5 +348,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  170 passing (2s)
+  174 passing (2s)
 

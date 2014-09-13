@@ -7,6 +7,9 @@
      - [.init(className, args, cb(err, v0))](#asyncobjectstore-initclassname-args-cberr-v0)
      - [.transRaw(v1, p, cb(err, v2, r, conf, eff))](#asyncobjectstore-transrawv1-p-cberr-v2-r-conf-eff)
      - [.trans(v1, ps, cb(err, v2, r, conf, w))](#asyncobjectstore-transv1-ps-cberr-v2-r-conf-w)
+   - [Atom](#atom)
+     - [get](#atom-get)
+     - [change](#atom-change)
    - [BinTree](#bintree)
      - [init](#bintree-init)
      - [fetch](#bintree-fetch)
@@ -63,6 +66,7 @@
          - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
          - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
            - [.self()](#dummyobjectstore-as-objectstore-context-effectpatch-self)
+   - [js](#js)
    - [JsClass](#jsclass)
    - [MergingStateStore](#mergingstatestore)
      - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
@@ -345,6 +349,37 @@ ostore.trans(myObjVersion, [{_type: 'counterPatch', patch: {_type: 'add', amount
 				 done();
 			     });
 			 });
+```
+
+<a name="atom"></a>
+# Atom
+<a name="atom-get"></a>
+## get
+should return the content of an atom.
+
+```js
+init: {"_type":"atom","value":"foo"}
+patch: {"_type":"get"}
+function (v) { assert.equal(v, 'foo'); }
+```
+
+<a name="atom-change"></a>
+## change
+should replace one value with another.
+
+```js
+init: {"_type":"atom","value":"foo"}
+patch: {"_type":"change","from":"foo","to":"bar"}
+patch: {"_type":"get"}
+function (v) { assert.equal(v, 'bar'); }
+```
+
+should raise a conflict if the precondition is not met.
+
+```js
+init: {"_type":"atom","value":"foo"}
+patch: {"_type":"change","from":"bar","to":"baz"}
+Should conflict
 ```
 
 <a name="bintree"></a>
@@ -1763,6 +1798,18 @@ var res = ostore.trans(ctx, v, {_type: 'fooSelf'})[1];
 assert.ifError(ctx.error);
 assert.equal(res, 'bar');
 done();
+```
+
+<a name="js"></a>
+# js
+should handle relayPatch patches by calling a Javascript function.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"_create","_path":[".@"],"content":{"_type":"js","main":".main.js"}}
+patch: {"_type":"_create","_path":[".main.js"],"content":{"_type":"atom","value":"exports.foo = function() { return \"bar\"; };"}}
+patch: {"_type":"foo","_path":[]}
+function (res) { assert.equal(res, 'bar'); }
 ```
 
 <a name="mergingstatestore"></a>
