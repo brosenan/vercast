@@ -38,8 +38,16 @@ exports._create = function(ctx, patch, u) {
     }
 }
 
+function relayPatch(self, ctx, patch) {
+    var handler = self.dir['.@'];
+    return ctx.query(handler, {_type: 'relayPatch', patch: patch, self: ctx.self()});
+}
+
 exports._default = function(ctx, patch, u) {
     var key = patch._path[this.depth];
+    if(typeof key === 'undefined') {
+	return relayPatch(this, ctx, patch);
+    }
     if(!(key in this.dir)) {
 	ctx.conflict();
 	return;

@@ -1215,6 +1215,26 @@ patch: {"_type":"get","_path":["child1"]}
 Should conflict
 ```
 
+should propagate unhandled patches directed at the directory itself to the .@ child, if exists.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"_create","_path":[".@"],"content":{"_type":"echo"}}
+patch: {"_type":"foo","_path":[],"bar":2}
+function (v) { assert.equal(v._type, 'relayPatch');
+			  assert.deepEqual(v.patch, {_type: 'foo', _path: [], bar: 2}); }
+```
+
+should provide the directori's version ID.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"_create","_path":["foo","bar",".@"],"content":{"_type":"query"}}
+patch: {"_type":"_create","_path":["foo","bar","baz"],"content":{"_type":"counter"}}
+patch: {"_type":"foo","_path":["foo","bar"],"query":{"_type":"get","_path":["foo","bar","baz"]}}
+function (v) { assert.equal(v, 0); }
+```
+
 <a name="directory-count"></a>
 ## count
 should return a count of the number of immediate children of a directory.

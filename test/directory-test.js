@@ -4,6 +4,10 @@ var disp = new ObjectDisp({
     'counter': require('../counter.js'),
     ':inv': require('../inv.js'),
     'directory': require('../directory.js'),
+    'echo': { init: function() {}, 
+	      _default: function(ctx, p, u) { return p; } },
+    'query': { init: function() {}, 
+	       relayPatch: function(ctx, p, u) { return ctx.query(p.self, p.patch.query); } },
 });
 var scenario = require('./scenario.js');
 
@@ -47,6 +51,21 @@ describe('Directory', function(){
 	    {_type: 'get', _path: ['child1']},
 	    {conflict: 1},
 	]));
+	it('should propagate unhandled patches directed at the directory itself to the .@ child, if exists', scenario(disp, [
+	    {_type: 'directory'},
+	    {_type: '_create', _path: ['.@'], content: {_type: 'echo'}},
+	    {_type: 'foo', _path: [], bar: 2},
+	    function(v) { assert.equal(v._type, 'relayPatch');
+			  assert.deepEqual(v.patch, {_type: 'foo', _path: [], bar: 2}); },
+	]));
+	it('should provide the directori\'s version ID', scenario(disp, [
+	    {_type: 'directory'},
+	    {_type: '_create', _path: ['foo', 'bar', '.@'], content: {_type: 'query'}},
+	    {_type: '_create', _path: ['foo', 'bar', 'baz'], content: {_type: 'counter'}},
+	    {_type: 'foo', _path: ['foo', 'bar'], query: {_type: 'get', _path: ['foo', 'bar', 'baz']}},
+	    function(v) { assert.equal(v, 0); },
+	]));
+
     });
     describe('count', function(){
 	it('should return a count of the number of immediate children of a directory', scenario(disp, [

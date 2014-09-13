@@ -141,6 +141,10 @@
   ․ Directory _default should propagate patches to the relevant child
     Directory _default should conflict when the child does not exist
   ․ Directory _default should conflict when the child does not exist
+    Directory _default should propagate unhandled patches directed at the directory itself to the .@ child, if exists
+  ․ Directory _default should propagate unhandled patches directed at the directory itself to the .@ child, if exists
+    Directory _default should provide the directori's version ID
+  ․ Directory _default should provide the directori's version ID
     Directory count should return a count of the number of immediate children of a directory
   ․ Directory count should return a count of the number of immediate children of a directory
     Directory count should be propagated to a child if the path so indicates
@@ -336,5 +340,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  168 passing (2s)
+  170 passing (2s)
 
