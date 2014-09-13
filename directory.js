@@ -2,7 +2,7 @@ exports.init = function(ctx, args) {
     this.depth = args.depth || 0;
     this.dir = Object.create(null);
 }
-exports.put = function(ctx, patch, u) {
+exports._create = function(ctx, patch, u) {
     var key = patch._path[this.depth];
     if(!u) {
 	if(patch._path.length == this.depth + 1) {
