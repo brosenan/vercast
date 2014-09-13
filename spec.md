@@ -1812,6 +1812,16 @@ patch: {"_type":"foo","_path":[]}
 function (res) { assert.equal(res, 'bar'); }
 ```
 
+should report a syntax error if one occurs.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"_create","_path":[".@"],"content":{"_type":"js","main":".main.js"}}
+patch: {"_type":"_create","_path":[".main.js"],"content":{"_type":"atom","value":"bla bla bla"}}
+patch: {"_type":"foo","_path":[]}
+Should error: Unexpected identifier
+```
+
 <a name="mergingstatestore"></a>
 # MergingStateStore
 <a name="mergingstatestore-transv1-p-simulate-cbv2-r-c"></a>

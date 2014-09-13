@@ -33,6 +33,7 @@ module.exports = function(disp) {
 	    },
 	    query: function(v1, p) {
 		var pair = self.trans(ctx, v1, p);
+		assert.ifError(ctx.error);
 		if(pair[0].$ != v1.$) throw new Error('Query patch ' + p._type + ' unexpectedly modified object value');
 		return pair[1];
 	    },

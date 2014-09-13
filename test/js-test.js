@@ -17,4 +17,11 @@ describe('js', function(){
 	{_type: 'foo', _path: []},
 	function(res) { assert.equal(res, 'bar'); },
     ]));
+    it('should report a syntax error if one occurs', scenario(disp, [
+	{_type: 'directory'},
+	{_type: '_create', _path: ['.@'], content: {_type: 'js', main: '.main.js'}},
+	{_type: '_create', _path: ['.main.js'], content: {_type: 'atom', value: 'bla bla bla'}},
+	{_type: 'foo', _path: []},
+	{error: 'Unexpected identifier'},
+    ]));
 });
