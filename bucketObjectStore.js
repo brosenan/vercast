@@ -64,7 +64,7 @@ module.exports = function(disp, cache, bucketStore) {
 	}
 	var pair;
 	try {
-	    pair = disp.apply(createContext(ctx), obj, p);
+	    pair = disp.apply(createContext(ctx, v1), obj, p);
 	} catch(e) {
 	    origCtx.error = e;
 	}
@@ -120,7 +120,7 @@ module.exports = function(disp, cache, bucketStore) {
 	    ctx.waitFor = [];
 	}
     }
-    function createContext(ctx) {
+    function createContext(ctx, v0) {
 	return {
 	    init: function(className, args) {
 		return self.init(ctx, className, args);
@@ -146,6 +146,9 @@ module.exports = function(disp, cache, bucketStore) {
 		}
 	    },
 	    _dbg: ctx,
+	    self: function() {
+		return v0;
+	    },
 	};
     }
     function handleBucketItem(err, item, bucket) {

@@ -8,7 +8,7 @@ module.exports = function(disp) {
     this.trans = function(ctx, v1, p) {
 	if(!v1.$) throw new Error('Bad ID: ' + v1.$);
 	try {
-	    var pair = disp.apply(createContext(ctx), JSON.parse(v1.$), p);
+	    var pair = disp.apply(createContext(ctx, v1), JSON.parse(v1.$), p);
 	} catch(e) {
 	    ctx.error = e;
 	    return [undefined, undefined];
@@ -21,7 +21,7 @@ module.exports = function(disp) {
 	return pair;
     };
 
-    function createContext(ctx) {
+    function createContext(ctx, v0) {
 	return {
 	    init: function(className, args) {
 		return self.init(ctx, className, args);
@@ -48,6 +48,9 @@ module.exports = function(disp) {
 		} else {
 		    ctx.eff = [eff];
 		}
+	    },
+	    self: function() {
+		return v0;
 	    },
 	};
     }

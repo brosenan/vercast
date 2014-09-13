@@ -189,9 +189,30 @@ module.exports = function(createOstore) {
 		    assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
 		    done();
 		});
-
+		describe('.self()', function(){
+		    it('should return the ID of the object version that received the patch being applied', function(done){
+			var disp = new ObjectDisp({
+			    Class1: {
+				init: function(ctx, args) {
+				},
+				foo: function(ctx, patch) {
+				    return "bar";
+				},
+				fooSelf: function(ctx, patch) {
+				    return ctx.query(ctx.self(), {_type: 'foo'});
+				},
+			    }
+			});
+			var ostore = createOstore(disp);
+			var v = ostore.init({}, 'Class1', {});
+			var ctx = {};
+			var res = ostore.trans(ctx, v, {_type: 'fooSelf'})[1];
+			assert.ifError(ctx.error);
+			assert.equal(res, 'bar');
+			done();
+		    });
+		});
 	    });
-
 	});
     });
     return ostore;

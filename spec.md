@@ -29,6 +29,7 @@
        - [context](#bucketobjectstore-as-objectstore-context)
          - [.conflict()](#bucketobjectstore-as-objectstore-context-conflict)
          - [.effect(patch)](#bucketobjectstore-as-objectstore-context-effectpatch)
+           - [.self()](#bucketobjectstore-as-objectstore-context-effectpatch-self)
      - [.hash(bucket, obj)](#bucketobjectstore-hashbucket-obj)
      - [.unhash(id)](#bucketobjectstore-unhashid)
      - [.trans(ctx, v1, p)](#bucketobjectstore-transctx-v1-p)
@@ -38,7 +39,7 @@
      - [add](#counter-add)
      - [get](#counter-get)
    - [Directory](#directory)
-     - [put](#directory-put)
+     - [_create](#directory-_create)
      - [_default](#directory-_default)
      - [count](#directory-count)
      - [_get_id](#directory-_get_id)
@@ -61,6 +62,7 @@
        - [context](#dummyobjectstore-as-objectstore-context)
          - [.conflict()](#dummyobjectstore-as-objectstore-context-conflict)
          - [.effect(patch)](#dummyobjectstore-as-objectstore-context-effectpatch)
+           - [.self()](#dummyobjectstore-as-objectstore-context-effectpatch-self)
    - [JsClass](#jsclass)
    - [MergingStateStore](#mergingstatestore)
      - [.init(className, args, cb(v0))](#mergingstatestore-initclassname-args-cbv0)
@@ -933,6 +935,32 @@ assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
 done();
 ```
 
+<a name="bucketobjectstore-as-objectstore-context-effectpatch-self"></a>
+##### .self()
+should return the ID of the object version that received the patch being applied.
+
+```js
+var disp = new ObjectDisp({
+    Class1: {
+	init: function(ctx, args) {
+	},
+	foo: function(ctx, patch) {
+	    return "bar";
+	},
+	fooSelf: function(ctx, patch) {
+	    return ctx.query(ctx.self(), {_type: 'foo'});
+	},
+    }
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+var res = ostore.trans(ctx, v, {_type: 'fooSelf'})[1];
+assert.ifError(ctx.error);
+assert.equal(res, 'bar');
+done();
+```
+
 <a name="bucketobjectstore-hashbucket-obj"></a>
 ## .hash(bucket, obj)
 should return a unique ID for each given object and bucket ID.
@@ -1132,21 +1160,21 @@ function (value) {
 
 <a name="directory"></a>
 # Directory
-<a name="directory-put"></a>
-## put
+<a name="directory-_create"></a>
+## _create
 should construct a new object if the _path if of size 1 and the entry does not exist.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child1"],"content":{"_type":"counter"}}
 ```
 
 should report a conflict if the child already exist.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child1"],"content":{"_type":"counter"}}
 Should conflict
 ```
 
@@ -1154,8 +1182,8 @@ should create sub-directories if they do not exist.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["foo","bar"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["foo","baz"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["foo","bar"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["foo","baz"],"content":{"_type":"counter"}}
 patch: {"_type":"add","_path":["foo","bar"],"amount":3}
 patch: {"_type":"add","_path":["foo","baz"],"amount":4}
 patch: {"_type":"get","_path":["foo","bar"]}
@@ -1170,8 +1198,8 @@ should propagate patches to the relevant child.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["child2"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child2"],"content":{"_type":"counter"}}
 patch: {"_type":"add","_path":["child1"],"amount":3}
 patch: {"_type":"get","_path":["child1"]}
 function (v) { assert.equal(v, 3); }
@@ -1193,8 +1221,8 @@ should return a count of the number of immediate children of a directory.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["child2"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child2"],"content":{"_type":"counter"}}
 patch: {"_type":"count","_path":[]}
 function (c) { assert.equal(c, 2); }
 ```
@@ -1203,7 +1231,7 @@ should be propagated to a child if the path so indicates.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["child1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["child1"],"content":{"_type":"counter"}}
 patch: {"_type":"count","_path":["child1"]}
 Should error: Patch method count is not defined in class counter
 ```
@@ -1214,10 +1242,10 @@ should return the version ID of the referenced object.
 
 ```js
 init: {"_type":"directory"}
-patch: {"_type":"put","_path":["a","b1","c1"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["a","b1","c2"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["a","b2","c1"],"content":{"_type":"counter"}}
-patch: {"_type":"put","_path":["a","b2","c2"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["a","b1","c1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["a","b1","c2"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["a","b2","c1"],"content":{"_type":"counter"}}
+patch: {"_type":"_create","_path":["a","b2","c2"],"content":{"_type":"counter"}}
 patch: {"_type":"add","_path":["a","b1","c1"],"amount":1}
 patch: {"_type":"add","_path":["a","b1","c2"],"amount":2}
 patch: {"_type":"add","_path":["a","b2","c1"],"amount":2}
@@ -1688,6 +1716,32 @@ var ctx = {};
 v = ostore.trans(ctx, v, {_type: 'addEffectPatch', patch: {_type: 'foo'}})[1];
 assert(!ctx.error, 'No error should occur');
 assert.deepEqual(ctx.eff, [{_type: 'foo'}]);
+done();
+```
+
+<a name="dummyobjectstore-as-objectstore-context-effectpatch-self"></a>
+##### .self()
+should return the ID of the object version that received the patch being applied.
+
+```js
+var disp = new ObjectDisp({
+    Class1: {
+	init: function(ctx, args) {
+	},
+	foo: function(ctx, patch) {
+	    return "bar";
+	},
+	fooSelf: function(ctx, patch) {
+	    return ctx.query(ctx.self(), {_type: 'foo'});
+	},
+    }
+});
+var ostore = createOstore(disp);
+var v = ostore.init({}, 'Class1', {});
+var ctx = {};
+var res = ostore.trans(ctx, v, {_type: 'fooSelf'})[1];
+assert.ifError(ctx.error);
+assert.equal(res, 'bar');
 done();
 ```
 

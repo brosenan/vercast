@@ -99,6 +99,8 @@
   ․ BucketObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
     BucketObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
   ․ BucketObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
+    BucketObjectStore as ObjectStore context .effect(patch) .self() should return the ID of the object version that received the patch being applied
+  ․ BucketObjectStore as ObjectStore context .effect(patch) .self() should return the ID of the object version that received the patch being applied
     BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
   ․ BucketObjectStore .hash(bucket, obj) should return a unique ID for each given object and bucket ID
     BucketObjectStore .hash(bucket, obj) should cache the object under its ID
@@ -129,12 +131,12 @@
   ․ counter add should subtract the given amount when unapplied
     counter get should return the counter value
   ․ counter get should return the counter value
-    Directory put should construct a new object if the _path if of size 1 and the entry does not exist
-  ․ Directory put should construct a new object if the _path if of size 1 and the entry does not exist
-    Directory put should report a conflict if the child already exist
-  ․ Directory put should report a conflict if the child already exist
-    Directory put should create sub-directories if they do not exist
-  ․ Directory put should create sub-directories if they do not exist
+    Directory _create should construct a new object if the _path if of size 1 and the entry does not exist
+  ․ Directory _create should construct a new object if the _path if of size 1 and the entry does not exist
+    Directory _create should report a conflict if the child already exist
+  ․ Directory _create should report a conflict if the child already exist
+    Directory _create should create sub-directories if they do not exist
+  ․ Directory _create should create sub-directories if they do not exist
     Directory _default should propagate patches to the relevant child
   ․ Directory _default should propagate patches to the relevant child
     Directory _default should conflict when the child does not exist
@@ -199,6 +201,8 @@
   ․ DummyObjectStore as ObjectStore context .conflict() should propagate conflicts to calling transitions
     DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
   ․ DummyObjectStore as ObjectStore context .effect(patch) should add a patch to the effect set held by the context
+    DummyObjectStore as ObjectStore context .effect(patch) .self() should return the ID of the object version that received the patch being applied
+  ․ DummyObjectStore as ObjectStore context .effect(patch) .self() should return the ID of the object version that received the patch being applied
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
   ․ MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should not record the transition if simulate is true
@@ -332,5 +336,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  166 passing (3s)
+  168 passing (2s)
 
