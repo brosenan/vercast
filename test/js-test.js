@@ -32,4 +32,12 @@ describe('js', function(){
 	{_type: 'foo', _path: []},
 	function(res) { assert.equal(res, 'baz'); },
     ]));
+    it('should provide the JS code a context to allow querying the directory', scenario(disp, [
+	{_type: 'directory'},
+	{_type: '_create', _path: ['.@'], content: {_type: 'js', main: '.main.js'}},
+	{_type: '_create', _path: ['.main.js'], content: {_type: 'atom', value: 'exports.foo = function(ctx) { return ctx.query("foo", {_type: "get"}); };'}},
+	{_type: '_create', _path: ['foo'], content: {_type: 'atom', value: 'bar'}},
+	{_type: 'foo', _path: []},
+	function(res) { assert.equal(res, 'bar'); },
+    ]));
 });

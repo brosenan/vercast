@@ -1833,6 +1833,17 @@ patch: {"_type":"foo","_path":[]}
 function (res) { assert.equal(res, 'baz'); }
 ```
 
+should provide the JS code a context to allow querying the directory.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"_create","_path":[".@"],"content":{"_type":"js","main":".main.js"}}
+patch: {"_type":"_create","_path":[".main.js"],"content":{"_type":"atom","value":"exports.foo = function(ctx) { return ctx.query(\"foo\", {_type: \"get\"}); };"}}
+patch: {"_type":"_create","_path":["foo"],"content":{"_type":"atom","value":"bar"}}
+patch: {"_type":"foo","_path":[]}
+function (res) { assert.equal(res, 'bar'); }
+```
+
 <a name="mergingstatestore"></a>
 # MergingStateStore
 <a name="mergingstatestore-transv1-p-simulate-cbv2-r-c"></a>

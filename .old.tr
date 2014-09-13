@@ -219,6 +219,8 @@
   ․ js should report a syntax error if one occurs
     js should support loading modules from the same directory using the require() function
   ․ js should support loading modules from the same directory using the require() function
+    js should provide the JS code a context to allow querying the directory
+  ․ js should provide the JS code a context to allow querying the directory
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
   ․ MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should not record the transition if simulate is true
@@ -352,5 +354,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  176 passing (2s)
+  177 passing (2s)
 
