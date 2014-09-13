@@ -24,4 +24,12 @@ describe('js', function(){
 	{_type: 'foo', _path: []},
 	{error: 'Unexpected identifier'},
     ]));
+    it('should support loading modules from the same directory using the require() function', scenario(disp, [
+	{_type: 'directory'},
+	{_type: '_create', _path: ['.@'], content: {_type: 'js', main: '.main.js'}},
+	{_type: '_create', _path: ['.other.js'], content: {_type: 'atom', value: 'exports.foo = function() { return "baz"; };'}},
+	{_type: '_create', _path: ['.main.js'], content: {_type: 'atom', value: 'var other = require(".other.js"); exports.foo = function() { return other.foo(); };'}},
+	{_type: 'foo', _path: []},
+	function(res) { assert.equal(res, 'baz'); },
+    ]));
 });

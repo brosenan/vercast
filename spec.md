@@ -1822,6 +1822,17 @@ patch: {"_type":"foo","_path":[]}
 Should error: Unexpected identifier
 ```
 
+should support loading modules from the same directory using the require() function.
+
+```js
+init: {"_type":"directory"}
+patch: {"_type":"_create","_path":[".@"],"content":{"_type":"js","main":".main.js"}}
+patch: {"_type":"_create","_path":[".other.js"],"content":{"_type":"atom","value":"exports.foo = function() { return \"baz\"; };"}}
+patch: {"_type":"_create","_path":[".main.js"],"content":{"_type":"atom","value":"var other = require(\".other.js\"); exports.foo = function() { return other.foo(); };"}}
+patch: {"_type":"foo","_path":[]}
+function (res) { assert.equal(res, 'baz'); }
+```
+
 <a name="mergingstatestore"></a>
 # MergingStateStore
 <a name="mergingstatestore-transv1-p-simulate-cbv2-r-c"></a>

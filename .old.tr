@@ -217,6 +217,8 @@
   ․ js should handle relayPatch patches by calling a Javascript function
     js should report a syntax error if one occurs
   ․ js should report a syntax error if one occurs
+    js should support loading modules from the same directory using the require() function
+  ․ js should support loading modules from the same directory using the require() function
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
   ․ MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should apply p to v1 to receive v2
     MergingStateStore .trans(v1, p,[ simulate,] cb(v2, r, c)) should not record the transition if simulate is true
@@ -350,5 +352,5 @@
     vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
   ․ vercast .randomByKey(key, prob) should behave consistently given a constant sequence of keys
 
-  175 passing (2s)
+  176 passing (2s)
 

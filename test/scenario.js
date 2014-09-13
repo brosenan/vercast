@@ -19,6 +19,7 @@ module.exports = function(disp, list) {
 		assert(ctx.conf, 'A conflict should be reported');
 		ctx.conf = false;
 	    } else if(typeof list[i] === 'function') {
+		assert.ifError(ctx.error);
 		list[i](pair[1]);
 	    } else {
 		throw new Error("Bad item in scenario");
