@@ -19,6 +19,8 @@ module.exports = function(stateStore, kvs) {
 	}
 	util.seq([
 	    function(_) { stateStore.trans(v1, p, transaction ? true : false, _.to('v2', 'r', 'c')); },
+	    function(_) { if(this.v2.$ === v1.$ && typeof this.r === 'object' && this.r._ping) self.trans(v1, this.r._ping, cb);
+			  else _(); },
 	    function(_) { if(transaction) transaction.curr = this.v2;
 			  cb(undefined, this.v2, this.r, this.c); },
 	], cb)();

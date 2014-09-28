@@ -36,6 +36,10 @@ var branchStore = createBranchStore({
     BinTree: require('../binTree.js'),
     ':transaction': require('../transaction.js'),
     ':inv': require('../inv.js'),
+    directory: require('../directory.js'),
+    atom: require('../atom.js'),
+    echo: { init: function() {},
+	    echo: function(ctx, p) { return p.echo; }},
 });
 
 describe('BranchStore', function(){
@@ -68,6 +72,17 @@ describe('BranchStore', function(){
 		if(err.message.substr(0, prefix.length) == prefix) done();
 		else done(err);
 	    })();
+	});
+	it('should apply patches returned from a transition if the result has a _ping field', function(done){
+	    util.seq([
+		function(_) { branchStore.init('directory', {}, _.to('v')); },
+		function(_) { branchStore.trans(this.v, {_type: '_create', _path: ['foo'], content: {_type: 'echo'}}, _.to('v'));},
+		function(_) { branchStore.trans(this.v, {_type: 'echo', _path: ['foo'], echo: {_ping: {_type: '_create', 
+												       _path: ['bar'], 
+												       content: {_type: 'atom', value: 'bar'}}}}, _.to('v'));},
+		function(_) { branchStore.trans(this.v, {_type: 'get', _path: ['bar']}, _.to('v', 'r')); },
+		function(_) { assert.equal(this.r, 'bar'); _(); },
+	    ], done)();
 	});
 
     });
