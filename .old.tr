@@ -1,4 +1,8 @@
 
+    ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
+  ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
+    ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
+  ․ ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
 
-  0 passing (4ms)
+  2 passing (11ms)
 

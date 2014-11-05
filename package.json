@@ -22,5 +22,8 @@
   "homepage": "https://github.com/brosenan/vercast",
   "devDependencies": {
     "mocha": "^2.0.1"
+  },
+  "dependencies": {
+    "asyncgen": "^1.0.4"
   }
 }
