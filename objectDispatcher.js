@@ -14,6 +14,9 @@ module.exports = function(dispMap) {
     };
     
     this.apply = function*(ctx, obj, patch, unapply) {
+	if(!obj._type) {
+	    throw Error('Given object is not a valid object: does not have a _type field');
+	}
 	var cls = dispMap[obj._type];
 	var method = cls[patch._type];
 	return yield* method.call(obj, patch, unapply);

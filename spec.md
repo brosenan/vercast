@@ -2,6 +2,9 @@
    - [ObjectDispatcher](#objectdispatcher)
      - [.init(type, args)](#objectdispatcher-inittype-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdispatcher-applyctx-obj-patch-unapply)
+   - [SinpleObjectStore](#sinpleobjectstore)
+     - [.init(type, args)](#sinpleobjectstore-inittype-args)
+     - [.trans(v, p, u) -> {v, r}](#sinpleobjectstore-transv-p-u---v-r)
 <a name=""></a>
  
 <a name="objectdispatcher"></a>
@@ -17,6 +20,24 @@ exports.run(genfunc, cb);
 <a name="objectdispatcher-applyctx-obj-patch-unapply"></a>
 ## .apply(ctx, obj, patch, unapply)
 should call a method corresponding to patch._type.
+
+```js
+exports.run(genfunc, cb);
+```
+
+<a name="sinpleobjectstore"></a>
+# SinpleObjectStore
+<a name="sinpleobjectstore-inittype-args"></a>
+## .init(type, args)
+should return a version ID of a newly created object.
+
+```js
+exports.run(genfunc, cb);
+```
+
+<a name="sinpleobjectstore-transv-p-u---v-r"></a>
+## .trans(v, p, u) -> {v, r}
+should return the value returned from the method corresponding to patch p.
 
 ```js
 exports.run(genfunc, cb);
