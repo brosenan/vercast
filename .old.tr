@@ -8,5 +8,5 @@
     SinpleObjectStore .trans(v, p, u) -> {v, r} should return the value returned from the method corresponding to patch p
   ․ SinpleObjectStore .trans(v, p, u) -> {v, r} should return the value returned from the method corresponding to patch p
 
-  4 passing (13ms)
+  4 passing (14ms)
 

@@ -40,9 +40,10 @@ describe('SinpleObjectStore', function(){
 	    };
 	    var ostore = createOStroe(classes);
 	    var v = yield* ostore.init('foo', {});
-	    var pair = (yield* ostore.trans(v, {_type: 'bar'}));
+	    var pair = yield* ostore.trans(v, {_type: 'bar'});
 	    assert.equal(pair.r, 1);
 	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    assert.equal(pair.r, 2);
 	}));
     });
 });
