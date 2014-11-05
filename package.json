@@ -1,0 +1,26 @@
+{
+  "name": "vercast",
+  "version": "0.1.0",
+  "description": "VERsion Controlled Application STate: A version control system for application state.",
+  "main": "index.js",
+  "scripts": {
+    "test": "./node_modules/mocha/bin/mocha -C -R dot --harmony"
+  },
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/brosenan/vercast.git#yield"
+  },
+  "keywords": [
+    "version-control",
+    "nosql"
+  ],
+  "author": "Boaz Rosenan <brosenan@gmail.com>",
+  "license": "MIT",
+  "bugs": {
+    "url": "https://github.com/brosenan/vercast/issues"
+  },
+  "homepage": "https://github.com/brosenan/vercast",
+  "devDependencies": {
+    "mocha": "^2.0.1"
+  }
+}
