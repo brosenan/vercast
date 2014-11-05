@@ -7,6 +7,10 @@
   ․ SinpleObjectStore .init(type, args) should return a version ID of a newly created object
     SinpleObjectStore .trans(v, p, u) -> {v, r} should return the value returned from the method corresponding to patch p
   ․ SinpleObjectStore .trans(v, p, u) -> {v, r} should return the value returned from the method corresponding to patch p
+    SinpleObjectStore .trans(v, p, u) -> {v, r} should pass the patch and u flag as parameters to the called method
+  ․ SinpleObjectStore .trans(v, p, u) -> {v, r} should pass the patch and u flag as parameters to the called method
+    SinpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
+  ․ SinpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
 
-  4 passing (14ms)
+  6 passing (16ms)
 
