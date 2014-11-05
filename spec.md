@@ -4,11 +4,13 @@
      - [.apply(ctx, obj, patch, unapply)](#objectdispatcher-applyctx-obj-patch-unapply)
    - [SinpleObjectStore](#sinpleobjectstore)
      - [.init(type, args)](#sinpleobjectstore-inittype-args)
-     - [.trans(v, p, u) -> {v, r}](#sinpleobjectstore-transv-p-u---v-r)
+     - [.trans(v, p, u, EQ) -> {v, r}](#sinpleobjectstore-transv-p-u-eq---v-r)
      - [context](#sinpleobjectstore-context)
        - [.init(type, args)](#sinpleobjectstore-context-inittype-args)
        - [.trans(v, p, u) -> {v,r}](#sinpleobjectstore-context-transv-p-u---vr)
        - [.conflict(msg)](#sinpleobjectstore-context-conflictmsg)
+       - [.effect(p)](#sinpleobjectstore-context-effectp)
+   - [SimpleQueue](#simplequeue)
 <a name=""></a>
  
 <a name="objectdispatcher"></a>
@@ -39,8 +41,8 @@ should return a version ID of a newly created object.
 exports.run(genfunc, cb);
 ```
 
-<a name="sinpleobjectstore-transv-p-u---v-r"></a>
-## .trans(v, p, u) -> {v, r}
+<a name="sinpleobjectstore-transv-p-u-eq---v-r"></a>
+## .trans(v, p, u, EQ) -> {v, r}
 should return the value returned from the method corresponding to patch p.
 
 ```js
@@ -74,6 +76,22 @@ exports.run(genfunc, cb);
 <a name="sinpleobjectstore-context-conflictmsg"></a>
 ### .conflict(msg)
 should throw an exception with .isConflict set to true.
+
+```js
+exports.run(genfunc, cb);
+```
+
+<a name="sinpleobjectstore-context-effectp"></a>
+### .effect(p)
+should add patch p to the effect queue.
+
+```js
+exports.run(genfunc, cb);
+```
+
+<a name="simplequeue"></a>
+# SimpleQueue
+should retrieve elements in the same order they were entered.
 
 ```js
 exports.run(genfunc, cb);

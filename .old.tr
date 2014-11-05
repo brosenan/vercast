@@ -5,16 +5,20 @@
   ․ ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
     SinpleObjectStore .init(type, args) should return a version ID of a newly created object
   ․ SinpleObjectStore .init(type, args) should return a version ID of a newly created object
-    SinpleObjectStore .trans(v, p, u) -> {v, r} should return the value returned from the method corresponding to patch p
-  ․ SinpleObjectStore .trans(v, p, u) -> {v, r} should return the value returned from the method corresponding to patch p
-    SinpleObjectStore .trans(v, p, u) -> {v, r} should pass the patch and u flag as parameters to the called method
-  ․ SinpleObjectStore .trans(v, p, u) -> {v, r} should pass the patch and u flag as parameters to the called method
+    SinpleObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
+  ․ SinpleObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
+    SinpleObjectStore .trans(v, p, u, EQ) -> {v, r} should pass the patch and u flag as parameters to the called method
+  ․ SinpleObjectStore .trans(v, p, u, EQ) -> {v, r} should pass the patch and u flag as parameters to the called method
     SinpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
   ․ SinpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
     SinpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
   ․ SinpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
     SinpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
   ․ SinpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
+    SinpleObjectStore context .effect(p) should add patch p to the effect queue
+  ․ SinpleObjectStore context .effect(p) should add patch p to the effect queue
+    SimpleQueue should retrieve elements in the same order they were entered
+  ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  8 passing (20ms)
+  10 passing (20ms)
 

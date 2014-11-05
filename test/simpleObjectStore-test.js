@@ -27,7 +27,7 @@ describe('SinpleObjectStore', function(){
 	    assert(called, 'The constructor should have been called');
 	}));
     });
-    describe('.trans(v, p, u) -> {v, r}', function(){
+    describe('.trans(v, p, u, EQ) -> {v, r}', function(){
 	it('should return the value returned from the method corresponding to patch p', asyncgen.async(function*(done){
 	    var dispMap = {
 		foo: {
@@ -143,8 +143,24 @@ describe('SinpleObjectStore', function(){
 		    }
 		}
 	    }));
-
 	});
-
+	describe('.effect(p)', function(){
+	    it('should add patch p to the effect queue', asyncgen.async(function*(){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var queue = new vercast.SimpleQueue();
+		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
+		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
+		assert.equal(yield* queue.dequeue(), 123);
+	    }));
+	});
     });
 });
