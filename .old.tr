@@ -11,6 +11,10 @@
   ․ SinpleObjectStore .trans(v, p, u) -> {v, r} should pass the patch and u flag as parameters to the called method
     SinpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
   ․ SinpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
+    SinpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
+  ․ SinpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
+    SinpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
+  ․ SinpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
 
-  6 passing (16ms)
+  8 passing (20ms)
 

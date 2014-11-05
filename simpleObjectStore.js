@@ -16,6 +16,14 @@ module.exports = function(disp) {
 	    init: function*(type, args) {
 		return yield* self.init(type, args);
 	    },
+	    trans: function*(v, p, u) {
+		return yield* self.trans(v, p, u);
+	    },
+	    conflict: function(reason) {
+		var err = Error(reason);
+		err.isConflict = true;
+		throw err;
+	    },
 	};
     }
 };

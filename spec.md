@@ -7,6 +7,8 @@
      - [.trans(v, p, u) -> {v, r}](#sinpleobjectstore-transv-p-u---v-r)
      - [context](#sinpleobjectstore-context)
        - [.init(type, args)](#sinpleobjectstore-context-inittype-args)
+       - [.trans(v, p, u) -> {v,r}](#sinpleobjectstore-context-transv-p-u---vr)
+       - [.conflict(msg)](#sinpleobjectstore-context-conflictmsg)
 <a name=""></a>
  
 <a name="objectdispatcher"></a>
@@ -56,6 +58,22 @@ exports.run(genfunc, cb);
 <a name="sinpleobjectstore-context-inittype-args"></a>
 ### .init(type, args)
 should initialize an object with the given type and args and return its version ID.
+
+```js
+exports.run(genfunc, cb);
+```
+
+<a name="sinpleobjectstore-context-transv-p-u---vr"></a>
+### .trans(v, p, u) -> {v,r}
+should transform a version and return the new version ID and result.
+
+```js
+exports.run(genfunc, cb);
+```
+
+<a name="sinpleobjectstore-context-conflictmsg"></a>
+### .conflict(msg)
+should throw an exception with .isConflict set to true.
 
 ```js
 exports.run(genfunc, cb);
