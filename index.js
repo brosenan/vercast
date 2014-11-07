@@ -1,3 +1,3 @@
 exports.ObjectDispatcher = require('./objectDispatcher.js');
-exports.SimpleObjectStore = require('./simpleObjectStore.js');
+exports.DummyObjectStore = require('./dummyObjectStore.js');
 exports.SimpleQueue = require('./simpleQueue.js');

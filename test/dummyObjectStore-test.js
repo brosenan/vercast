@@ -9,7 +9,7 @@ var sleep = asyncgen.thunkify(function(msec, cb) { setTimeout(cb, msec); });
 describe('SinpleObjectStore', function(){
     function createOStore(dispMap) {
 	var disp = new vercast.ObjectDispatcher(dispMap);
-	return new vercast.SimpleObjectStore(disp);
+	return new vercast.DummyObjectStore(disp);
     }
     describe('.init(type, args)', function(){
 	it('should return a version ID of a newly created object', asyncgen.async(function*(done){
@@ -182,7 +182,6 @@ describe('SinpleObjectStore', function(){
 		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
 		assert.equal(yield* queue.dequeue(), 123);
 	    }));
-
 	});
     });
 });
