@@ -1,8 +1,4 @@
 
-    ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
-  ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
-    ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
-  ․ ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
     SinpleObjectStore .init(type, args) should return a version ID of a newly created object
   ․ SinpleObjectStore .init(type, args) should return a version ID of a newly created object
     SinpleObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
@@ -19,8 +15,12 @@
   ․ SinpleObjectStore context .effect(p) should add patch p to the effect queue
     SinpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
   ․ SinpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
+    ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
+  ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
+    ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
+  ․ ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  11 passing (22ms)
+  11 passing (16ms)
 
