@@ -6,7 +6,7 @@ var vercast = require('vercast');
 
 var sleep = asyncgen.thunkify(function(msec, cb) { setTimeout(cb, msec); });
 
-describe('SinpleObjectStore', function(){
+describe('DummyObjectStore', function(){
     function createOStore(dispMap) {
 	var disp = new vercast.ObjectDispatcher(dispMap);
 	return new vercast.DummyObjectStore(disp);
