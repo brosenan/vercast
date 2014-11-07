@@ -17,8 +17,10 @@
   ․ SinpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
     SinpleObjectStore context .effect(p) should add patch p to the effect queue
   ․ SinpleObjectStore context .effect(p) should add patch p to the effect queue
+    SinpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
+  ․ SinpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  10 passing (20ms)
+  11 passing (22ms)
 

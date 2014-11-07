@@ -89,6 +89,12 @@ should add patch p to the effect queue.
 exports.run(genfunc, cb);
 ```
 
+should add patches to the effect set even when called from a nested transformation.
+
+```js
+exports.run(genfunc, cb);
+```
+
 <a name="simplequeue"></a>
 # SimpleQueue
 should retrieve elements in the same order they were entered.

@@ -17,7 +17,7 @@ module.exports = function(disp) {
 		return yield* self.init(type, args);
 	    },
 	    trans: function*(v, p, u) {
-		return yield* self.trans(v, p, u);
+		return yield* self.trans(v, p, u, EQ);
 	    },
 	    conflict: function(reason) {
 		var err = Error(reason);

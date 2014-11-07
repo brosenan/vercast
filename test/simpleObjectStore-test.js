@@ -161,6 +161,28 @@ describe('SinpleObjectStore', function(){
 		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
 		assert.equal(yield* queue.dequeue(), 123);
 	    }));
+	    it('should add patches to the effect set even when called from a nested transformation', asyncgen.async(function*(){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
+			eff: function*(ctx, p, u) {
+			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
+			},
+		    },
+		    bar: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var queue = new vercast.SimpleQueue();
+		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
+		assert.equal(yield* queue.dequeue(), 123);
+	    }));
+
 	});
     });
 });
