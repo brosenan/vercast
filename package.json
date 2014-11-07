@@ -24,6 +24,6 @@
     "mocha": "^2.0.1"
   },
   "dependencies": {
-    "asyncgen": "^1.0.4"
+    "asyncgen": "^1.0.5"
   }
 }

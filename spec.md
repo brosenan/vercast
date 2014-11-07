@@ -20,7 +20,19 @@
 should return a version ID of a newly created object.
 
 ```js
-exports.run(genfunc, cb);
+function* (done){
+	    var called = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			called = true;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    assert.equal(typeof v.$, 'string');
+	    assert(called, 'The constructor should have been called');
 ```
 
 <a name="dummyobjectstore-transv-p-u-eq---v-r"></a>
@@ -28,13 +40,50 @@ exports.run(genfunc, cb);
 should return the value returned from the method corresponding to patch p.
 
 ```js
-exports.run(genfunc, cb);
+function* (done){
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			this.baz = 0;
+		    },
+		    bar: function*() {
+			yield sleep(1);
+			this.baz += 1;
+			return this.baz;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var pair = yield* ostore.trans(v, {_type: 'bar'});
+	    assert.equal(pair.r, 1);
+	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    assert.equal(pair.r, 2);
 ```
 
 should pass the patch and u flag as parameters to the called method.
 
 ```js
-exports.run(genfunc, cb);
+function* (done){
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			this.baz = 0;
+		    },
+		    bar: function*(ctx, p, u) {
+			var amount = p.amount;
+			if(u) amount = -amount;
+			this.baz += amount;
+			return this.baz;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var pair = yield* ostore.trans(v, {_type: 'bar', amount: 3});
+	    assert.equal(pair.r, 3);
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar', amount: 2}, true);
+	    assert.equal(pair.r, 1);
 ```
 
 <a name="dummyobjectstore-context"></a>
@@ -44,7 +93,24 @@ exports.run(genfunc, cb);
 should initialize an object with the given type and args and return its version ID.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+		var dispMap = {
+		    creator: {
+			init: function*(ctx, args) {},
+			create: function*(ctx, p, u) {
+			    return yield* ctx.init(p.type, p.args);
+			},
+		    },
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			get: function*() { return this.value; },
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var creator = yield* ostore.init('creator', {});
+		var foo1 = yield* ostore.trans(creator, {_type: 'create', type: 'foo', args: {value: 3}});
+		var res = yield* ostore.trans(foo1.r, {_type: 'get'});
+		assert.equal(res.r, 3);
 ```
 
 <a name="dummyobjectstore-context-transv-p-u---vr"></a>
@@ -52,7 +118,34 @@ exports.run(genfunc, cb);
 should transform a version and return the new version ID and result.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) {
+			    this.bar = yield* ctx.init('bar', {});
+			},
+			add: function*(ctx, p, u) {
+			    var pair = yield* ctx.trans(this.bar, p, u);
+			    this.bar = pair.v;
+			    return pair.r;
+			},
+		    },
+		    bar: {
+			init: function*() {
+			    this.value = 0;
+			},
+			add: function*(ctx, p, u) {
+			    this.value += (u?-1:1) * p.amount;
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var pair = yield* ostore.trans(foo, {_type: 'add', amount: 3});
+		assert.equal(pair.r, 3);
+		pair = yield* ostore.trans(pair.v, {_type: 'add', amount: 2}, true);
+		assert.equal(pair.r, 1);
 ```
 
 <a name="dummyobjectstore-context-conflictmsg"></a>
@@ -60,7 +153,23 @@ exports.run(genfunc, cb);
 should throw an exception with .isConflict set to true.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			raise: function*(ctx, p, u) { ctx.conflict('foo raises a conflict'); },
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		try {
+		    yield* ostore.trans(foo, {_type: 'raise'});
+		    assert(false, 'should not be here');
+		} catch(e) {
+		    if(!e.isConflict) {
+			throw e;
+		    }
+		}
 ```
 
 <a name="dummyobjectstore-context-effectp"></a>
@@ -68,13 +177,46 @@ exports.run(genfunc, cb);
 should add patch p to the effect queue.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var queue = new vercast.SimpleQueue();
+		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
+		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
+		assert.equal(yield* queue.dequeue(), 123);
 ```
 
 should add patches to the effect set even when called from a nested transformation.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
+			eff: function*(ctx, p, u) {
+			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
+			},
+		    },
+		    bar: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var queue = new vercast.SimpleQueue();
+		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
+		assert.equal(yield* queue.dequeue(), 123);
 ```
 
 <a name="objectdispatcher"></a>
@@ -84,7 +226,21 @@ exports.run(genfunc, cb);
 should return an instance of the referenced type, after calling the init() function associated with the type.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+	    var disp = new vercast.ObjectDispatcher({foo: {
+		init: function*(ctx, args) {
+		    this.bar = 2;
+		    this.ctx = ctx;
+		    this.baz = args.baz;
+		}
+	    }
+						    });
+	    var ctx = 777;
+	    var obj = yield* disp.init(ctx, 'foo', {baz: 123});
+	    assert.equal(obj._type, 'foo');
+	    assert.equal(obj.bar, 2);
+	    assert.equal(obj.ctx, ctx);
+	    assert.equal(obj.baz, 123);
 ```
 
 <a name="objectdispatcher-applyctx-obj-patch-unapply"></a>
@@ -92,7 +248,19 @@ exports.run(genfunc, cb);
 should call a method corresponding to patch._type.
 
 ```js
-exports.run(genfunc, cb);
+function* (done){
+	    var disp = new vercast.ObjectDispatcher({
+		foo: {
+		    init: function*(ctx, args) {},
+		    bar: function*() {this.bar = 2;
+				      return ctx + 1;},
+		}
+	    });
+	    var ctx = 777;
+	    var obj = yield* disp.init(ctx, 'foo');
+	    var res = yield* disp.apply(ctx, obj, {_type: 'bar'});
+	    assert.equal(obj.bar, 2);
+	    assert.equal(res, 778);
 ```
 
 <a name="simplequeue"></a>
@@ -100,6 +268,17 @@ exports.run(genfunc, cb);
 should retrieve elements in the same order they were entered.
 
 ```js
-exports.run(genfunc, cb);
+function* (){
+	var queue = new vercast.SimpleQueue();
+	var i;
+	for(i = 0; i < 10; i++) {
+	    yield* queue.enqueue(i);
+	}
+	for(i = 0; i < 10; i++) {
+	    assert(!(yield* queue.isEmpty()), 'queue should not be empty yet');
+	    var n = yield* queue.dequeue();
+	    assert.equal(n, i);
+	}
+	assert(yield* queue.isEmpty(), 'queue should be empty');
 ```
 
