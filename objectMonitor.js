@@ -1,6 +1,12 @@
 "use strict";
+
+var crypto = require('crypto');
+
 module.exports = function(obj) {
-    var dirty = false;
+    var dirtyCounter = 0;
+    var cleanValue = 0;
+    var hashCounter = -1;
+
     this.proxy = function() {
 	var props = {};
 	Object.keys(obj).forEach(function(key) {
@@ -11,9 +17,20 @@ module.exports = function(obj) {
 	return proxy;
     };
     this.isDirty = function() { 
-	var nowDirty = dirty;
-	dirty = false;
-	return nowDirty;
+	var lastClean = cleanValue;
+	cleanValue = dirtyCounter;
+	return lastClean !== dirtyCounter;
+    };
+    this.hash = function() {
+	if(hashCounter === dirtyCounter) {
+	    return this.lastHash;
+	}
+	var hash = crypto.createHash('sha256');
+	var str = JSON.stringify(obj);
+	hash.update(str);
+	this.lastHash = hash.digest('base64')
+	hashCounter = dirtyCounter;
+	return this.lastHash;
     };
 
     function createProxyProperty(key) {
@@ -30,9 +47,9 @@ module.exports = function(obj) {
 		    return child;
 		}
 	    },
-	    set: function(value) { 
+	    set: function(value) {
 		obj[key] = value; 
-		dirty = true; 
+		dirtyCounter += 1; 
 	    },
 	};
     }
@@ -51,7 +68,7 @@ module.exports = function(obj) {
 	};
 	this.put = function(key, value) {
 	    obj[key] = value;
-	    dirty = true;
+	    dirtyCounter += 1;
 	}
 	Object.freeze(this);
     }

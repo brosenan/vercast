@@ -13,6 +13,7 @@
    - [ObjectMonitor](#objectmonitor)
      - [.proxy()](#objectmonitor-proxy)
      - [.isDirty()](#objectmonitor-isdirty)
+     - [.hash()](#objectmonitor-hash)
    - [SimpleQueue](#simplequeue)
 <a name=""></a>
  
@@ -344,6 +345,11 @@ try {
 		    throw e;
 		}
 }
+assert.equal(proxy.a.get(2).get('x'), 1);
+monitor.isDirty(); // reset the dirty flag
+proxy.a.get(2).put('x', 4);
+assert(monitor.isDirty(), 'should be dirty now');
+assert.equal(proxy.a.get(2).get('x'), 4);
 ```
 
 <a name="objectmonitor-isdirty"></a>
@@ -358,6 +364,40 @@ assert(!monitor.isDirty(), 'monitor should not be dirty yet');
 proxy.a = 3;
 assert(monitor.isDirty(), 'monitor should now be dirty');
 assert(!monitor.isDirty(), 'monitor should not be dirty anymore');
+```
+
+<a name="objectmonitor-hash"></a>
+## .hash()
+should return a unique string representing the content of the object.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+proxy.a = [1, 2, 3];
+var hash1 = monitor.hash();
+assert.equal(typeof hash1, 'string');
+proxy.a.put(0, 4);
+var hash2 = monitor.hash();
+assert.notEqual(hash1, hash2);
+proxy.a.put(0, 1);
+var hash3 = monitor.hash();
+assert.equal(hash3, hash1);
+```
+
+should work regardless of dirty testing.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+proxy.a = [1, 2, 3];
+var hash1 = monitor.hash();
+assert.equal(typeof hash1, 'string');
+proxy.a.put(0, 4);
+monitor.isDirty();
+var hash2 = monitor.hash();
+assert.notEqual(hash1, hash2);
 ```
 
 <a name="simplequeue"></a>

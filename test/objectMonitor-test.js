@@ -66,9 +66,12 @@ describe('ObjectMonitor', function(){
 		    throw e;
 		}
 	    }
+	    assert.equal(proxy.a.get(2).get('x'), 1);
+	    monitor.isDirty(); // reset the dirty flag
+	    proxy.a.get(2).put('x', 4);
+	    assert(monitor.isDirty(), 'should be dirty now');
+	    assert.equal(proxy.a.get(2).get('x'), 4);
 	});
-
-
     });
     describe('.isDirty()', function(){
 	it('should indicate if a change to the object has been made since the last time it has been called', function(){
@@ -81,4 +84,34 @@ describe('ObjectMonitor', function(){
 	    assert(!monitor.isDirty(), 'monitor should not be dirty anymore');
 	});
     });
+    describe('.hash()', function(){
+	it('should return a unique string representing the content of the object', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var proxy = monitor.proxy();
+	    proxy.a = [1, 2, 3];
+	    var hash1 = monitor.hash();
+	    assert.equal(typeof hash1, 'string');
+	    proxy.a.put(0, 4);
+	    var hash2 = monitor.hash();
+	    assert.notEqual(hash1, hash2);
+	    proxy.a.put(0, 1);
+	    var hash3 = monitor.hash();
+	    assert.equal(hash3, hash1);
+	});
+	it('should work regardless of dirty testing', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var proxy = monitor.proxy();
+	    proxy.a = [1, 2, 3];
+	    var hash1 = monitor.hash();
+	    assert.equal(typeof hash1, 'string');
+	    proxy.a.put(0, 4);
+	    monitor.isDirty();
+	    var hash2 = monitor.hash();
+	    assert.notEqual(hash1, hash2);
+	});
+
+    });
+
 });

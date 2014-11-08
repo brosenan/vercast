@@ -31,8 +31,12 @@
   ․ ObjectMonitor .proxy() should use map proxies recursively
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
+    ObjectMonitor .hash() should return a unique string representing the content of the object
+  ․ ObjectMonitor .hash() should return a unique string representing the content of the object
+    ObjectMonitor .hash() should work regardless of dirty testing
+  ․ ObjectMonitor .hash() should work regardless of dirty testing
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  17 passing (34ms)
+  19 passing (37ms)
 
