@@ -14,6 +14,7 @@
      - [.proxy()](#objectmonitor-proxy)
      - [.isDirty()](#objectmonitor-isdirty)
      - [.hash()](#objectmonitor-hash)
+     - [.seal(obj) [static]](#objectmonitor-sealobj-static)
    - [SimpleQueue](#simplequeue)
 <a name=""></a>
  
@@ -415,6 +416,27 @@ proxy.a.put(0, 4);
 monitor.isDirty();
 var hash2 = monitor.hash();
 assert.notEqual(hash1, hash2);
+```
+
+<a name="objectmonitor-sealobj-static"></a>
+## .seal(obj) [static]
+should make the given object unmodifiable.
+
+```js
+var obj = {a:1, b:2};
+vercast.ObjectMonitor.seal(obj);
+assert.throws(function() {
+		obj.a = 3;
+}, /Cannot assign to read only property/);
+```
+
+should place the object's hash as the $ property of the object.
+
+```js
+var hash1 = new vercast.ObjectMonitor({a:1, b:2}).hash();
+var obj = {a:1, b:2};
+vercast.ObjectMonitor.seal(obj);
+assert.equal(obj.$, hash1);
 ```
 
 <a name="simplequeue"></a>

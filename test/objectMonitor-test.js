@@ -126,6 +126,21 @@ describe('ObjectMonitor', function(){
 	    var hash2 = monitor.hash();
 	    assert.notEqual(hash1, hash2);
 	});
+    });
+    describe('.seal(obj) [static]', function(){
+	it('should make the given object unmodifiable', function(){
+	    var obj = {a:1, b:2};
+	    vercast.ObjectMonitor.seal(obj);
+	    assert.throws(function() {
+		obj.a = 3;
+	    }, /Cannot assign to read only property/);
+	});
+	it('should place the object\'s hash as the $ property of the object', function(){
+	    var hash1 = new vercast.ObjectMonitor({a:1, b:2}).hash();
+	    var obj = {a:1, b:2};
+	    vercast.ObjectMonitor.seal(obj);
+	    assert.equal(obj.$, hash1);
+	});
 
     });
 

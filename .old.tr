@@ -37,8 +37,12 @@
   ․ ObjectMonitor .hash() should return a unique string representing the content of the object
     ObjectMonitor .hash() should work regardless of dirty testing
   ․ ObjectMonitor .hash() should work regardless of dirty testing
+    ObjectMonitor .seal(obj) [static] should make the given object unmodifiable
+  ․ ObjectMonitor .seal(obj) [static] should make the given object unmodifiable
+    ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
+  ․ ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  20 passing (31ms)
+  22 passing (36ms)
 

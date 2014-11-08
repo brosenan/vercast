@@ -26,14 +26,11 @@ module.exports = function(obj) {
 	if(hashCounter === dirtyCounter) {
 	    return this.lastHash;
 	}
-	var hash = crypto.createHash('sha256');
-	var str = JSON.stringify(obj);
-	hash.update(str);
-	this.lastHash = hash.digest('base64')
 	hashCounter = dirtyCounter;
+	this.lastHash = calcHash(obj);
 	return this.lastHash;
     };
-
+    
     function createProxyProperty(key) {
 	return {
 	    enumerable: true,
@@ -74,3 +71,15 @@ module.exports = function(obj) {
 	Object.freeze(this);
     }
 }
+
+function calcHash(obj) {
+    var hash = crypto.createHash('sha256');
+    var str = JSON.stringify(obj);
+    hash.update(str);
+    return hash.digest('base64')
+}
+
+module.exports.seal = function(obj) {
+    obj.$ = calcHash(obj);
+    Object.freeze(obj);
+};
