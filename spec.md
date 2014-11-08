@@ -315,6 +315,37 @@ assert(monitor.isDirty(), 'should be dirty after updating the value');
 assert.equal(proxy.a.get(2), 5);
 ```
 
+should retain the original object as a simple, JSON-style object.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+proxy.a = [1, 2, 3];
+assert.deepEqual(obj, {a:[1, 2, 3], b:2});
+proxy.a.put(2, 4);
+assert.deepEqual(obj, {a:[1, 2, 4], b:2});
+```
+
+should use map proxies recursively.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+proxy.a = [1, 2, 3];
+proxy.a.put(2, {x:1, y: 2});
+try {
+		proxy.a.get(2).x = 3;
+		assert(false, 'previous statement should fail');
+} catch(e) {
+		var goodError = "Can't add property x, object is not extensible";
+		if(e.message.substring(0, goodError.length) !== goodError) {
+		    throw e;
+		}
+}
+```
+
 <a name="objectmonitor-isdirty"></a>
 ## .isDirty()
 should indicate if a change to the object has been made since the last time it has been called.

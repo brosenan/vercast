@@ -6,7 +6,9 @@ module.exports = function(obj) {
 	Object.keys(obj).forEach(function(key) {
 	    props[key] = createProxyProperty(key);
 	});
-	return Object.create(null, props);
+	var proxy = Object.create(null, props);
+	proxy.__childProxies = {};
+	return proxy;
     };
     this.isDirty = function() { 
 	var nowDirty = dirty;
@@ -17,22 +19,38 @@ module.exports = function(obj) {
     function createProxyProperty(key) {
 	return {
 	    enumerable: true,
-	    get: function() { return obj[key]; },
-	    set: function(value) { 
-		if(typeof value === 'object') {
-		    value = new MapProxy(value);
+	    get: function() {
+		var child = obj[key];
+		if(child && typeof child === 'object') {
+		    if(!this.__childProxies[key]) {
+			this.__childProxies[key] = new MapProxy(child);
+		    }
+		    return this.__childProxies[key];
+		} else {
+		    return child;
 		}
+	    },
+	    set: function(value) { 
 		obj[key] = value; 
 		dirty = true; 
 	    },
 	};
     }
-    function MapProxy(child) {
+    function MapProxy(obj) {
+	this.__childProxies = {};
 	this.get = function(key) {
-	    return child[key];
+	    var child = obj[key];
+	    if(child && typeof child === 'object') {
+		if(!this.__childProxies[key]) {
+		    this.__childProxies[key] = new MapProxy(child);
+		}
+		return this.__childProxies[key];
+	    } else {
+		return child;
+	    }
 	};
 	this.put = function(key, value) {
-	    child[key] = value;
+	    obj[key] = value;
 	    dirty = true;
 	}
 	Object.freeze(this);

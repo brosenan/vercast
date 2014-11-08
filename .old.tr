@@ -25,10 +25,14 @@
   ․ ObjectMonitor .proxy() should wrap objects (including arrays) with map proxies
     ObjectMonitor .proxy() should provide access to child object fields via get/put methods, that update the dirty flag
   ․ ObjectMonitor .proxy() should provide access to child object fields via get/put methods, that update the dirty flag
+    ObjectMonitor .proxy() should retain the original object as a simple, JSON-style object
+  ․ ObjectMonitor .proxy() should retain the original object as a simple, JSON-style object
+    ObjectMonitor .proxy() should use map proxies recursively
+  ․ ObjectMonitor .proxy() should use map proxies recursively
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  15 passing (29ms)
+  17 passing (34ms)
 
