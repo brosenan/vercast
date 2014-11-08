@@ -352,6 +352,23 @@ assert(monitor.isDirty(), 'should be dirty now');
 assert.equal(proxy.a.get(2).get('x'), 4);
 ```
 
+should return an unextensible proxy object.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+try {
+		proxy.c = 4;
+		assert(false, 'the previous statement should fail');
+} catch(e) {
+		var goodError = "Can't add property c, object is not extensible";
+		if(e.message !== goodError) {
+		    throw e;
+		}
+}
+```
+
 <a name="objectmonitor-isdirty"></a>
 ## .isDirty()
 should indicate if a change to the object has been made since the last time it has been called.

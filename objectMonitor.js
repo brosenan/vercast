@@ -14,6 +14,7 @@ module.exports = function(obj) {
 	});
 	var proxy = Object.create(null, props);
 	proxy.__childProxies = {};
+	Object.freeze(proxy);
 	return proxy;
     };
     this.isDirty = function() { 
