@@ -19,8 +19,12 @@
   ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
     ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
   ․ ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
+    ObjectMonitor .proxy() should allow modifying an object through a proxy
+  ․ ObjectMonitor .proxy() should allow modifying an object through a proxy
+    ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
+  ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  11 passing (18ms)
+  13 passing (26ms)
 

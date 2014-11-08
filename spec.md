@@ -10,6 +10,9 @@
    - [ObjectDispatcher](#objectdispatcher)
      - [.init(type, args)](#objectdispatcher-inittype-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdispatcher-applyctx-obj-patch-unapply)
+   - [ObjectMonitor](#objectmonitor)
+     - [.proxy()](#objectmonitor-proxy)
+     - [.isDirty()](#objectmonitor-isdirty)
    - [SimpleQueue](#simplequeue)
 <a name=""></a>
  
@@ -261,6 +264,35 @@ function* (done){
 	    var res = yield* disp.apply(ctx, obj, {_type: 'bar'});
 	    assert.equal(obj.bar, 2);
 	    assert.equal(res, 778);
+```
+
+<a name="objectmonitor"></a>
+# ObjectMonitor
+<a name="objectmonitor-proxy"></a>
+## .proxy()
+should allow modifying an object through a proxy.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+assert.equal(proxy.a, 1);
+proxy.a = 3;
+assert.equal(obj.a, 3);
+```
+
+<a name="objectmonitor-isdirty"></a>
+## .isDirty()
+should indicate if a change to the object has been made since the last time it has been called.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+assert(!monitor.isDirty(), 'monitor should not be dirty yet');
+proxy.a = 3;
+assert(monitor.isDirty(), 'monitor should now be dirty');
+assert(!monitor.isDirty(), 'monitor should not be dirty anymore');
 ```
 
 <a name="simplequeue"></a>
