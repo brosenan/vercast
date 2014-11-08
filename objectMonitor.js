@@ -1,3 +1,4 @@
+"use strict";
 module.exports = function(obj) {
     var dirty = false;
     this.proxy = function() {
@@ -18,9 +19,22 @@ module.exports = function(obj) {
 	    enumerable: true,
 	    get: function() { return obj[key]; },
 	    set: function(value) { 
+		if(typeof value === 'object') {
+		    value = new MapProxy(value);
+		}
 		obj[key] = value; 
 		dirty = true; 
 	    },
 	};
+    }
+    function MapProxy(child) {
+	this.get = function(key) {
+	    return child[key];
+	};
+	this.put = function(key, value) {
+	    child[key] = value;
+	    dirty = true;
+	}
+	Object.freeze(this);
     }
 }

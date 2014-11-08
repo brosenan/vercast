@@ -21,10 +21,14 @@
   ․ ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
     ObjectMonitor .proxy() should allow modifying an object through a proxy
   ․ ObjectMonitor .proxy() should allow modifying an object through a proxy
+    ObjectMonitor .proxy() should wrap objects (including arrays) with map proxies
+  ․ ObjectMonitor .proxy() should wrap objects (including arrays) with map proxies
+    ObjectMonitor .proxy() should provide access to child object fields via get/put methods, that update the dirty flag
+  ․ ObjectMonitor .proxy() should provide access to child object fields via get/put methods, that update the dirty flag
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  13 passing (26ms)
+  15 passing (29ms)
 
