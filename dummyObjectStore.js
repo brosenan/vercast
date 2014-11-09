@@ -11,22 +11,23 @@ module.exports = function(disp) {
 	return {r: r, v: {$:JSON.stringify(obj)}};
     };
 
-    function createContext(self, EQ) {
-	return {
-	    init: function*(type, args) {
-		return yield* self.init(type, args);
-	    },
-	    trans: function*(v, p, u) {
-		return yield* self.trans(v, p, u, EQ);
-	    },
-	    conflict: function(reason) {
-		var err = Error(reason);
-		err.isConflict = true;
-		throw err;
-	    },
-	    effect: function*(p) {
-		yield* EQ.enqueue(p);
-	    },
-	};
-    }
 };
+function createContext(self, EQ) {
+    return {
+	init: function*(type, args) {
+	    return yield* self.init(type, args);
+	},
+	trans: function*(v, p, u) {
+	    return yield* self.trans(v, p, u, EQ);
+	},
+	conflict: function(reason) {
+	    var err = Error(reason);
+	    err.isConflict = true;
+	    throw err;
+	},
+	effect: function*(p) {
+	    yield* EQ.enqueue(p);
+	},
+    };
+}
+module.exports.createContext = createContext;

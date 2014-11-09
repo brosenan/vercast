@@ -39,7 +39,7 @@ module.exports = function(obj) {
 	    enumerable: true,
 	    get: function() {
 		var child = obj[key];
-		if(child && typeof child === 'object' && !Object.isFrozen(child)) {
+		if(child && typeof child === 'object' && typeof child.$ !== 'string') {
 		    if(!this.__childProxies[key]) {
 			this.__childProxies[key] = new MapProxy(child);
 		    }
@@ -58,7 +58,7 @@ module.exports = function(obj) {
 	this.__childProxies = {};
 	this.get = function(key) {
 	    var child = obj[key];
-	    if(child && typeof child === 'object' && !Object.isFrozen(child)) {
+	    if(child && typeof child === 'object' && typeof child.$ !== 'string') {
 		if(!this.__childProxies[key]) {
 		    this.__childProxies[key] = new MapProxy(child);
 		}

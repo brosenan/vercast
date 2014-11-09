@@ -67,25 +67,21 @@ describe('ObjectMonitor', function(){
 		proxy.c = 4;
 	    }, /Can't add property c, object is not extensible/);
 	});
-	it('should not provide a map proxy for frozen objects', function(){
+	it('should not provide a map proxy for id-like objects', function(){
 	    var obj = {a:1, b:2};
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    var proxy = monitor.proxy();
-	    var frozen = {x:3};
-	    Object.freeze(frozen);
-	    proxy.a = frozen;
-	    assert.equal(proxy.a.x, 3);
+	    proxy.a = {$:'abc'};
+	    assert.equal(proxy.a.$, 'abc');
 	});
-	it('should not provide a map proxy for frozen nested objects', function(){
-	    var obj = {a:1, b:2};
+	it('should not provide a map proxy for id-like nested objects', function(){
+	    var obj = {a:1, b:2, c: {$:'abc'}};
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    var proxy = monitor.proxy();
 	    proxy.b = [1, 2, 3];
-	    var frozen = {x:4};
-	    Object.freeze(frozen);
-	    proxy.b.put(1, frozen);
-	    assert.equal(proxy.b.get(1).x, 4);
-	    
+	    proxy.b.put(1, {$:'efg'});
+	    assert.equal(proxy.b.get(1).$, 'efg');
+	    assert.equal(proxy.c.$, 'abc');
 	});
 
 

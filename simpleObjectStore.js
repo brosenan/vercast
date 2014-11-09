@@ -3,39 +3,27 @@ var vercast = require('vercast');
 
 module.exports = function(disp, kvs) {
     this.init = function*(type, args) {
-	var obj = yield* disp.init(createContext(this), type, args);
+	var obj = yield* disp.init(vercast.DummyObjectStore.createContext(this), type, args);
 	var monitor = new vercast.ObjectMonitor(obj);
 	var id = {$:monitor.hash()};
 	Object.freeze(id);
-	yield* kvs.store(id.$, obj);
+	yield* kvs.store(id.$, JSON.stringify(obj));
 	return id;
     };
     this.trans = function*(v, p, u, EQ) {
-	var obj = yield* kvs.fetch(v.$);
+	if(typeof v.$ === 'undefined') {
+	    throw Error('undefined version ID');
+	}
+	var json = yield* kvs.fetch(v.$);
+	if(typeof json === 'undefined') {
+	    throw Error('No object version matching id: ' + v.$);
+	}
+	var obj = JSON.parse(json);
 	var monitor = new vercast.ObjectMonitor(obj);
-	var res = yield* disp.apply(createContext(this, EQ), monitor.proxy(), p, u);
+	var res = yield* disp.apply(vercast.DummyObjectStore.createContext(this, EQ), monitor.proxy(), p, u);
 	var id = {$:monitor.hash()};
 	Object.freeze(id);
-	yield* kvs.store(id.$, obj);
+	yield* kvs.store(id.$, JSON.stringify(obj));
 	return {v: id, r: res};
     };
-
-    function createContext(self, EQ) {
-	return {
-	    init: function*(type, args) {
-		return yield* self.init(type, args);
-	    },
-	    trans: function*(v, p, u) {
-		return yield* self.trans(v, p, u, EQ);
-	    },
-	    conflict: function(reason) {
-		var err = Error(reason);
-		err.isConflict = true;
-		throw err;
-	    },
-	    effect: function*(p) {
-		yield* EQ.enqueue(p);
-	    },
-	};
-    }
 };

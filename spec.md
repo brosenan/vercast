@@ -373,29 +373,26 @@ assert.throws(function() {
 }, /Can't add property c, object is not extensible/);
 ```
 
-should not provide a map proxy for frozen objects.
+should not provide a map proxy for id-like objects.
 
 ```js
 var obj = {a:1, b:2};
 var monitor = new vercast.ObjectMonitor(obj);
 var proxy = monitor.proxy();
-var frozen = {x:3};
-Object.freeze(frozen);
-proxy.a = frozen;
-assert.equal(proxy.a.x, 3);
+proxy.a = {$:'abc'};
+assert.equal(proxy.a.$, 'abc');
 ```
 
-should not provide a map proxy for frozen nested objects.
+should not provide a map proxy for id-like nested objects.
 
 ```js
-var obj = {a:1, b:2};
+var obj = {a:1, b:2, c: {$:'abc'}};
 var monitor = new vercast.ObjectMonitor(obj);
 var proxy = monitor.proxy();
 proxy.b = [1, 2, 3];
-var frozen = {x:4};
-Object.freeze(frozen);
-proxy.b.put(1, frozen);
-assert.equal(proxy.b.get(1).x, 4);
+proxy.b.put(1, {$:'efg'});
+assert.equal(proxy.b.get(1).$, 'efg');
+assert.equal(proxy.c.$, 'abc');
 ```
 
 <a name="objectmonitor-isdirty"></a>
@@ -484,6 +481,30 @@ assert.equal(monitor.revision(), 2);
 
 <a name="simpleobjectstore"></a>
 # SimpleObjectStore
+should avoid running the patch method again if the patch has already been applied on an identical object.
+
+```js
+function* (){
+	var count = 0;
+	var dispMap = {
+	    foo: {
+		init: function*() { this.x = 0; },
+		bar: function*(ctx, p, u) {
+		    count += 1;
+		    this.x += 1;
+		},
+	    },
+	};
+	var ostore = createOStore(dispMap);
+	var v0 = yield* ostore.init('foo', {});
+	var v1 = (yield* ostore.trans(v0, {_type: 'bar'})).v;
+	assert.equal(count, 1);
+	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar'})).v;
+	assert.equal(v1.$, v1Prime.$);
+	// This should not 
+//	assert.equal(count, 1);
+```
+
 <a name="simpleobjectstore-inittype-args"></a>
 ## .init(type, args)
 should return a version ID of a newly created object.

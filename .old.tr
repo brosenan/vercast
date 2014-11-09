@@ -33,10 +33,10 @@
   ․ ObjectMonitor .proxy() should use map proxies recursively
     ObjectMonitor .proxy() should return an unextensible proxy object
   ․ ObjectMonitor .proxy() should return an unextensible proxy object
-    ObjectMonitor .proxy() should not provide a map proxy for frozen objects
-  ․ ObjectMonitor .proxy() should not provide a map proxy for frozen objects
-    ObjectMonitor .proxy() should not provide a map proxy for frozen nested objects
-  ․ ObjectMonitor .proxy() should not provide a map proxy for frozen nested objects
+    ObjectMonitor .proxy() should not provide a map proxy for id-like objects
+  ․ ObjectMonitor .proxy() should not provide a map proxy for id-like objects
+    ObjectMonitor .proxy() should not provide a map proxy for id-like nested objects
+  ․ ObjectMonitor .proxy() should not provide a map proxy for id-like nested objects
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     ObjectMonitor .hash() should return a unique string representing the content of the object
@@ -49,6 +49,8 @@
   ․ ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
     ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
   ․ ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
+    SimpleObjectStore should avoid running the patch method again if the patch has already been applied on an identical object
+  ․ SimpleObjectStore should avoid running the patch method again if the patch has already been applied on an identical object
     SimpleObjectStore .init(type, args) should return a version ID of a newly created object
   ․ SimpleObjectStore .init(type, args) should return a version ID of a newly created object
     SimpleObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
@@ -68,5 +70,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  34 passing (48ms)
+  35 passing (46ms)
 
