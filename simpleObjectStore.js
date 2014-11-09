@@ -18,12 +18,25 @@ module.exports = function(disp, kvs) {
 	if(typeof json === 'undefined') {
 	    throw Error('No object version matching id: ' + v.$);
 	}
+	
+	// Check for a cached result
+	var pHash = vercast.ObjectMonitor.seal(p);
+	var cachedKey = v.$ + '>' + pHash;
+	var cachedResult = yield* kvs.fetch(cachedKey);
+	if(typeof cachedResult === 'string') {
+	    return JSON.parse(cachedResult);
+	}
+
 	var obj = JSON.parse(json);
 	var monitor = new vercast.ObjectMonitor(obj);
 	var res = yield* disp.apply(vercast.DummyObjectStore.createContext(this, EQ), monitor.proxy(), p, u);
 	var id = {$:monitor.hash()};
 	Object.freeze(id);
 	yield* kvs.store(id.$, JSON.stringify(obj));
-	return {v: id, r: res};
+
+	// Cache the result
+	var retVal = {v: id, r: res};
+	yield* kvs.store(cachedKey, JSON.stringify(retVal));
+	return retVal;
     };
 };

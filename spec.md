@@ -464,6 +464,23 @@ vercast.ObjectMonitor.seal(obj);
 assert.equal(obj.$, hash1);
 ```
 
+should return the hash.
+
+```js
+var obj = {a:1, b:2};
+var hash1 = vercast.ObjectMonitor.seal(obj);
+assert.equal(obj.$, hash1);
+```
+
+should allow an object to be sealed multiple times.
+
+```js
+var obj = {a:1, b:2};
+var hash1 = vercast.ObjectMonitor.seal(obj);
+var hash2 = vercast.ObjectMonitor.seal(obj);
+assert.equal(hash1, hash2);
+```
+
 <a name="objectmonitor-revision"></a>
 ## .revision()
 should return the object's revision number, one that icrements with each change.
@@ -502,7 +519,7 @@ function* (){
 	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar'})).v;
 	assert.equal(v1.$, v1Prime.$);
 	// This should not 
-//	assert.equal(count, 1);
+	assert.equal(count, 1);
 ```
 
 <a name="simpleobjectstore-inittype-args"></a>

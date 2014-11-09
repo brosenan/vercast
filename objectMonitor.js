@@ -83,6 +83,10 @@ function calcHash(obj) {
 }
 
 module.exports.seal = function(obj) {
+    if(Object.isFrozen(obj) && typeof obj.$ === 'string') {
+	return obj.$;
+    }
     obj.$ = calcHash(obj);
     Object.freeze(obj);
+    return obj.$;
 };

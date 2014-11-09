@@ -83,8 +83,6 @@ describe('ObjectMonitor', function(){
 	    assert.equal(proxy.b.get(1).$, 'efg');
 	    assert.equal(proxy.c.$, 'abc');
 	});
-
-
     });
     describe('.isDirty()', function(){
 	it('should indicate if a change to the object has been made since the last time it has been called', function(){
@@ -139,6 +137,18 @@ describe('ObjectMonitor', function(){
 	    vercast.ObjectMonitor.seal(obj);
 	    assert.equal(obj.$, hash1);
 	});
+	it('should return the hash', function(){
+	    var obj = {a:1, b:2};
+	    var hash1 = vercast.ObjectMonitor.seal(obj);
+	    assert.equal(obj.$, hash1);
+	});
+	it('should allow an object to be sealed multiple times', function(){
+	    var obj = {a:1, b:2};
+	    var hash1 = vercast.ObjectMonitor.seal(obj);
+	    var hash2 = vercast.ObjectMonitor.seal(obj);
+	    assert.equal(hash1, hash2);
+	});
+
 
     });
     describe('.revision()', function(){

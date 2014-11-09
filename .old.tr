@@ -47,6 +47,10 @@
   ․ ObjectMonitor .seal(obj) [static] should make the given object unmodifiable
     ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
   ․ ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
+    ObjectMonitor .seal(obj) [static] should return the hash
+  ․ ObjectMonitor .seal(obj) [static] should return the hash
+    ObjectMonitor .seal(obj) [static] should allow an object to be sealed multiple times
+  ․ ObjectMonitor .seal(obj) [static] should allow an object to be sealed multiple times
     ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
   ․ ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
     SimpleObjectStore should avoid running the patch method again if the patch has already been applied on an identical object
@@ -70,5 +74,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  35 passing (46ms)
+  37 passing (46ms)
 
