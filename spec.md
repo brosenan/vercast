@@ -1,4 +1,5 @@
 # TOC
+   - [DummyKeyValueStore](#dummykeyvaluestore)
    - [DummyObjectStore](#dummyobjectstore)
      - [.init(type, args)](#dummyobjectstore-inittype-args)
      - [.trans(v, p, u, EQ) -> {v, r}](#dummyobjectstore-transv-p-u-eq---v-r)
@@ -15,9 +16,29 @@
      - [.isDirty()](#objectmonitor-isdirty)
      - [.hash()](#objectmonitor-hash)
      - [.seal(obj) [static]](#objectmonitor-sealobj-static)
+     - [.revision()](#objectmonitor-revision)
+   - [SimpleObjectStore](#simpleobjectstore)
+     - [.init(type, args)](#simpleobjectstore-inittype-args)
+     - [.trans(v, p, u, EQ) -> {v, r}](#simpleobjectstore-transv-p-u-eq---v-r)
+     - [context](#simpleobjectstore-context)
+       - [.init(type, args)](#simpleobjectstore-context-inittype-args)
+       - [.trans(v, p, u) -> {v,r}](#simpleobjectstore-context-transv-p-u---vr)
+       - [.conflict(msg)](#simpleobjectstore-context-conflictmsg)
+       - [.effect(p)](#simpleobjectstore-context-effectp)
    - [SimpleQueue](#simplequeue)
 <a name=""></a>
  
+<a name="dummykeyvaluestore"></a>
+# DummyKeyValueStore
+should retrieve stored values.
+
+```js
+function* (){
+	var kvs = new vercast.DummyKeyValueStore();
+	yield* kvs.store('foo', 'bar');
+	assert.equal(yield* kvs.fetch('foo'), 'bar');
+```
+
 <a name="dummyobjectstore"></a>
 # DummyObjectStore
 <a name="dummyobjectstore-inittype-args"></a>
@@ -290,15 +311,9 @@ var obj = {a:1, b:2};
 var monitor = new vercast.ObjectMonitor(obj);
 var proxy = monitor.proxy();
 proxy.a = [1, 2, 3];
-try {
+assert.throws(function() {
 		proxy.a[0] = 4;
-		assert(false, '');
-} catch(e) {
-		var goodError = "Can't add property 0, object is not extensible";
-		if(e.message.substring(0, goodError.length) !== goodError) {
-		    throw e;
-		}
-}
+}, /Can't add property 0, object is not extensible/);
 ```
 
 should provide access to child object fields via get/put methods, that update the dirty flag.
@@ -337,15 +352,9 @@ var monitor = new vercast.ObjectMonitor(obj);
 var proxy = monitor.proxy();
 proxy.a = [1, 2, 3];
 proxy.a.put(2, {x:1, y: 2});
-try {
+assert.throws(function() {
 		proxy.a.get(2).x = 3;
-		assert(false, 'previous statement should fail');
-} catch(e) {
-		var goodError = "Can't add property x, object is not extensible";
-		if(e.message.substring(0, goodError.length) !== goodError) {
-		    throw e;
-		}
-}
+}, /Can't add property x, object is not extensible/);
 assert.equal(proxy.a.get(2).get('x'), 1);
 monitor.isDirty(); // reset the dirty flag
 proxy.a.get(2).put('x', 4);
@@ -359,15 +368,34 @@ should return an unextensible proxy object.
 var obj = {a:1, b:2};
 var monitor = new vercast.ObjectMonitor(obj);
 var proxy = monitor.proxy();
-try {
+assert.throws(function() {
 		proxy.c = 4;
-		assert(false, 'the previous statement should fail');
-} catch(e) {
-		var goodError = "Can't add property c, object is not extensible";
-		if(e.message !== goodError) {
-		    throw e;
-		}
-}
+}, /Can't add property c, object is not extensible/);
+```
+
+should not provide a map proxy for frozen objects.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+var frozen = {x:3};
+Object.freeze(frozen);
+proxy.a = frozen;
+assert.equal(proxy.a.x, 3);
+```
+
+should not provide a map proxy for frozen nested objects.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+proxy.b = [1, 2, 3];
+var frozen = {x:4};
+Object.freeze(frozen);
+proxy.b.put(1, frozen);
+assert.equal(proxy.b.get(1).x, 4);
 ```
 
 <a name="objectmonitor-isdirty"></a>
@@ -437,6 +465,227 @@ var hash1 = new vercast.ObjectMonitor({a:1, b:2}).hash();
 var obj = {a:1, b:2};
 vercast.ObjectMonitor.seal(obj);
 assert.equal(obj.$, hash1);
+```
+
+<a name="objectmonitor-revision"></a>
+## .revision()
+should return the object's revision number, one that icrements with each change.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+assert.equal(monitor.revision(), 0);
+proxy.a = [1, 2, 3];
+assert.equal(monitor.revision(), 1);
+proxy.a.put(0, 3);
+assert.equal(monitor.revision(), 2);
+```
+
+<a name="simpleobjectstore"></a>
+# SimpleObjectStore
+<a name="simpleobjectstore-inittype-args"></a>
+## .init(type, args)
+should return a version ID of a newly created object.
+
+```js
+function* (done){
+	    var called = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			called = true;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    assert.equal(typeof v.$, 'string');
+	    assert(called, 'The constructor should have been called');
+```
+
+<a name="simpleobjectstore-transv-p-u-eq---v-r"></a>
+## .trans(v, p, u, EQ) -> {v, r}
+should return the value returned from the method corresponding to patch p.
+
+```js
+function* (done){
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			this.baz = 0;
+		    },
+		    bar: function*() {
+			yield sleep(1);
+			this.baz += 1;
+			return this.baz;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var pair = yield* ostore.trans(v, {_type: 'bar'});
+	    assert.equal(pair.r, 1);
+	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    assert.equal(pair.r, 2);
+```
+
+should pass the patch and u flag as parameters to the called method.
+
+```js
+function* (done){
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			this.baz = 0;
+		    },
+		    bar: function*(ctx, p, u) {
+			var amount = p.amount;
+			if(u) amount = -amount;
+			this.baz += amount;
+			return this.baz;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var pair = yield* ostore.trans(v, {_type: 'bar', amount: 3});
+	    assert.equal(pair.r, 3);
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar', amount: 2}, true);
+	    assert.equal(pair.r, 1);
+```
+
+<a name="simpleobjectstore-context"></a>
+## context
+<a name="simpleobjectstore-context-inittype-args"></a>
+### .init(type, args)
+should initialize an object with the given type and args and return its version ID.
+
+```js
+function* (){
+		var dispMap = {
+		    creator: {
+			init: function*(ctx, args) {},
+			create: function*(ctx, p, u) {
+			    return yield* ctx.init(p.type, p.args);
+			},
+		    },
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			get: function*() { return this.value; },
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var creator = yield* ostore.init('creator', {});
+		var foo1 = yield* ostore.trans(creator, {_type: 'create', type: 'foo', args: {value: 3}});
+		var res = yield* ostore.trans(foo1.r, {_type: 'get'});
+		assert.equal(res.r, 3);
+```
+
+<a name="simpleobjectstore-context-transv-p-u---vr"></a>
+### .trans(v, p, u) -> {v,r}
+should transform a version and return the new version ID and result.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) {
+			    this.bar = yield* ctx.init('bar', {});
+			},
+			add: function*(ctx, p, u) {
+			    var pair = yield* ctx.trans(this.bar, p, u);
+			    this.bar = pair.v;
+			    return pair.r;
+			},
+		    },
+		    bar: {
+			init: function*() {
+			    this.value = 0;
+			},
+			add: function*(ctx, p, u) {
+			    this.value += (u?-1:1) * p.amount;
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var pair = yield* ostore.trans(foo, {_type: 'add', amount: 3});
+		assert.equal(pair.r, 3);
+		pair = yield* ostore.trans(pair.v, {_type: 'add', amount: 2}, true);
+		assert.equal(pair.r, 1);
+```
+
+<a name="simpleobjectstore-context-conflictmsg"></a>
+### .conflict(msg)
+should throw an exception with .isConflict set to true.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			raise: function*(ctx, p, u) { ctx.conflict('foo raises a conflict'); },
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		try {
+		    yield* ostore.trans(foo, {_type: 'raise'});
+		    assert(false, 'should not be here');
+		} catch(e) {
+		    if(!e.isConflict) {
+			throw e;
+		    }
+		}
+```
+
+<a name="simpleobjectstore-context-effectp"></a>
+### .effect(p)
+should add patch p to the effect queue.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var queue = new vercast.SimpleQueue();
+		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
+		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
+		assert.equal(yield* queue.dequeue(), 123);
+```
+
+should add patches to the effect set even when called from a nested transformation.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
+			eff: function*(ctx, p, u) {
+			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
+			},
+		    },
+		    bar: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var queue = new vercast.SimpleQueue();
+		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
+		assert.equal(yield* queue.dequeue(), 123);
 ```
 
 <a name="simplequeue"></a>

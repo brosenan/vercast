@@ -1,7 +1,6 @@
 "use strict";
 var assert = require('assert');
 
-var asyncgen = require('asyncgen'); 
 var vercast = require('vercast');
 
 describe('ObjectMonitor', function(){
@@ -19,15 +18,9 @@ describe('ObjectMonitor', function(){
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    var proxy = monitor.proxy();
 	    proxy.a = [1, 2, 3];
-	    try {
+	    assert.throws(function() {
 		proxy.a[0] = 4;
-		assert(false, '');
-	    } catch(e) {
-		var goodError = "Can't add property 0, object is not extensible";
-		if(e.message.substring(0, goodError.length) !== goodError) {
-		    throw e;
-		}
-	    }
+	    }, /Can't add property 0, object is not extensible/);
 	});
 	it('should provide access to child object fields via get/put methods, that update the dirty flag', function(){
 	    var obj = {a:1, b:2};
@@ -57,15 +50,9 @@ describe('ObjectMonitor', function(){
 	    var proxy = monitor.proxy();
 	    proxy.a = [1, 2, 3];
 	    proxy.a.put(2, {x:1, y: 2});
-	    try {
+	    assert.throws(function() {
 		proxy.a.get(2).x = 3;
-		assert(false, 'previous statement should fail');
-	    } catch(e) {
-		var goodError = "Can't add property x, object is not extensible";
-		if(e.message.substring(0, goodError.length) !== goodError) {
-		    throw e;
-		}
-	    }
+	    }, /Can't add property x, object is not extensible/);
 	    assert.equal(proxy.a.get(2).get('x'), 1);
 	    monitor.isDirty(); // reset the dirty flag
 	    proxy.a.get(2).put('x', 4);
@@ -76,16 +63,31 @@ describe('ObjectMonitor', function(){
 	    var obj = {a:1, b:2};
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    var proxy = monitor.proxy();
-	    try {
+	    assert.throws(function() {
 		proxy.c = 4;
-		assert(false, 'the previous statement should fail');
-	    } catch(e) {
-		var goodError = "Can't add property c, object is not extensible";
-		if(e.message !== goodError) {
-		    throw e;
-		}
-	    }
+	    }, /Can't add property c, object is not extensible/);
 	});
+	it('should not provide a map proxy for frozen objects', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var proxy = monitor.proxy();
+	    var frozen = {x:3};
+	    Object.freeze(frozen);
+	    proxy.a = frozen;
+	    assert.equal(proxy.a.x, 3);
+	});
+	it('should not provide a map proxy for frozen nested objects', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var proxy = monitor.proxy();
+	    proxy.b = [1, 2, 3];
+	    var frozen = {x:4};
+	    Object.freeze(frozen);
+	    proxy.b.put(1, frozen);
+	    assert.equal(proxy.b.get(1).x, 4);
+	    
+	});
+
 
     });
     describe('.isDirty()', function(){
@@ -143,5 +145,16 @@ describe('ObjectMonitor', function(){
 	});
 
     });
-
+    describe('.revision()', function(){
+	it('should return the object\'s revision number, one that icrements with each change', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var proxy = monitor.proxy();
+	    assert.equal(monitor.revision(), 0);
+	    proxy.a = [1, 2, 3];
+	    assert.equal(monitor.revision(), 1);
+	    proxy.a.put(0, 3);
+	    assert.equal(monitor.revision(), 2);
+	});
+    });
 });

@@ -1,4 +1,6 @@
 
+    DummyKeyValueStore should retrieve stored values
+  ․ DummyKeyValueStore should retrieve stored values
     DummyObjectStore .init(type, args) should return a version ID of a newly created object
   ․ DummyObjectStore .init(type, args) should return a version ID of a newly created object
     DummyObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
@@ -31,6 +33,10 @@
   ․ ObjectMonitor .proxy() should use map proxies recursively
     ObjectMonitor .proxy() should return an unextensible proxy object
   ․ ObjectMonitor .proxy() should return an unextensible proxy object
+    ObjectMonitor .proxy() should not provide a map proxy for frozen objects
+  ․ ObjectMonitor .proxy() should not provide a map proxy for frozen objects
+    ObjectMonitor .proxy() should not provide a map proxy for frozen nested objects
+  ․ ObjectMonitor .proxy() should not provide a map proxy for frozen nested objects
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     ObjectMonitor .hash() should return a unique string representing the content of the object
@@ -41,8 +47,26 @@
   ․ ObjectMonitor .seal(obj) [static] should make the given object unmodifiable
     ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
   ․ ObjectMonitor .seal(obj) [static] should place the object's hash as the $ property of the object
+    ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
+  ․ ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
+    SimpleObjectStore .init(type, args) should return a version ID of a newly created object
+  ․ SimpleObjectStore .init(type, args) should return a version ID of a newly created object
+    SimpleObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
+  ․ SimpleObjectStore .trans(v, p, u, EQ) -> {v, r} should return the value returned from the method corresponding to patch p
+    SimpleObjectStore .trans(v, p, u, EQ) -> {v, r} should pass the patch and u flag as parameters to the called method
+  ․ SimpleObjectStore .trans(v, p, u, EQ) -> {v, r} should pass the patch and u flag as parameters to the called method
+    SimpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
+  ․ SimpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
+    SimpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
+  ․ SimpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
+    SimpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
+  ․ SimpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
+    SimpleObjectStore context .effect(p) should add patch p to the effect queue
+  ․ SimpleObjectStore context .effect(p) should add patch p to the effect queue
+    SimpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
+  ․ SimpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  22 passing (36ms)
+  34 passing (48ms)
 

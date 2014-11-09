@@ -30,13 +30,16 @@ module.exports = function(obj) {
 	this.lastHash = calcHash(obj);
 	return this.lastHash;
     };
+    this.revision = function() {
+	return dirtyCounter;
+    };
     
     function createProxyProperty(key) {
 	return {
 	    enumerable: true,
 	    get: function() {
 		var child = obj[key];
-		if(child && typeof child === 'object') {
+		if(child && typeof child === 'object' && !Object.isFrozen(child)) {
 		    if(!this.__childProxies[key]) {
 			this.__childProxies[key] = new MapProxy(child);
 		    }
@@ -55,7 +58,7 @@ module.exports = function(obj) {
 	this.__childProxies = {};
 	this.get = function(key) {
 	    var child = obj[key];
-	    if(child && typeof child === 'object') {
+	    if(child && typeof child === 'object' && !Object.isFrozen(child)) {
 		if(!this.__childProxies[key]) {
 		    this.__childProxies[key] = new MapProxy(child);
 		}
