@@ -1,0 +1,54 @@
+"use strict";
+
+var vercast = require('vercast');
+
+module.exports = function(kvs) {
+    this.createSequenceStore = function() {
+	return new SequenceStore();
+    };
+   
+    function SequenceStore() {
+	var seq = [];
+	this.append = function*(obj) {
+	    seq.push(obj);
+	};
+	this.isEmpty = function() {
+	    return seq.length === 0;
+	};
+	this.shift = function*() {
+	    var first = seq.shift(); 
+	    while(typeof first === 'string') {
+		var prefix = JSON.parse(yield* kvs.fetch(first));
+		if(Array.isArray(prefix)) {
+		    seq = prefix.concat(seq);
+		    first = seq.shift();
+		} else {
+		    if(prefix.$) {
+			delete prefix.$;
+		    }
+		    first = prefix;
+		}
+	    }
+	    return first;
+	};
+	this.hash = function*() {
+	    switch(seq.length) {
+	    case 0:
+		return '';
+	    case 1:
+		if(typeof seq[0] === 'string') {
+		    return seq[0];
+		} else {
+		    return yield* store(seq[0]);
+		}
+	    default:
+		return yield* store(seq);
+	    }
+	};
+    }
+    function* store(obj) {
+	var hash = vercast.ObjectMonitor.seal(obj);
+	yield* kvs.store(hash, JSON.stringify(obj));
+	return hash;
+    }
+};

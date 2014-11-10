@@ -17,6 +17,12 @@
      - [.hash()](#objectmonitor-hash)
      - [.seal(obj) [static]](#objectmonitor-sealobj-static)
      - [.revision()](#objectmonitor-revision)
+   - [SequenceStoreFactory](#sequencestorefactory)
+     - [.createSequenceStore()](#sequencestorefactory-createsequencestore)
+       - [.append(obj)](#sequencestorefactory-createsequencestore-appendobj)
+       - [.isEmpty()](#sequencestorefactory-createsequencestore-isempty)
+       - [.shift()](#sequencestorefactory-createsequencestore-shift)
+       - [.hash()](#sequencestorefactory-createsequencestore-hash)
    - [SimpleObjectStore](#simpleobjectstore)
      - [.init(type, args)](#simpleobjectstore-inittype-args)
      - [.trans(v, p, u, EQ) -> {v, r}](#simpleobjectstore-transv-p-u-eq---v-r)
@@ -494,6 +500,141 @@ proxy.a = [1, 2, 3];
 assert.equal(monitor.revision(), 1);
 proxy.a.put(0, 3);
 assert.equal(monitor.revision(), 2);
+```
+
+<a name="sequencestorefactory"></a>
+# SequenceStoreFactory
+<a name="sequencestorefactory-createsequencestore"></a>
+## .createSequenceStore()
+should return a new sequence store.
+
+```js
+var seqStore = factory.createSequenceStore();
+assert.equal(typeof seqStore, 'object');
+```
+
+<a name="sequencestorefactory-createsequencestore-appendobj"></a>
+### .append(obj)
+should append an object to a sequence.
+
+```js
+function* (){
+		var seqStore = factory.createSequenceStore();
+		yield* seqStore.append({a:1});
+		yield* seqStore.append({a:2});
+```
+
+should append an entire sequence if given its hash.
+
+```js
+function* (){
+		var seqStore1 = factory.createSequenceStore();
+		yield* seqStore1.append({a:1});
+		yield* seqStore1.append({a:2});
+
+		var seqStore2 = factory.createSequenceStore();
+		yield* seqStore2.append(yield* seqStore1.hash());
+		yield* seqStore2.append({a:3});
+		
+		assert.deepEqual(yield* seqStore2.shift(), {a:1});
+		assert.deepEqual(yield* seqStore2.shift(), {a:2});
+		assert.deepEqual(yield* seqStore2.shift(), {a:3});
+```
+
+should append a sequence consisting of a single object when given its hash.
+
+```js
+function* (){
+		var seqStore1 = factory.createSequenceStore();
+		yield* seqStore1.append({a:2});
+
+		var seqStore2 = factory.createSequenceStore();
+		yield* seqStore2.append({a:1});
+		yield* seqStore2.append(yield* seqStore1.hash());
+		yield* seqStore2.append({a:3});
+		
+		assert.deepEqual(yield* seqStore2.shift(), {a:1});
+		assert.deepEqual(yield* seqStore2.shift(), {a:2});
+		assert.deepEqual(yield* seqStore2.shift(), {a:3});
+```
+
+<a name="sequencestorefactory-createsequencestore-isempty"></a>
+### .isEmpty()
+should indicate if the sequence is empty.
+
+```js
+function* (){
+		var seqStore = factory.createSequenceStore();
+		assert(seqStore.isEmpty(), 'should be empty');
+		yield* seqStore.append({a:1});
+		assert(!seqStore.isEmpty(), 'should not be empty anymore');
+```
+
+<a name="sequencestorefactory-createsequencestore-shift"></a>
+### .shift()
+should remove the first element from the sequence and return it.
+
+```js
+function* (){
+		var seqStore = factory.createSequenceStore();
+		yield* seqStore.append({a:1});
+		yield* seqStore.append({a:2});
+		assert.deepEqual(yield* seqStore.shift(), {a:1});
+		assert.deepEqual(yield* seqStore.shift(), {a:2});
+		assert(seqStore.isEmpty());
+```
+
+<a name="sequencestorefactory-createsequencestore-hash"></a>
+### .hash()
+should return an empty string if the sequence is empty.
+
+```js
+function* (){
+		var seqStore = factory.createSequenceStore();
+		assert.equal(yield* seqStore.hash(), '');
+```
+
+should return the object hash, assuming only one object in the sequence.
+
+```js
+function* (){
+		var seqStore = factory.createSequenceStore();
+		yield* seqStore.append({a:1});
+		assert.equal(yield* seqStore.hash(), vercast.ObjectMonitor.seal({a:1}));
+```
+
+should return a hash unique to the sequence for sequence size larger than 1.
+
+```js
+function* (){
+		var seqStore1 = factory.createSequenceStore();
+		yield* seqStore1.append({a:1});
+		yield* seqStore1.append({a:2});
+		yield* seqStore1.append({a:3});
+		var seqStore2 = factory.createSequenceStore();
+		yield* seqStore2.append({a:1});
+		yield* seqStore2.append({a:2});
+		yield* seqStore2.append({a:3});
+		assert.equal(yield* seqStore1.hash(), yield* seqStore2.hash());
+		var seqStore3 = factory.createSequenceStore();
+		yield* seqStore3.append({a:1});
+		yield* seqStore3.append({a:2});
+		assert.notEqual(yield* seqStore3.hash(), yield* seqStore2.hash());
+```
+
+should provide the same hash if the only element in a sequence is a hash of another sequence.
+
+```js
+function* (){
+		var seqStore1 = factory.createSequenceStore();
+		yield* seqStore1.append({a:1});
+		yield* seqStore1.append({a:2});
+		yield* seqStore1.append({a:3});
+		
+		var seqStore2 = factory.createSequenceStore();
+		yield* seqStore2.append(yield* seqStore1.hash());
+		
+		assert.equal(yield* seqStore1.hash(), yield* seqStore2.hash());
 ```
 
 <a name="simpleobjectstore"></a>
