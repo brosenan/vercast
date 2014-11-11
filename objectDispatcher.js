@@ -20,7 +20,10 @@ module.exports = function(dispMap) {
 	var cls = dispMap[obj._type];
 	var method = cls[patch._type];
 	if(!method) {
-	    throw Error('Object type ' + obj._type + ' does not support patch ' + patch._type);
+	    method = dispMap['$' + patch._type];
+	    if(!method) {
+		throw Error('Object type ' + obj._type + ' does not support patch ' + patch._type);
+	    }
 	}
 	return yield* method.call(obj, ctx, patch, unapply);
     };

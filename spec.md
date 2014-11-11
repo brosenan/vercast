@@ -302,6 +302,49 @@ function* (done){
 	    assert.equal(res, 778);
 ```
 
+should call a patch handler function if one exists in the map.
+
+```js
+function* (){
+	    var called = false;
+	    var disp = new vercast.ObjectDispatcher({
+		foo: {
+		    init: function*() { this.value = 2; },
+		},
+		$bar: function*(ctx, p, u) {
+		    called = true;
+		    assert.equal(p.a, 3);
+		    assert.equal(this.value, 2);
+		},
+	    });
+	    var ctx = 777;
+	    var foo = yield* disp.init(ctx, 'foo');
+	    var res = yield* disp.apply(ctx, foo, {_type: 'bar', a:3});
+	    assert(called, 'patch handler should have been called');
+```
+
+should prefer the object method when both a method and a handler are defined.
+
+```js
+function* (){
+	    var called = false;
+	    var disp = new vercast.ObjectDispatcher({
+		foo: {
+		    init: function*() { this.value = 2; },
+		    bar: function*() {
+			called = true;
+		    },
+		},
+		$bar: function*() {
+		    assert(false, 'The handler should not have been called');
+		},
+	    });
+	    var ctx = 777;
+	    var foo = yield* disp.init(ctx, 'foo');
+	    var res = yield* disp.apply(ctx, foo, {_type: 'bar', a:3});
+	    assert(called, 'patch method should have been called');
+```
+
 <a name="objectmonitor"></a>
 # ObjectMonitor
 <a name="objectmonitor-proxy"></a>
@@ -590,6 +633,28 @@ function* (){
 						   name: 'foo',
 						   patch: {_type: 'inc'}});
 	    assert.equal(pair.r, 2);
+```
+
+should return the return value of the original patch.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    bar: function*(ctx) {
+			yield* ctx.effect({_type: 'baz'});
+			return 1;
+		    },
+		    baz: function*() {
+			return 2;
+		    },
+		}
+	    };
+	    var rootStore = new vercast.RootStore(createOStore(dispMap));
+	    var v = yield* rootStore.init('foo', {});
+	    var res = yield* rootStore.trans(v, {_type: 'bar'});
+	    assert.equal(res.r, 1);
 ```
 
 <a name="sequencestorefactory"></a>

@@ -37,5 +37,40 @@ describe('ObjectDispatcher', function(){
 	    assert.equal(obj.bar, 2);
 	    assert.equal(res, 778);
 	}));
+	it('should call a patch handler function if one exists in the map', asyncgen.async(function*(){
+	    var called = false;
+	    var disp = new vercast.ObjectDispatcher({
+		foo: {
+		    init: function*() { this.value = 2; },
+		},
+		$bar: function*(ctx, p, u) {
+		    called = true;
+		    assert.equal(p.a, 3);
+		    assert.equal(this.value, 2);
+		},
+	    });
+	    var ctx = 777;
+	    var foo = yield* disp.init(ctx, 'foo');
+	    var res = yield* disp.apply(ctx, foo, {_type: 'bar', a:3});
+	    assert(called, 'patch handler should have been called');
+	}));
+	it('should prefer the object method when both a method and a handler are defined', asyncgen.async(function*(){
+	    var called = false;
+	    var disp = new vercast.ObjectDispatcher({
+		foo: {
+		    init: function*() { this.value = 2; },
+		    bar: function*() {
+			called = true;
+		    },
+		},
+		$bar: function*() {
+		    assert(false, 'The handler should not have been called');
+		},
+	    });
+	    var ctx = 777;
+	    var foo = yield* disp.init(ctx, 'foo');
+	    var res = yield* disp.apply(ctx, foo, {_type: 'bar', a:3});
+	    assert(called, 'patch method should have been called');
+	}));
     });
 });

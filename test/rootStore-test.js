@@ -79,6 +79,24 @@ describe('RootStore', function(){
 						   patch: {_type: 'inc'}});
 	    assert.equal(pair.r, 2);
 	}));
+	it('should return the return value of the original patch', asyncgen.async(function*(){
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    bar: function*(ctx) {
+			yield* ctx.effect({_type: 'baz'});
+			return 1;
+		    },
+		    baz: function*() {
+			return 2;
+		    },
+		}
+	    };
+	    var rootStore = new vercast.RootStore(createOStore(dispMap));
+	    var v = yield* rootStore.init('foo', {});
+	    var res = yield* rootStore.trans(v, {_type: 'bar'});
+	    assert.equal(res.r, 1);
+	}));
 
     });
 
