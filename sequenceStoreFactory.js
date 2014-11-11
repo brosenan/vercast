@@ -10,6 +10,9 @@ module.exports = function(kvs) {
     function SequenceStore() {
 	var seq = [];
 	this.append = function*(obj) {
+	    if(obj === '') {
+		return;
+	    }
 	    seq.push(obj);
 	};
 	this.isEmpty = function() {
@@ -18,7 +21,11 @@ module.exports = function(kvs) {
 	this.shift = function*() {
 	    var first = seq.shift(); 
 	    while(typeof first === 'string') {
-		var prefix = JSON.parse(yield* kvs.fetch(first));
+		var json = yield* kvs.fetch(first);
+		if(typeof json === 'undefined') {
+		    throw Error('Invalid key for sequence element: ' + first);
+		}
+		var prefix = JSON.parse(json);
 		if(Array.isArray(prefix)) {
 		    seq = prefix.concat(seq);
 		    first = seq.shift();

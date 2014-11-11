@@ -5,7 +5,7 @@
      - [.trans(v, p, u, EQ) -> {v, r}](#dummyobjectstore-transv-p-u-eq---v-r)
      - [context](#dummyobjectstore-context)
        - [.init(type, args)](#dummyobjectstore-context-inittype-args)
-       - [.trans(v, p, u) -> {v,r}](#dummyobjectstore-context-transv-p-u---vr)
+       - [.trans(v, p, u) -> {v,r,eff}](#dummyobjectstore-context-transv-p-u---vreff)
        - [.conflict(msg)](#dummyobjectstore-context-conflictmsg)
        - [.effect(p)](#dummyobjectstore-context-effectp)
    - [ObjectDispatcher](#objectdispatcher)
@@ -28,7 +28,7 @@
      - [.trans(v, p, u, EQ) -> {v, r}](#simpleobjectstore-transv-p-u-eq---v-r)
      - [context](#simpleobjectstore-context)
        - [.init(type, args)](#simpleobjectstore-context-inittype-args)
-       - [.trans(v, p, u) -> {v,r}](#simpleobjectstore-context-transv-p-u---vr)
+       - [.trans(v, p, u) -> {v,r,eff}](#simpleobjectstore-context-transv-p-u---vreff)
        - [.conflict(msg)](#simpleobjectstore-context-conflictmsg)
        - [.effect(p)](#simpleobjectstore-context-effectp)
    - [SimpleQueue](#simplequeue)
@@ -145,8 +145,8 @@ function* (){
 		assert.equal(res.r, 3);
 ```
 
-<a name="dummyobjectstore-context-transv-p-u---vr"></a>
-### .trans(v, p, u) -> {v,r}
+<a name="dummyobjectstore-context-transv-p-u---vreff"></a>
+### .trans(v, p, u) -> {v,r,eff}
 should transform a version and return the new version ID and result.
 
 ```js
@@ -206,7 +206,7 @@ function* (){
 
 <a name="dummyobjectstore-context-effectp"></a>
 ### .effect(p)
-should add patch p to the effect queue.
+should add patch p to the effect sequence.
 
 ```js
 function* (){
@@ -220,10 +220,11 @@ function* (){
 		};
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
-		var queue = new vercast.SimpleQueue();
-		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
-		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
-		assert.equal(yield* queue.dequeue(), 123);
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert(!seqStore.isEmpty(), 'sequence should contain an element');
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
 ```
 
 should add patches to the effect set even when called from a nested transformation.
@@ -234,6 +235,7 @@ function* (){
 		    foo: {
 			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
 			eff: function*(ctx, p, u) {
+			    yield* ctx.effect({p:333});
 			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
 			},
 		    },
@@ -246,9 +248,11 @@ function* (){
 		};
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
-		var queue = new vercast.SimpleQueue();
-		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
-		assert.equal(yield* queue.dequeue(), 123);
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert.deepEqual(yield* seqStore.shift(), {p:333});
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
 ```
 
 <a name="objectdispatcher"></a>
@@ -761,8 +765,8 @@ function* (){
 		assert.equal(res.r, 3);
 ```
 
-<a name="simpleobjectstore-context-transv-p-u---vr"></a>
-### .trans(v, p, u) -> {v,r}
+<a name="simpleobjectstore-context-transv-p-u---vreff"></a>
+### .trans(v, p, u) -> {v,r,eff}
 should transform a version and return the new version ID and result.
 
 ```js
@@ -822,7 +826,7 @@ function* (){
 
 <a name="simpleobjectstore-context-effectp"></a>
 ### .effect(p)
-should add patch p to the effect queue.
+should add patch p to the effect sequence.
 
 ```js
 function* (){
@@ -836,10 +840,11 @@ function* (){
 		};
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
-		var queue = new vercast.SimpleQueue();
-		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
-		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
-		assert.equal(yield* queue.dequeue(), 123);
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert(!seqStore.isEmpty(), 'sequence should contain an element');
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
 ```
 
 should add patches to the effect set even when called from a nested transformation.
@@ -850,6 +855,7 @@ function* (){
 		    foo: {
 			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
 			eff: function*(ctx, p, u) {
+			    yield* ctx.effect({p:333});
 			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
 			},
 		    },
@@ -862,9 +868,11 @@ function* (){
 		};
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
-		var queue = new vercast.SimpleQueue();
-		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
-		assert.equal(yield* queue.dequeue(), 123);
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert.deepEqual(yield* seqStore.shift(), {p:333});
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
 ```
 
 <a name="simplequeue"></a>

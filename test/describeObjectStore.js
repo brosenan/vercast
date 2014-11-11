@@ -89,7 +89,7 @@ module.exports = function(createOStore) {
 		assert.equal(res.r, 3);
 	    }));
 	});
-	describe('.trans(v, p, u) -> {v,r}', function(){
+	describe('.trans(v, p, u) -> {v,r,eff}', function(){
 	    it('should transform a version and return the new version ID and result', asyncgen.async(function*(){
 		var dispMap = {
 		    foo: {
@@ -141,7 +141,7 @@ module.exports = function(createOStore) {
 	    }));
 	});
 	describe('.effect(p)', function(){
-	    it('should add patch p to the effect queue', asyncgen.async(function*(){
+	    it('should add patch p to the effect sequence', asyncgen.async(function*(){
 		var dispMap = {
 		    foo: {
 			init: function*() {},
@@ -152,16 +152,18 @@ module.exports = function(createOStore) {
 		};
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
-		var queue = new vercast.SimpleQueue();
-		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
-		assert(!(yield* queue.isEmpty()), 'queue should contain an element');
-		assert.equal(yield* queue.dequeue(), 123);
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert(!seqStore.isEmpty(), 'sequence should contain an element');
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
 	    }));
 	    it('should add patches to the effect set even when called from a nested transformation', asyncgen.async(function*(){
 		var dispMap = {
 		    foo: {
 			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
 			eff: function*(ctx, p, u) {
+			    yield* ctx.effect({p:333});
 			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
 			},
 		    },
@@ -174,9 +176,11 @@ module.exports = function(createOStore) {
 		};
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
-		var queue = new vercast.SimpleQueue();
-		yield* ostore.trans(foo, {_type: 'eff', patch: 123}, false, queue);
-		assert.equal(yield* queue.dequeue(), 123);
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert.deepEqual(yield* seqStore.shift(), {p:333});
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
 	    }));
 	});
     });

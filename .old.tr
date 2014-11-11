@@ -9,12 +9,12 @@
   ․ DummyObjectStore .trans(v, p, u, EQ) -> {v, r} should pass the patch and u flag as parameters to the called method
     DummyObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
   ․ DummyObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
-    DummyObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
-  ․ DummyObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
+    DummyObjectStore context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
+  ․ DummyObjectStore context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
     DummyObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
   ․ DummyObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
-    DummyObjectStore context .effect(p) should add patch p to the effect queue
-  ․ DummyObjectStore context .effect(p) should add patch p to the effect queue
+    DummyObjectStore context .effect(p) should add patch p to the effect sequence
+  ․ DummyObjectStore context .effect(p) should add patch p to the effect sequence
     DummyObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
   ․ DummyObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
     ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
@@ -83,16 +83,16 @@
   ․ SimpleObjectStore .trans(v, p, u, EQ) -> {v, r} should pass the patch and u flag as parameters to the called method
     SimpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
   ․ SimpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
-    SimpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
-  ․ SimpleObjectStore context .trans(v, p, u) -> {v,r} should transform a version and return the new version ID and result
+    SimpleObjectStore context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
+  ․ SimpleObjectStore context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
     SimpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
   ․ SimpleObjectStore context .conflict(msg) should throw an exception with .isConflict set to true
-    SimpleObjectStore context .effect(p) should add patch p to the effect queue
-  ․ SimpleObjectStore context .effect(p) should add patch p to the effect queue
+    SimpleObjectStore context .effect(p) should add patch p to the effect sequence
+  ․ SimpleObjectStore context .effect(p) should add patch p to the effect sequence
     SimpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
   ․ SimpleObjectStore context .effect(p) should add patches to the effect set even when called from a nested transformation
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  47 passing (77ms)
+  47 passing (76ms)
 
