@@ -53,6 +53,8 @@
   ․ ObjectMonitor .seal(obj) [static] should allow an object to be sealed multiple times
     ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
   ․ ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
+    RootStore .init(type, args) should return an initial version ID of a new object
+  ․ RootStore .init(type, args) should return an initial version ID of a new object
     SequenceStoreFactory .createSequenceStore() should return a new sequence store
   ․ SequenceStoreFactory .createSequenceStore() should return a new sequence store
     SequenceStoreFactory .createSequenceStore() .append(obj) should append an object to a sequence
@@ -94,5 +96,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  47 passing (76ms)
+  48 passing (83ms)
 

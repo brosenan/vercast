@@ -17,6 +17,8 @@
      - [.hash()](#objectmonitor-hash)
      - [.seal(obj) [static]](#objectmonitor-sealobj-static)
      - [.revision()](#objectmonitor-revision)
+   - [RootStore](#rootstore)
+     - [.init(type, args)](#rootstore-inittype-args)
    - [SequenceStoreFactory](#sequencestorefactory)
      - [.createSequenceStore()](#sequencestorefactory-createsequencestore)
        - [.append(obj)](#sequencestorefactory-createsequencestore-appendobj)
@@ -504,6 +506,25 @@ proxy.a = [1, 2, 3];
 assert.equal(monitor.revision(), 1);
 proxy.a.put(0, 3);
 assert.equal(monitor.revision(), 2);
+```
+
+<a name="rootstore"></a>
+# RootStore
+<a name="rootstore-inittype-args"></a>
+## .init(type, args)
+should return an initial version ID of a new object.
+
+```js
+function* (){
+	    var called = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() { called = true; },
+		},
+	    };
+	    var rootStore = new vercast.RootStore(createOStore(dispMap));
+	    var v = yield* rootStore.init('foo', {});
+	    assert(called, 'constructor should have been called');
 ```
 
 <a name="sequencestorefactory"></a>
