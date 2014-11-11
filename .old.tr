@@ -55,6 +55,10 @@
   ․ ObjectMonitor .revision() should return the object's revision number, one that icrements with each change
     RootStore .init(type, args) should return an initial version ID of a new object
   ․ RootStore .init(type, args) should return an initial version ID of a new object
+    RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
+  ․ RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
+    RootStore .trans(v, p, u) -> {v,r} should apply the effect set internally
+  ․ RootStore .trans(v, p, u) -> {v,r} should apply the effect set internally
     SequenceStoreFactory .createSequenceStore() should return a new sequence store
   ․ SequenceStoreFactory .createSequenceStore() should return a new sequence store
     SequenceStoreFactory .createSequenceStore() .append(obj) should append an object to a sequence
@@ -96,5 +100,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  48 passing (83ms)
+  50 passing (83ms)
 
