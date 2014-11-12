@@ -6,6 +6,7 @@ module.exports = function(obj) {
     var dirtyCounter = 0;
     var cleanValue = 0;
     var hashCounter = -1;
+    var jsonCounter = -1;
 
     this.proxy = function() {
 	var props = {};
@@ -14,6 +15,10 @@ module.exports = function(obj) {
 	});
 	var proxy = Object.create(null, props);
 	proxy.__childProxies = {};
+	proxy._replaceWith = function(newObj) {
+	    obj = newObj;
+	    dirtyCounter += 1;
+	};
 	Object.freeze(proxy);
 	return proxy;
     };
@@ -27,11 +32,22 @@ module.exports = function(obj) {
 	    return this.lastHash;
 	}
 	hashCounter = dirtyCounter;
-	this.lastHash = calcHash(obj);
+	this.lastHash = calcHash(obj, this);
 	return this.lastHash;
     };
     this.revision = function() {
 	return dirtyCounter;
+    };
+    this.json = function() {
+	if(jsonCounter === dirtyCounter) {
+	    return this.lastJson;
+	}
+	jsonCounter = dirtyCounter;
+	this.lastJson = JSON.stringify(obj);
+	return this.lastJson;
+    };
+    this.object = function() {
+	return obj;
     };
     
     function createProxyProperty(key) {
@@ -75,9 +91,14 @@ module.exports = function(obj) {
     }
 }
 
-function calcHash(obj) {
+function calcHash(obj, monitor) {
     var hash = crypto.createHash('sha256');
-    var str = JSON.stringify(obj);
+    var str;
+    if(monitor) {
+	str = monitor.json();
+    } else {
+	str = JSON.stringify(obj);
+    }
     hash.update(str);
     return hash.digest('base64')
 }

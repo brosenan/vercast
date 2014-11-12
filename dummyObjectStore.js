@@ -12,9 +12,17 @@ module.exports = function(disp) {
     this.trans = function*(v, p, u) {
 	var effSeq = effSeqFactory.createSequenceStore();
 	var obj = JSON.parse(v.$);
-	var r = yield* disp.apply(createContext(this, effSeq), obj, p, u);
+	var monitor = new vercast.ObjectMonitor(obj);
+	var r = yield* disp.apply(createContext(this, effSeq, v), monitor.proxy(), p, u);
+	if(monitor.object()._type) {
+	    v = {$:monitor.json()};
+	} else if(monitor.object().$) {
+	    v = monitor.object();
+	} else {
+	    throw Error('new version is niether a avalid object nor an ID');
+	}
 	return {r: r, 
-		v: {$:JSON.stringify(obj)},
+		v: v,
 		eff: yield* effSeq.hash()};
     };
     this.getSequenceStore = function() {
@@ -22,7 +30,7 @@ module.exports = function(disp) {
     };
 
 };
-function createContext(self, effSeq) {
+function createContext(self, effSeq, v) {
     return {
 	init: function*(type, args) {
 	    return yield* self.init(type, args);
@@ -39,6 +47,9 @@ function createContext(self, effSeq) {
 	},
 	effect: function*(p) {
 	    yield* effSeq.append(p);
+	},
+	self: function() {
+	    return v;
 	},
     };
 }

@@ -6,3 +6,4 @@ exports.ObjectMonitor = require('./objectMonitor.js');
 exports.DummyKeyValueStore = require('./dummyKeyValueStore.js');
 exports.SequenceStoreFactory = require('./sequenceStoreFactory.js');
 exports.RootStore = require('./rootStore.js');
+exports.$inv = require('./inv.js');

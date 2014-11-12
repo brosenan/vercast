@@ -2,21 +2,26 @@
    - [DummyKeyValueStore](#dummykeyvaluestore)
    - [DummyObjectStore](#dummyobjectstore)
      - [.init(type, args)](#dummyobjectstore-inittype-args)
-     - [.trans(v, p, u, EQ) -> {v, r}](#dummyobjectstore-transv-p-u-eq---v-r)
+     - [.trans(v, p, u) -> {v, r, eff}](#dummyobjectstore-transv-p-u---v-r-eff)
      - [context](#dummyobjectstore-context)
        - [.init(type, args)](#dummyobjectstore-context-inittype-args)
        - [.trans(v, p, u) -> {v,r,eff}](#dummyobjectstore-context-transv-p-u---vreff)
        - [.conflict(msg)](#dummyobjectstore-context-conflictmsg)
        - [.effect(p)](#dummyobjectstore-context-effectp)
+       - [.self()](#dummyobjectstore-context-self)
+   - [$inv](#inv)
    - [ObjectDispatcher](#objectdispatcher)
      - [.init(type, args)](#objectdispatcher-inittype-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdispatcher-applyctx-obj-patch-unapply)
    - [ObjectMonitor](#objectmonitor)
      - [.proxy()](#objectmonitor-proxy)
+       - [._replaceWith(obj)](#objectmonitor-proxy-_replacewithobj)
      - [.isDirty()](#objectmonitor-isdirty)
      - [.hash()](#objectmonitor-hash)
      - [.seal(obj) [static]](#objectmonitor-sealobj-static)
      - [.revision()](#objectmonitor-revision)
+     - [.json()](#objectmonitor-json)
+     - [.object()](#objectmonitor-object)
    - [RootStore](#rootstore)
      - [.init(type, args)](#rootstore-inittype-args)
      - [.trans(v, p, u) -> {v,r}](#rootstore-transv-p-u---vr)
@@ -28,12 +33,13 @@
        - [.hash()](#sequencestorefactory-createsequencestore-hash)
    - [SimpleObjectStore](#simpleobjectstore)
      - [.init(type, args)](#simpleobjectstore-inittype-args)
-     - [.trans(v, p, u, EQ) -> {v, r}](#simpleobjectstore-transv-p-u-eq---v-r)
+     - [.trans(v, p, u) -> {v, r, eff}](#simpleobjectstore-transv-p-u---v-r-eff)
      - [context](#simpleobjectstore-context)
        - [.init(type, args)](#simpleobjectstore-context-inittype-args)
        - [.trans(v, p, u) -> {v,r,eff}](#simpleobjectstore-context-transv-p-u---vreff)
        - [.conflict(msg)](#simpleobjectstore-context-conflictmsg)
        - [.effect(p)](#simpleobjectstore-context-effectp)
+       - [.self()](#simpleobjectstore-context-self)
    - [SimpleQueue](#simplequeue)
 <a name=""></a>
  
@@ -70,8 +76,8 @@ function* (done){
 	    assert(called, 'The constructor should have been called');
 ```
 
-<a name="dummyobjectstore-transv-p-u-eq---v-r"></a>
-## .trans(v, p, u, EQ) -> {v, r}
+<a name="dummyobjectstore-transv-p-u---v-r-eff"></a>
+## .trans(v, p, u) -> {v, r, eff}
 should return the value returned from the method corresponding to patch p.
 
 ```js
@@ -119,6 +125,28 @@ function* (done){
 	    assert.equal(pair.r, 3);
 	    pair = yield* ostore.trans(pair.v, {_type: 'bar', amount: 2}, true);
 	    assert.equal(pair.r, 1);
+```
+
+should replace the object with another if replaced with its ID.
+
+```js
+function* (){
+	    var dispMap = {
+		foo:{
+		    init: function*() {},
+		    changeToBar: function*(ctx) {
+			this._replaceWith(yield* ctx.init('bar', {}));
+		    },
+		},
+		bar:{
+		    init: function*() {},
+		    query: function*() { return 555; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
+	    res = yield* ostore.trans(res.v, {_type: 'query'});
 ```
 
 <a name="dummyobjectstore-context"></a>
@@ -256,6 +284,53 @@ function* (){
 		yield* seqStore.append(res.eff);
 		assert.deepEqual(yield* seqStore.shift(), {p:333});
 		assert.deepEqual(yield* seqStore.shift(), {p:123});
+```
+
+<a name="dummyobjectstore-context-self"></a>
+### .self()
+should return the version ID of the object prior to this patch application.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() { this.value = 44; },
+			bar: function*(ctx, p, u) {
+			    this.value = 999;
+			    return yield* ctx.trans(ctx.self(), {_type: 'baz'});
+			},
+			baz: function*(ctx, p, u) {
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+```
+
+<a name="inv"></a>
+# $inv
+should unapply the underlying patch.
+
+```js
+function* (){
+	var dispMap = {
+	    $inv: vercast.$inv,
+	    counter: {
+		init: function*() {this.value = 0;},
+		add: function*(ctx, p, u) {
+		    this.value += (u?-1:1) * p.amount;
+		    return this.value;
+		},
+	    },
+	};
+	var ostore = createOStore(dispMap);
+	var v = yield* ostore.init('counter', {});
+	var res = yield* ostore.trans(v, {_type: 'inv', 
+					  patch: {_type: 'add',
+						  amount: 2}});
+	assert.equal(res.r, -2);
 ```
 
 <a name="objectdispatcher"></a>
@@ -451,6 +526,21 @@ assert.equal(proxy.b.get(1).$, 'efg');
 assert.equal(proxy.c.$, 'abc');
 ```
 
+<a name="objectmonitor-proxy-_replacewithobj"></a>
+### ._replaceWith(obj)
+should replace the underlying object with the given one.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+assert.equal(monitor.json(), '{"a":1,"b":2}');
+proxy._replaceWith({x:1, y:2});
+var proxy2 = monitor.proxy();
+assert.equal(proxy2.x, 1);
+assert.equal(monitor.json(), '{"x":1,"y":2}');
+```
+
 <a name="objectmonitor-isdirty"></a>
 ## .isDirty()
 should indicate if a change to the object has been made since the last time it has been called.
@@ -550,6 +640,29 @@ proxy.a = [1, 2, 3];
 assert.equal(monitor.revision(), 1);
 proxy.a.put(0, 3);
 assert.equal(monitor.revision(), 2);
+```
+
+<a name="objectmonitor-json"></a>
+## .json()
+should return a JSON representation of the object.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+proxy.a = [1, 2, 3];
+assert.equal(monitor.json(), '{"a":[1,2,3],"b":2}');
+```
+
+<a name="objectmonitor-object"></a>
+## .object()
+should provide an unprovisioned access to the object.
+
+```js
+var obj = {a:1, b:2};
+var monitor = new vercast.ObjectMonitor(obj);
+var obj2 = monitor.object();
+assert.equal(obj2.a, 1);
 ```
 
 <a name="rootstore"></a>
@@ -838,8 +951,8 @@ function* (done){
 	    assert(called, 'The constructor should have been called');
 ```
 
-<a name="simpleobjectstore-transv-p-u-eq---v-r"></a>
-## .trans(v, p, u, EQ) -> {v, r}
+<a name="simpleobjectstore-transv-p-u---v-r-eff"></a>
+## .trans(v, p, u) -> {v, r, eff}
 should return the value returned from the method corresponding to patch p.
 
 ```js
@@ -887,6 +1000,28 @@ function* (done){
 	    assert.equal(pair.r, 3);
 	    pair = yield* ostore.trans(pair.v, {_type: 'bar', amount: 2}, true);
 	    assert.equal(pair.r, 1);
+```
+
+should replace the object with another if replaced with its ID.
+
+```js
+function* (){
+	    var dispMap = {
+		foo:{
+		    init: function*() {},
+		    changeToBar: function*(ctx) {
+			this._replaceWith(yield* ctx.init('bar', {}));
+		    },
+		},
+		bar:{
+		    init: function*() {},
+		    query: function*() { return 555; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
+	    res = yield* ostore.trans(res.v, {_type: 'query'});
 ```
 
 <a name="simpleobjectstore-context"></a>
@@ -1024,6 +1159,29 @@ function* (){
 		yield* seqStore.append(res.eff);
 		assert.deepEqual(yield* seqStore.shift(), {p:333});
 		assert.deepEqual(yield* seqStore.shift(), {p:123});
+```
+
+<a name="simpleobjectstore-context-self"></a>
+### .self()
+should return the version ID of the object prior to this patch application.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() { this.value = 44; },
+			bar: function*(ctx, p, u) {
+			    this.value = 999;
+			    return yield* ctx.trans(ctx.self(), {_type: 'baz'});
+			},
+			baz: function*(ctx, p, u) {
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
 ```
 
 <a name="simplequeue"></a>

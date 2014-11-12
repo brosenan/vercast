@@ -83,6 +83,18 @@ describe('ObjectMonitor', function(){
 	    assert.equal(proxy.b.get(1).$, 'efg');
 	    assert.equal(proxy.c.$, 'abc');
 	});
+	describe('._replaceWith(obj)', function(){
+	    it('should replace the underlying object with the given one', function(){
+		var obj = {a:1, b:2};
+		var monitor = new vercast.ObjectMonitor(obj);
+		var proxy = monitor.proxy();
+		assert.equal(monitor.json(), '{"a":1,"b":2}');
+		proxy._replaceWith({x:1, y:2});
+		var proxy2 = monitor.proxy();
+		assert.equal(proxy2.x, 1);
+		assert.equal(monitor.json(), '{"x":1,"y":2}');
+	    });
+	});
     });
     describe('.isDirty()', function(){
 	it('should indicate if a change to the object has been made since the last time it has been called', function(){
@@ -163,4 +175,23 @@ describe('ObjectMonitor', function(){
 	    assert.equal(monitor.revision(), 2);
 	});
     });
+    describe('.json()', function(){
+	it('should return a JSON representation of the object', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var proxy = monitor.proxy();
+	    proxy.a = [1, 2, 3];
+	    assert.equal(monitor.json(), '{"a":[1,2,3],"b":2}');
+	});
+    });
+    describe('.object()', function(){
+	it('should provide an unprovisioned access to the object', function(){
+	    var obj = {a:1, b:2};
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    var obj2 = monitor.object();
+	    assert.equal(obj2.a, 1);
+	});
+
+    });
+
 });

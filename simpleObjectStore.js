@@ -32,13 +32,19 @@ module.exports = function(disp, kvs) {
 	var effSeq = factory.createSequenceStore();
 	var obj = JSON.parse(json);
 	var monitor = new vercast.ObjectMonitor(obj);
-	var res = yield* disp.apply(vercast.DummyObjectStore.createContext(this, effSeq), monitor.proxy(), p, u);
-	var id = {$:monitor.hash()};
-	Object.freeze(id);
-	yield* kvs.store(id.$, JSON.stringify(obj));
+	var res = yield* disp.apply(vercast.DummyObjectStore.createContext(this, effSeq, v), monitor.proxy(), p, u);
+	if(monitor.object()._type) {
+	    v = {$:monitor.hash()};
+	    yield* kvs.store(v.$, monitor.json());
+	} else if(monitor.object().$) {
+	    v = monitor.object();
+	} else {
+	    throw Error('new version is niether a avalid object nor an ID');
+	}
+	Object.freeze(v);
 
 	// Cache the result
-	var retVal = {v: id, r: res, eff: yield* effSeq.hash()};
+	var retVal = {v: v, r: res, eff: yield* effSeq.hash()};
 	yield* kvs.store(cachedKey, JSON.stringify(retVal));
 	return retVal;
     };

@@ -23,7 +23,7 @@ module.exports = function(createOStore) {
 	    assert(called, 'The constructor should have been called');
 	}));
     });
-    describe('.trans(v, p, u, EQ) -> {v, r}', function(){
+    describe('.trans(v, p, u) -> {v, r, eff}', function(){
 	it('should return the value returned from the method corresponding to patch p', asyncgen.async(function*(done){
 	    var dispMap = {
 		foo: {
@@ -64,6 +64,24 @@ module.exports = function(createOStore) {
 	    assert.equal(pair.r, 3);
 	    pair = yield* ostore.trans(pair.v, {_type: 'bar', amount: 2}, true);
 	    assert.equal(pair.r, 1);
+	}));
+	it('should replace the object with another if replaced with its ID', asyncgen.async(function*(){
+	    var dispMap = {
+		foo:{
+		    init: function*() {},
+		    changeToBar: function*(ctx) {
+			this._replaceWith(yield* ctx.init('bar', {}));
+		    },
+		},
+		bar:{
+		    init: function*() {},
+		    query: function*() { return 555; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
+	    res = yield* ostore.trans(res.v, {_type: 'query'});
 	}));
 
     });
@@ -183,5 +201,26 @@ module.exports = function(createOStore) {
 		assert.deepEqual(yield* seqStore.shift(), {p:123});
 	    }));
 	});
+	describe('.self()', function(){
+	    it('should return the version ID of the object prior to this patch application', asyncgen.async(function*(){
+		var dispMap = {
+		    foo: {
+			init: function*() { this.value = 44; },
+			bar: function*(ctx, p, u) {
+			    this.value = 999;
+			    return yield* ctx.trans(ctx.self(), {_type: 'baz'});
+			},
+			baz: function*(ctx, p, u) {
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+	    }));
+
+	});
+
     });
 }
