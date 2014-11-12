@@ -6,18 +6,21 @@ var vercast = require('vercast');
 
 describe('ObjectTestBed', function(){
     describe('.trans(p)', function(){
-	it.skip('should apply a patch, returning the result', asyncgen.async(function*(){
+	it('should apply a patch, returning the result', asyncgen.async(function*(){
 	    var dispMap = {
-		foo: {
+		counter: {
 		    init: function*() {this.value = 0;},
-		    bar: function*(ctx, p, u) {
-			this.value += p.amount;
+		    add: function*(ctx, p, u) {
+			this.value += (u?-1:1) * p.amount;
 			return this.value;
 		    },
 		},
 	    };
-	    var otb = new vercast.ObjectTestBed(createOStore(dispMap), 'foo', {});
-	    //var r = yield* otb.trans({_type: 
+	    var otb = new vercast.ObjectTestBed(dispMap, 'counter', {});
+	    var r = yield* otb.trans({_type: 'add', amount: 2});
+	    assert.equal(r, 2);
+	    r = yield* otb.trans({_type: 'add', amount: 3});
+	    assert.equal(r, 5);
 	}));
 
     });

@@ -71,7 +71,8 @@
   ․ ObjectMonitor .json() should return a JSON representation of the object
     ObjectMonitor .object() should provide an unprovisioned access to the object
   ․ ObjectMonitor .object() should provide an unprovisioned access to the object
-  - ObjectTestBed .trans(p) should apply a patch, returning the result
+    ObjectTestBed .trans(p) should apply a patch, returning the result
+  ․ ObjectTestBed .trans(p) should apply a patch, returning the result
     RootStore .init(type, args) should return an initial version ID of a new object
   ․ RootStore .init(type, args) should return an initial version ID of a new object
     RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
@@ -125,6 +126,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  62 passing (79ms)
-  1 pending
+  63 passing (77ms)
 
