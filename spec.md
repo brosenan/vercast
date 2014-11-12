@@ -9,6 +9,7 @@
        - [.conflict(msg)](#dummyobjectstore-context-conflictmsg)
        - [.effect(p)](#dummyobjectstore-context-effectp)
        - [.self()](#dummyobjectstore-context-self)
+     - [.addTransListener(handler(v1, p, u, v2, r, eff))](#dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff)
    - [$inv](#inv)
    - [ObjectDispatcher](#objectdispatcher)
      - [.init(type, args)](#objectdispatcher-inittype-args)
@@ -22,6 +23,8 @@
      - [.revision()](#objectmonitor-revision)
      - [.json()](#objectmonitor-json)
      - [.object()](#objectmonitor-object)
+   - [ObjectTestBed](#objecttestbed)
+     - [.trans(p)](#objecttestbed-transp)
    - [RootStore](#rootstore)
      - [.init(type, args)](#rootstore-inittype-args)
      - [.trans(v, p, u) -> {v,r}](#rootstore-transv-p-u---vr)
@@ -307,6 +310,43 @@ function* (){
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
+```
+
+<a name="dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff"></a>
+## .addTransListener(handler(v1, p, u, v2, r, eff))
+should call the handler on each successful call to trans().
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*() { this.value = 0; },
+		    bar: function*(ctx) { this.value += 1;
+					  yield* ctx.effect({a:1});
+					  return 99;},
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var called = false;
+	    var foo;
+	    var v2_out, eff_out;
+	    ostore.addTransListener(function(v1, p, u, v2, r, eff) {
+		called = true;
+		assert.equal(v1.$, foo.$);
+		assert.deepEqual(p, {_type: 'bar', x: 2});
+		assert.equal(u, false);
+		v2_out = v2;
+		assert.equal(r, 99);
+		eff_out = eff;
+	    });
+	    foo = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(foo, {_type: 'bar', x: 2}, false);
+	    assert(called, 'handler should have been called');
+	    assert.equal(v2_out.$, res.v.$);
+
+	    var seq = ostore.getSequenceStore();
+	    yield* seq.append(eff_out);
+	    assert.deepEqual(yield* seq.shift(), {a:1});
 ```
 
 <a name="inv"></a>
@@ -665,6 +705,10 @@ var obj2 = monitor.object();
 assert.equal(obj2.a, 1);
 ```
 
+<a name="objecttestbed"></a>
+# ObjectTestBed
+<a name="objecttestbed-transp"></a>
+## .trans(p)
 <a name="rootstore"></a>
 # RootStore
 <a name="rootstore-inittype-args"></a>

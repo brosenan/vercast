@@ -1,9 +1,11 @@
 "use strict";
+var events = require('events');
 
 var vercast = require('vercast');
 
 
 module.exports = function(disp) {
+    var emitter = new events.EventEmitter();
     var effSeqFactory = new vercast.SequenceStoreFactory(new vercast.DummyKeyValueStore());
     this.init = function*(type, args) {
 	var obj = yield* disp.init(createContext(this), type, args);
@@ -14,21 +16,26 @@ module.exports = function(disp) {
 	var obj = JSON.parse(v.$);
 	var monitor = new vercast.ObjectMonitor(obj);
 	var r = yield* disp.apply(createContext(this, effSeq, v), monitor.proxy(), p, u);
+	var v2 = v;
 	if(monitor.object()._type) {
-	    v = {$:monitor.json()};
+	    v2 = {$:monitor.json()};
 	} else if(monitor.object().$) {
-	    v = monitor.object();
+	    v2 = monitor.object();
 	} else {
 	    throw Error('new version is niether a avalid object nor an ID');
 	}
+	var eff = yield* effSeq.hash();
+	emitter.emit('trans', v, p, u, v2, r, eff);
 	return {r: r, 
-		v: v,
-		eff: yield* effSeq.hash()};
+		v: v2,
+		eff: eff};
     };
     this.getSequenceStore = function() {
 	return effSeqFactory.createSequenceStore();
     };
-
+    this.addTransListener = function(handler) {
+	emitter.addListener('trans', handler);
+    };
 };
 function createContext(self, effSeq, v) {
     return {
