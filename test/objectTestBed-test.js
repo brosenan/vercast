@@ -22,7 +22,24 @@ describe('ObjectTestBed', function(){
 	    r = yield* otb.trans({_type: 'add', amount: 3});
 	    assert.equal(r, 5);
 	}));
+	it('should fail for non-reversible transformations', asyncgen.async(function*(){
+	    var dispMap = {
+		badCounter: {
+		    init: function*() {this.value = 0;},
+		    add: function*(ctx, p, u) {
+			this.value += p.amount; // ignoring u
+			return this.value;
+		    },
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'badCounter', {});
+	    try {
+		yield* otb.trans({_type: 'add', amount: 2});
+		assert(false, 'error is expected');
+	    } catch(e) {
+		assert.equal(e.message, 'Transformation "add" for type "badCounter" is not reversible');
+	    }
+	}));
 
     });
-
 });

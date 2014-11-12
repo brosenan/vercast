@@ -5,7 +5,7 @@ var vercast = require('vercast');
 
 
 module.exports = function(disp) {
-    var emitter = new events.EventEmitter();
+    var transListeners = [];
     var effSeqFactory = new vercast.SequenceStoreFactory(new vercast.DummyKeyValueStore());
     this.init = function*(type, args) {
 	var obj = yield* disp.init(createContext(this), type, args);
@@ -25,7 +25,9 @@ module.exports = function(disp) {
 	    throw Error('new version is niether a avalid object nor an ID');
 	}
 	var eff = yield* effSeq.hash();
-	emitter.emit('trans', v, p, u, v2, r, eff);
+	for(var iListener = 0; iListener < transListeners.length; iListener += 1) {
+	    yield* transListeners[iListener](v, p, u, v2, r, eff);
+	}
 	return {r: r, 
 		v: v2,
 		eff: eff};
@@ -34,7 +36,7 @@ module.exports = function(disp) {
 	return effSeqFactory.createSequenceStore();
     };
     this.addTransListener = function(handler) {
-	emitter.addListener('trans', handler);
+	transListeners.push(handler);
     };
 };
 function createContext(self, effSeq, v) {
