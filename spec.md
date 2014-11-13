@@ -751,6 +751,37 @@ function* (){
 	    }
 ```
 
+should fail for independent transformations that do not commute.
+
+```js
+function* (){
+	    var dispMap = {
+		badCounter: {
+		    init: function*() {this.value = 0;},
+		    add: function*(ctx, p, u) {
+			this.value += (u?-1:1) * p.amount;
+			return this.value;
+		    },
+		    mult: function*(ctx, p, u) {
+			if(u) {
+			    this.value /= p.amount;
+			} else {
+			    this.value *= p.amount;
+			}
+			return this.value;
+		    },
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'badCounter', {});
+	    yield* otb.trans({_type: 'add', amount: 2});
+	    try {
+		yield* otb.trans({_type: 'mult', amount: 3});
+		assert(false, 'error is expected');
+	    } catch(e) {
+		assert.equal(e.message, 'Transformations "add" and "mult" for type "badCounter" are independent but do not commute');
+	    }
+```
+
 <a name="rootstore"></a>
 # RootStore
 <a name="rootstore-inittype-args"></a>
