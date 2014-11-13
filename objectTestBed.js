@@ -38,13 +38,21 @@ module.exports = function(dispMap, type, args) {
 	function* commutativityChecker(v1, p, u, v2, r, eff) {
 	    if(v1.$ in verMap) {
 		var prev = verMap[v1.$];
-		var alt = yield* ostore2.trans(prev.v1, p, u);
-		alt = yield* ostore2.trans(alt.v, prev.p, prev.u);
-		if(alt.v.$ !== v2.$) {
-		    var obj = JSON.parse(v1.$);
-		    throw Error('Transformations "' + prev.p._type + '" and "' +
-				p._type + '" for type "' + obj._type + 
-				'" are independent but do not commute');
+		try {
+		    var alt = yield* ostore2.trans(prev.v1, p, u);
+		    try {
+			alt = yield* ostore2.trans(alt.v, prev.p, prev.u);
+		    } catch(e) {
+			alt.v = {$:''};
+		    }
+		    if(alt.v.$ !== v2.$) {
+			var obj = JSON.parse(v1.$);
+			throw Error('Transformations "' + prev.p._type + '" and "' +
+				    p._type + '" for type "' + obj._type + 
+				    '" are independent but do not commute');
+		    }
+		} catch(e) {
+		    if(!e.isConflict) throw e;			
 		}
 	    }
 	    verMap[v2.$] = {v1: v1, p: p, u: u, r: r};

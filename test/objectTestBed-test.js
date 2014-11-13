@@ -67,6 +67,47 @@ describe('ObjectTestBed', function(){
 		assert.equal(e.message, 'Transformations "add" and "mult" for type "badCounter" are independent but do not commute');
 	    }
 	}));
+	it('should not fail when the transformations are not independent', asyncgen.async(function*(){
+	    var dispMap = {
+		atom: {
+		    init: function*(ctx, args) { this.value = args.value; },
+		    change: function*(ctx, p, u) {
+			var from = u ? p.to : p.from;
+			var to = u ? p.from : p.to;
+			if(this.value !== from) {
+			    ctx.conflict('Expected: ' + from + ' found: ' + this.value);
+			}
+			this.value = to;
+		    },
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'atom', {value: 'a'});
+	    yield* otb.trans({_type: 'change', from: 'a', to: 'b'});
+	    yield* otb.trans({_type: 'change', from: 'b', to: 'c'});
+	}));
+	it('should fail when for independent p1 and p2, one permutation conflicts', asyncgen.async(function*(){
+	    var dispMap = {
+		badAtom: {
+		    init: function*(ctx, args) { this.value = args.value; },
+		    change: function*(ctx, p, u) {
+			var from = u ? p.to : p.from;
+			var to = u ? p.from : p.to;
+			if(this.value > from) {
+			    ctx.conflict('Expected: ' + from + ' found: ' + this.value);
+			}
+			this.value = to;
+		    },
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'badAtom', {value: 0});
+	    yield* otb.trans({_type: 'change', from: 0, to: 1});
+	    try {
+		yield* otb.trans({_type: 'change', from: 1, to: 2});
+		assert(false, 'previous statement should fail');
+	    } catch(e) {
+		assert.equal(e.message, 'Transformations "change" and "change" for type "badAtom" are independent but do not commute');
+	    }
+	}));
 
     });
 });
