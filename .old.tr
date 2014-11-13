@@ -73,14 +73,14 @@
   ․ ObjectMonitor .object() should provide an unprovisioned access to the object
     ObjectTestBed .trans(p) should apply a patch, returning the result
   ․ ObjectTestBed .trans(p) should apply a patch, returning the result
-    ObjectTestBed .trans(p) should fail for non-reversible transformations
-  ․ ObjectTestBed .trans(p) should fail for non-reversible transformations
-    ObjectTestBed .trans(p) should fail for independent transformations that do not commute
-  ․ ObjectTestBed .trans(p) should fail for independent transformations that do not commute
-    ObjectTestBed .trans(p) should not fail when the transformations are not independent
-  ․ ObjectTestBed .trans(p) should not fail when the transformations are not independent
-    ObjectTestBed .trans(p) should fail when for independent p1 and p2, one permutation conflicts
-  ․ ObjectTestBed .trans(p) should fail when for independent p1 and p2, one permutation conflicts
+    ObjectTestBed .trans(p) reversibilityChecker should fail for non-reversible transformations
+  ․ ObjectTestBed .trans(p) reversibilityChecker should fail for non-reversible transformations
+    ObjectTestBed .trans(p) commutativityChecker should fail for independent transformations that do not commute
+  ․ ObjectTestBed .trans(p) commutativityChecker should fail for independent transformations that do not commute
+    ObjectTestBed .trans(p) commutativityChecker should not fail when the transformations are not independent
+  ․ ObjectTestBed .trans(p) commutativityChecker should not fail when the transformations are not independent
+    ObjectTestBed .trans(p) commutativityChecker should fail when for independent p1 and p2, one permutation conflicts
+  ․ ObjectTestBed .trans(p) commutativityChecker should fail when for independent p1 and p2, one permutation conflicts
     RootStore .init(type, args) should return an initial version ID of a new object
   ․ RootStore .init(type, args) should return an initial version ID of a new object
     RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
@@ -134,5 +134,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  67 passing (78ms)
+  67 passing (89ms)
 
