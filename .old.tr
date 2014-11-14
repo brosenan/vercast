@@ -133,6 +133,10 @@
   ․ SimpleObjectStore context .self() should return the version ID of the object prior to this patch application
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
+    atom should allow setting and getting a value
+  ․ atom should allow setting and getting a value
+    counter should add the given amount to the counter and return the value
+  ․ counter should add the given amount to the counter and return the value
 
-  67 passing (87ms)
+  69 passing (93ms)
 
