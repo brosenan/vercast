@@ -134,5 +134,5 @@
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
 
-  67 passing (89ms)
+  67 passing (87ms)
 

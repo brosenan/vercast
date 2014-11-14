@@ -4,7 +4,7 @@
   "description": "VERsion Controlled Application STate: A version control system for application state.",
   "main": "index.js",
   "scripts": {
-    "test": "./node_modules/mocha/bin/mocha -C -R dot --harmony"
+    "test": "find . -maxdepth 2 -name test -type d | xargs ./node_modules/mocha/bin/mocha -C -R dot --harmony"
   },
   "repository": {
     "type": "git",
