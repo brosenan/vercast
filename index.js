@@ -7,6 +7,7 @@ exports.DummyKeyValueStore = require('./dummyKeyValueStore.js');
 exports.SequenceStoreFactory = require('./sequenceStoreFactory.js');
 exports.RootStore = require('./rootStore.js');
 exports.$inv = require('./inv.js');
+exports.$transaction = require('./transaction.js');
 exports.ObjectTestBed = require('./objectTestBed.js');
 exports.examples = require('./examples/index.js');
 exports.DummyGraphDB = require('./dummyGraphDB.js');

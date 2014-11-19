@@ -60,6 +60,7 @@
      - [.getMergeStrategy(v1, v2)](#simpleversiongraph-getmergestrategyv1-v2)
      - [.recordMerge(mergeInfo, newV, p1, p2)](#simpleversiongraph-recordmergemergeinfo-newv-p1-p2)
      - [.appendPatchesTo(mergeInfo, seq, taken)](#simpleversiongraph-appendpatchestomergeinfo-seq-taken)
+   - [$transaction](#transaction)
 <a name=""></a>
  
 <a name="dummygraphdb"></a>
@@ -595,6 +596,38 @@ function* (){
 	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
 	    var vm2 = yield* ostore.merge(v2, vm, false); // should not be conflicting
 	    assert.equal((yield* ostore.trans(vm2, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+```
+
+should record each patch by itself when atomic is false or omitted.
+
+```js
+function* (){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    var vm = yield* ostore.merge(v1, v2, true);
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
+```
+
+should bundle all patches contributed by a merge in a single transaction.
+
+```js
+function* (){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    v2 = yield* ostore.merge(v, v2, false, true); // package everything on v2 as a transaction
+	    var vm = yield* ostore.merge(v1, v2, true);
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+	    // The  transaction was rolled-back due to a conflict on key foo.
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, '');
 ```
 
 <a name="objectdispatcher"></a>
@@ -1854,5 +1887,25 @@ function* (){
 		m *= item;
 	    });
 	    assert.equal(m, 25);
+```
+
+<a name="transaction"></a>
+# $transaction
+should apply all patches enclosed in the hash that it holds as a single transaction.
+
+```js
+function* (){
+	var ostore = new vercast.DummyObjectStore(new vercast.ObjectDispatcher(vercast.examples));
+	var seq = ostore.getSequenceStore();
+	ostore = new vercast.RootStore(ostore);
+	yield* seq.append({_type: 'set', from: '', to: 'a'});
+	yield* seq.append({_type: 'set', from: 'a', to: 'b'});
+	yield* seq.append({_type: 'set', from: 'b', to: 'c'});
+	yield* seq.append({_type: 'set', from: 'c', to: 'd'});
+	var hash = yield* seq.hash();
+	var v = yield* ostore.init('atom', {value: ''});
+	var res = yield* ostore.trans(v, {_type: 'transaction', hash: hash});
+	res = yield* ostore.trans(res.v, {_type: 'get'});
+	assert.equal(res.r, 'd');
 ```
 

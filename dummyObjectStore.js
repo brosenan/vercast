@@ -4,9 +4,9 @@ var events = require('events');
 var vercast = require('vercast');
 
 
-module.exports = function(disp) {
+module.exports = function(disp, effSeqFactory) {
     var transListeners = [];
-    var effSeqFactory = new vercast.SequenceStoreFactory(new vercast.DummyKeyValueStore());
+    effSeqFactory = effSeqFactory || new vercast.SequenceStoreFactory(new vercast.DummyKeyValueStore());
     this.init = function*(type, args) {
 	var obj = yield* disp.init(createContext(this), type, args);
 	return {$:JSON.stringify(obj)};

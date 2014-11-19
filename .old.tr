@@ -55,6 +55,10 @@
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should pass if resolve === true, preferring v1
     MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record the merge in such a way that will preserve the resolution decisions
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record the merge in such a way that will preserve the resolution decisions
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each patch by itself when atomic is false or omitted
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each patch by itself when atomic is false or omitted
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should bundle all patches contributed by a merge in a single transaction
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should bundle all patches contributed by a merge in a single transaction
     ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
   ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
     ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
@@ -189,6 +193,8 @@
   ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V2 to the given sequence, if taken is true
     SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V1 to the given sequence, if taken is false
   ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V1 to the given sequence, if taken is false
+    $transaction should apply all patches enclosed in the hash that it holds as a single transaction
+  ․ $transaction should apply all patches enclosed in the hash that it holds as a single transaction
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -196,5 +202,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  98 passing (154ms)
+  101 passing (157ms)
 

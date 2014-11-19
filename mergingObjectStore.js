@@ -11,7 +11,7 @@ module.exports = function(ostore, versionGraph, seqFactory) {
 	yield* versionGraph.recordTrans(v, ph, res.v);
 	return res;
     };
-    this.merge = function*(v1, v2, resolve) {
+    this.merge = function*(v1, v2, resolve, atomic) {
 	var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	var seq = seqFactory.createSequenceStore();
 	yield* versionGraph.appendPatchesTo(mergeInfo, seq, true);
@@ -33,6 +33,9 @@ module.exports = function(ostore, versionGraph, seqFactory) {
 	    }
 	}
 	var pathTaken = yield* seqTaken.hash();
+	if(atomic) {
+	    pathTaken = yield* createTransaction(pathTaken);
+	}
 	var pathNotTaken = yield* pathNotTakenHash(mergeInfo, conflictingPatches);
 	yield* versionGraph.recordMerge(mergeInfo, vm, pathTaken, pathNotTaken);
 	return vm;
@@ -44,6 +47,11 @@ module.exports = function(ostore, versionGraph, seqFactory) {
 	    yield* seq.append({_type: 'inv', patch: conflictingPatches[i]});
 	}
 	yield* versionGraph.appendPatchesTo(mergeInfo, seq, false);
+	return yield* seq.hash();
+    }
+    function* createTransaction(hash) {
+	var seq = seqFactory.createSequenceStore();
+	yield* seq.append({_type: 'transaction', hash: hash});
 	return yield* seq.hash();
     }
 };

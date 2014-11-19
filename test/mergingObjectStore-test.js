@@ -8,7 +8,7 @@ var graphDB = new vercast.DummyGraphDB();
 var kvs = new vercast.DummyKeyValueStore();
 var seqFactory = new vercast.SequenceStoreFactory(kvs);
 var versionGraph = new vercast.SimpleVersionGraph(graphDB);
-var ostore = new vercast.DummyObjectStore(new vercast.ObjectDispatcher(vercast.examples));
+var ostore = new vercast.DummyObjectStore(new vercast.ObjectDispatcher(vercast.examples), seqFactory);
 ostore = new vercast.RootStore(ostore);
 ostore = new vercast.MergingObjectStore(ostore, versionGraph, seqFactory);
 
@@ -91,6 +91,29 @@ describe('MergingObjectStore', function(){
 	    var vm2 = yield* ostore.merge(v2, vm, false); // should not be conflicting
 	    assert.equal((yield* ostore.trans(vm2, {_type: 'get', _key: 'foo'})).r, 'FOO1');
 	}));
-
+	it('should record each patch by itself when atomic is false or omitted', asyncgen.async(function*(){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    var vm = yield* ostore.merge(v1, v2, true);
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
+	}));
+	it('should bundle all patches contributed by a merge in a single transaction', asyncgen.async(function*(){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    v2 = yield* ostore.merge(v, v2, false, true); // package everything on v2 as a transaction
+	    var vm = yield* ostore.merge(v1, v2, true);
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+	    // The  transaction was rolled-back due to a conflict on key foo.
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, '');
+	}));
     });
 });
