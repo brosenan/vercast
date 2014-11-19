@@ -169,12 +169,12 @@
   ․ SimpleQueue should retrieve elements in the same order they were entered
     SimpleVersionGraph .recordTrans(v1, p, v2) should return a callback with no error if all is OK
   ․ SimpleVersionGraph .recordTrans(v1, p, v2) should return a callback with no error if all is OK
-    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return x as the common ancestor of v1 and v2
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return x as the common ancestor of v1 and v2
-    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return either v1 or v2 as V1, and the other as V2
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return either v1 or v2 as V1, and the other as V2
-    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 to be v1 and v2 respectively if resolve=true
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 to be v1 and v2 respectively if resolve=true
+    SimpleVersionGraph .getMergeStrategy(v1, v2) should return x as the common ancestor of v1 and v2
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2) should return x as the common ancestor of v1 and v2
+    SimpleVersionGraph .getMergeStrategy(v1, v2) should return either v1 or v2 as V1, and the other as V2
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2) should return either v1 or v2 as V1, and the other as V2
+    SimpleVersionGraph .getMergeStrategy(v1, v2) should set V1 and V2 to be v1 and v2 respectively if resolve=true
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2) should set V1 and V2 to be v1 and v2 respectively if resolve=true
     SimpleVersionGraph .recordMerge(mergeInfo, newV, p1, p2) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
   ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, p1, p2) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
     SimpleVersionGraph .appendPatchesTo(mergeInfo, seq) should append all the labels along the path from x to V2 to the given sequence
@@ -186,5 +186,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  93 passing (152ms)
+  93 passing (151ms)
 

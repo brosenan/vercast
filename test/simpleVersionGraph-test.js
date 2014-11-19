@@ -32,18 +32,18 @@ describe('SimpleVersionGraph', function(){
 	    yield* versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, {$:'bar'});
 	}));
     });
-    describe('.getMergeStrategy(v1, v2, resolve)', function(){
+    describe('.getMergeStrategy(v1, v2)', function(){
 	beforeEach(asyncgen.async(function*() {
 	    yield* createGraph(30);
 	}));
 	it('should return x as the common ancestor of v1 and v2', asyncgen.async(function*(){
-	    var mergeInfo = yield* versionGraph.getMergeStrategy({$:18}, {$:14}, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy({$:18}, {$:14});
 	    assert.equal(mergeInfo.x.$, 2);
 	}));
 	it('should return either v1 or v2 as V1, and the other as V2', asyncgen.async(function*(){
 	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
 	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    assert(mergeInfo.V1.$ == v1.$ || mergeInfo.V1.$ == v2.$, 'V1 should be either v1 or v2: ' + mergeInfo.V1.$);
 	    assert(mergeInfo.V2.$ == v1.$ || mergeInfo.V2.$ == v2.$, 'V2 should be either v1 or v2: ' + mergeInfo.V2.$);
 	    assert(mergeInfo.V1.$ != mergeInfo.V2.$ || v1.$ == v2.$, 'V1 and V2 should not be the same one');
@@ -56,7 +56,7 @@ describe('SimpleVersionGraph', function(){
 		v1 = v2;
 		v2 = tmp;
 	    }
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, true);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    assert.equal(v1, mergeInfo.V1);
 	    assert.equal(v2, mergeInfo.V2);
 	}));
@@ -69,9 +69,9 @@ describe('SimpleVersionGraph', function(){
 	it('should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version', asyncgen.async(function*(){
 	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
 	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    yield* versionGraph.recordMerge(mergeInfo, {$:'newVersion'}, '', '');
-	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}, false); // The new version should be in the graph
+	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}); // The new version should be in the graph
 	}));
     });
     describe('.appendPatchesTo(mergeInfo, seq)', function(){
@@ -87,7 +87,7 @@ describe('SimpleVersionGraph', function(){
 	    }
 	    var v1 = {$:25};
 	    var v2 = {$:24};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    var seq = new Sequence();
 	    yield* versionGraph.appendPatchesTo(mergeInfo, seq);
 	    

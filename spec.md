@@ -57,7 +57,7 @@
    - [SimpleQueue](#simplequeue)
    - [SimpleVersionGraph](#simpleversiongraph)
      - [.recordTrans(v1, p, v2)](#simpleversiongraph-recordtransv1-p-v2)
-     - [.getMergeStrategy(v1, v2, resolve)](#simpleversiongraph-getmergestrategyv1-v2-resolve)
+     - [.getMergeStrategy(v1, v2)](#simpleversiongraph-getmergestrategyv1-v2)
      - [.recordMerge(mergeInfo, newV, p1, p2)](#simpleversiongraph-recordmergemergeinfo-newv-p1-p2)
      - [.appendPatchesTo(mergeInfo, seq)](#simpleversiongraph-appendpatchestomergeinfo-seq)
 <a name=""></a>
@@ -1688,13 +1688,13 @@ function* (){
 	    yield* versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, {$:'bar'});
 ```
 
-<a name="simpleversiongraph-getmergestrategyv1-v2-resolve"></a>
-## .getMergeStrategy(v1, v2, resolve)
+<a name="simpleversiongraph-getmergestrategyv1-v2"></a>
+## .getMergeStrategy(v1, v2)
 should return x as the common ancestor of v1 and v2.
 
 ```js
 function* (){
-	    var mergeInfo = yield* versionGraph.getMergeStrategy({$:18}, {$:14}, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy({$:18}, {$:14});
 	    assert.equal(mergeInfo.x.$, 2);
 ```
 
@@ -1704,7 +1704,7 @@ should return either v1 or v2 as V1, and the other as V2.
 function* (){
 	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
 	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    assert(mergeInfo.V1.$ == v1.$ || mergeInfo.V1.$ == v2.$, 'V1 should be either v1 or v2: ' + mergeInfo.V1.$);
 	    assert(mergeInfo.V2.$ == v1.$ || mergeInfo.V2.$ == v2.$, 'V2 should be either v1 or v2: ' + mergeInfo.V2.$);
 	    assert(mergeInfo.V1.$ != mergeInfo.V2.$ || v1.$ == v2.$, 'V1 and V2 should not be the same one');
@@ -1721,7 +1721,7 @@ function* (){
 		v1 = v2;
 		v2 = tmp;
 	    }
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, true);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    assert.equal(v1, mergeInfo.V1);
 	    assert.equal(v2, mergeInfo.V2);
 ```
@@ -1734,9 +1734,9 @@ should record a merge using the mergeInfo object obtained from getMergeStrategy(
 function* (){
 	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
 	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    yield* versionGraph.recordMerge(mergeInfo, {$:'newVersion'}, '', '');
-	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}, false); // The new version should be in the graph
+	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}); // The new version should be in the graph
 ```
 
 <a name="simpleversiongraph-appendpatchestomergeinfo-seq"></a>
@@ -1753,7 +1753,7 @@ function* (){
 	    }
 	    var v1 = {$:25};
 	    var v2 = {$:24};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    var seq = new Sequence();
 	    yield* versionGraph.appendPatchesTo(mergeInfo, seq);
 	    

@@ -6,7 +6,7 @@ module.exports = function(graphDB) {
 	    yield* graphDB.addEdge(v1.$, p, v2.$);
 	}
     }
-    this.getMergeStrategy = function*(v1, v2, resolve) {
+    this.getMergeStrategy = function*(v1, v2) {
 	var res = yield* graphDB.findCommonAncestor(v1.$, v2.$);
 	var pathToFollow, pathNotToFollow;
 	var mergeInfo = {x: {$:res.node},
