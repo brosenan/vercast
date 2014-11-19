@@ -102,7 +102,7 @@ describe('MergingObjectStore', function(){
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
 	}));
-	it('should bundle all patches contributed by a merge in a single transaction', asyncgen.async(function*(){
+	it('should bundle all patches contributed by a merge in a single transaction, if atomic is true', asyncgen.async(function*(){
 	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
 	    var v1 = v;
 	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;

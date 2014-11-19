@@ -1,4 +1,9 @@
 # TOC
+   - [DummyAtomicKVS](#dummyatomickvs)
+     - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
+       - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
+       - [.retrieve(key))](#dummyatomickvs-as-atomickeyvalue-retrievekey)
+       - [.modify(key, oldVal, newVal)](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval)
    - [DummyGraphDB](#dummygraphdb)
      - [as GraphDB](#dummygraphdb-as-graphdb)
        - [addEdge](#dummygraphdb-as-graphdb-addedge)
@@ -63,6 +68,72 @@
    - [$transaction](#transaction)
 <a name=""></a>
  
+<a name="dummyatomickvs"></a>
+# DummyAtomicKVS
+<a name="dummyatomickvs-as-atomickeyvalue"></a>
+## as AtomicKeyValue
+<a name="dummyatomickvs-as-atomickeyvalue-newkeykey-val"></a>
+### .newKey(key, val)
+should store a new key/value pair, given that key does not already exist.
+
+```js
+function* (){
+		yield* atomicKV.newKey('foo', 'bar');
+		var value = yield* atomicKV.retrieve('foo');
+		assert.equal(value, 'bar');
+```
+
+should emit an error when the key already exists.
+
+```js
+function* (){
+		try {
+		    yield* atomicKV.newKey('foo', 'bar');
+		    yield* atomicKV.newKey('foo', 'bar');
+		    assert(false, 'An error should be emitted');
+		} catch(err) {
+		    assert.equal(err.message, 'Key foo already exists');
+		}
+```
+
+<a name="dummyatomickvs-as-atomickeyvalue-retrievekey"></a>
+### .retrieve(key))
+should emit an error if the value does not exist.
+
+```js
+function* (){
+		try {
+		    var value = yield* atomicKV.retrieve('foo');
+		    assert(false, 'the value is not supposed to be found');
+		} catch(err) {
+		    assert.equal(err.message, 'Key foo was not found');
+		}
+```
+
+<a name="dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval"></a>
+### .modify(key, oldVal, newVal)
+should change the value under key to newVal, given that the previous value was oldVal.
+
+```js
+function* (){
+		yield* atomicKV.newKey('foo', 'bar');
+		var valAfterMod = yield* atomicKV.modify('foo', 'bar', 'baz');
+		assert.equal(valAfterMod, 'baz');
+		var val = yield* atomicKV.retrieve('foo');
+		assert.equal(val, 'baz');
+```
+
+should not change the value under key if the current value does not equal oldVal.
+
+```js
+function* (){
+		yield* atomicKV.newKey('foo', 'bar');
+		var valAfterMod = yield* atomicKV.modify('foo', 'baz', 'bat');
+		assert.equal(valAfterMod, 'bar'); // The value before the change
+		var val = yield* atomicKV.retrieve('foo');
+		assert.equal(val, 'bar');
+```
+
 <a name="dummygraphdb"></a>
 # DummyGraphDB
 <a name="dummygraphdb-as-graphdb"></a>
@@ -613,7 +684,7 @@ function* (){
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
 ```
 
-should bundle all patches contributed by a merge in a single transaction.
+should bundle all patches contributed by a merge in a single transaction, if atomic is true.
 
 ```js
 function* (){

@@ -1,4 +1,14 @@
 
+    DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
+  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
+    DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists
+  ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists
+    DummyAtomicKVS as AtomicKeyValue .retrieve(key)) should emit an error if the value does not exist
+  ․ DummyAtomicKVS as AtomicKeyValue .retrieve(key)) should emit an error if the value does not exist
+    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should change the value under key to newVal, given that the previous value was oldVal
+  ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should change the value under key to newVal, given that the previous value was oldVal
+    DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should not change the value under key if the current value does not equal oldVal
+  ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should not change the value under key if the current value does not equal oldVal
     DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
   ․ DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
     DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
@@ -57,8 +67,8 @@
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record the merge in such a way that will preserve the resolution decisions
     MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each patch by itself when atomic is false or omitted
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each patch by itself when atomic is false or omitted
-    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should bundle all patches contributed by a merge in a single transaction
-  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should bundle all patches contributed by a merge in a single transaction
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should bundle all patches contributed by a merge in a single transaction, if atomic is true
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should bundle all patches contributed by a merge in a single transaction, if atomic is true
     ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
   ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
     ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
@@ -202,5 +212,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  101 passing (157ms)
+  106 passing (168ms)
 
