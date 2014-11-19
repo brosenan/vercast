@@ -84,7 +84,7 @@ module.exports = function() {
     };
     this.findPath = function*(x, y) {
 	var self = this;
-	yield function(_) { setTimeout(_, 0); };
+	//yield function(_) { setTimeout(_, 0); };
 	var res = self.bfs(x, function(node, path) {
 	    var res = {};
 	    var i = 0;

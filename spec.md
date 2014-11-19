@@ -59,7 +59,7 @@
      - [.recordTrans(v1, p, v2)](#simpleversiongraph-recordtransv1-p-v2)
      - [.getMergeStrategy(v1, v2)](#simpleversiongraph-getmergestrategyv1-v2)
      - [.recordMerge(mergeInfo, newV, p1, p2)](#simpleversiongraph-recordmergemergeinfo-newv-p1-p2)
-     - [.appendPatchesTo(mergeInfo, seq)](#simpleversiongraph-appendpatchestomergeinfo-seq)
+     - [.appendPatchesTo(mergeInfo, seq, taken)](#simpleversiongraph-appendpatchestomergeinfo-seq-taken)
 <a name=""></a>
  
 <a name="dummygraphdb"></a>
@@ -526,6 +526,29 @@ function* (){
 	    var vm = yield* ostore.merge(v1, v2);
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO');
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
+```
+
+should record each merge so that further merges can be performed.
+
+```js
+function* (){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    var vm1 = yield* ostore.merge(v1, v2);
+	    
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'baz', from: '', to: 'BAZ'})).v;
+	    var vm2 = yield* ostore.merge(v1, vm1);
+
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'bat', from: '', to: 'BAT'})).v;
+	    var vm3 = yield* ostore.merge(vm2, v1);
+
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'foo'})).r, 'FOO');
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'bar'})).r, 'BAR');
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'baz'})).r, 'BAZ');
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'bat'})).r, 'BAT');
 ```
 
 <a name="objectdispatcher"></a>
@@ -1739,9 +1762,9 @@ function* (){
 	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}); // The new version should be in the graph
 ```
 
-<a name="simpleversiongraph-appendpatchestomergeinfo-seq"></a>
-## .appendPatchesTo(mergeInfo, seq)
-should append all the labels along the path from x to V2 to the given sequence.
+<a name="simpleversiongraph-appendpatchestomergeinfo-seq-taken"></a>
+## .appendPatchesTo(mergeInfo, seq, taken)
+should append all the labels along the path from x to V2 to the given sequence, if taken is true.
 
 ```js
 function* (){
@@ -1755,12 +1778,35 @@ function* (){
 	    var v2 = {$:24};
 	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    var seq = new Sequence();
-	    yield* versionGraph.appendPatchesTo(mergeInfo, seq);
+	    yield* versionGraph.appendPatchesTo(mergeInfo, seq, true);
 	    
 	    var m = 1; // The GCD of 24 and 25
 	    seq.seq.forEach(function(item) {
 		m *= item;
 	    });
 	    assert.equal(m, 24);
+```
+
+should append all the labels along the path from x to V1 to the given sequence, if taken is false.
+
+```js
+function* (){
+	    function Sequence() {
+		this.seq = [];
+		this.append = function*(item) {
+		    this.seq.push(item);
+		}
+	    }
+	    var v1 = {$:25};
+	    var v2 = {$:24};
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
+	    var seq = new Sequence();
+	    yield* versionGraph.appendPatchesTo(mergeInfo, seq, false);
+	    
+	    var m = 1; // The GCD of 24 and 25
+	    seq.seq.forEach(function(item) {
+		m *= item;
+	    });
+	    assert.equal(m, 25);
 ```
 

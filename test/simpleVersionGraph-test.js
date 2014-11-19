@@ -74,11 +74,11 @@ describe('SimpleVersionGraph', function(){
 	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}); // The new version should be in the graph
 	}));
     });
-    describe('.appendPatchesTo(mergeInfo, seq)', function(){
+    describe('.appendPatchesTo(mergeInfo, seq, taken)', function(){
 	beforeEach(asyncgen.async(function*() {
 	    yield* createGraph(30);
 	}));
-	it('should append all the labels along the path from x to V2 to the given sequence', asyncgen.async(function*(){
+	it('should append all the labels along the path from x to V2 to the given sequence, if taken is true', asyncgen.async(function*(){
 	    function Sequence() {
 		this.seq = [];
 		this.append = function*(item) {
@@ -89,13 +89,32 @@ describe('SimpleVersionGraph', function(){
 	    var v2 = {$:24};
 	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	    var seq = new Sequence();
-	    yield* versionGraph.appendPatchesTo(mergeInfo, seq);
+	    yield* versionGraph.appendPatchesTo(mergeInfo, seq, true);
 	    
 	    var m = 1; // The GCD of 24 and 25
 	    seq.seq.forEach(function(item) {
 		m *= item;
 	    });
 	    assert.equal(m, 24);
+	}));
+	it('should append all the labels along the path from x to V1 to the given sequence, if taken is false', asyncgen.async(function*(){
+	    function Sequence() {
+		this.seq = [];
+		this.append = function*(item) {
+		    this.seq.push(item);
+		}
+	    }
+	    var v1 = {$:25};
+	    var v2 = {$:24};
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
+	    var seq = new Sequence();
+	    yield* versionGraph.appendPatchesTo(mergeInfo, seq, false);
+	    
+	    var m = 1; // The GCD of 24 and 25
+	    seq.seq.forEach(function(item) {
+		m *= item;
+	    });
+	    assert.equal(m, 25);
 	}));
     });
 });

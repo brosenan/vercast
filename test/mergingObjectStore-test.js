@@ -38,5 +38,24 @@ describe('MergingObjectStore', function(){
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO');
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
 	}));
+	it('should record each merge so that further merges can be performed', asyncgen.async(function*(){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    var vm1 = yield* ostore.merge(v1, v2);
+	    
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'baz', from: '', to: 'BAZ'})).v;
+	    var vm2 = yield* ostore.merge(v1, vm1);
+
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'bat', from: '', to: 'BAT'})).v;
+	    var vm3 = yield* ostore.merge(vm2, v1);
+
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'foo'})).r, 'FOO');
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'bar'})).r, 'BAR');
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'baz'})).r, 'BAZ');
+	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'bat'})).r, 'BAT');
+	}));
     });
 });

@@ -18,8 +18,8 @@ module.exports = function(graphDB) {
 	yield* graphDB.addEdge(mergeInfo.V1.$, p1, newV.$);
 	yield* graphDB.addEdge(mergeInfo.V2.$, p2, newV.$);
     };
-    this.appendPatchesTo = function*(mergeInfo, seq) {
-	var path = yield* graphDB.findPath(mergeInfo.x.$, mergeInfo.V2.$);
+    this.appendPatchesTo = function*(mergeInfo, seq, taken) {
+	var path = yield* graphDB.findPath(mergeInfo.x.$, taken ? mergeInfo.V2.$ : mergeInfo.V1.$);
 	var i;
 	for(i = 0; i < path.length; i += 1) {
 	    yield* seq.append(path[i]);

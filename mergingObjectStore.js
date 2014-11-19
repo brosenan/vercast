@@ -14,12 +14,20 @@ module.exports = function(ostore, versionGraph, seqFactory) {
     this.merge = function*(v1, v2) {
 	var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	var seq = seqFactory.createSequenceStore();
-	yield* versionGraph.appendPatchesTo(mergeInfo, seq);
-	var v = v1;
+	yield* versionGraph.appendPatchesTo(mergeInfo, seq, true);
+	var vm = v1;
 	while(!seq.isEmpty()) {
 	    var p = yield* seq.shift();
-	    v = (yield* ostore.trans(v, p)).v;
+	    vm = (yield* ostore.trans(vm, p)).v;
 	}
-	return v;
+	var pathTaken = yield* pathHash(mergeInfo, true);
+	var pathNotTaken = yield* pathHash(mergeInfo, false);
+	yield* versionGraph.recordMerge(mergeInfo, vm, pathTaken, pathNotTaken);
+	return vm;
     };
+    function* pathHash(mergeInfo, taken) {
+	var seq = seqFactory.createSequenceStore();
+	yield* versionGraph.appendPatchesTo(mergeInfo, seq, taken);
+	return yield* seq.hash();
+    }
 };

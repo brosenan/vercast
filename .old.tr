@@ -47,6 +47,8 @@
   ․ MergingObjectStore .trans(v, p, u) -> {v,r} should apply a patch to the state
     MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should return the merged version of both v1 and v2
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should return the merged version of both v1 and v2
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each merge so that further merges can be performed
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each merge so that further merges can be performed
     ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
   ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
     ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
@@ -177,8 +179,10 @@
   ․ SimpleVersionGraph .getMergeStrategy(v1, v2) should set V1 and V2 to be v1 and v2 respectively if resolve=true
     SimpleVersionGraph .recordMerge(mergeInfo, newV, p1, p2) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
   ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, p1, p2) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
-    SimpleVersionGraph .appendPatchesTo(mergeInfo, seq) should append all the labels along the path from x to V2 to the given sequence
-  ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq) should append all the labels along the path from x to V2 to the given sequence
+    SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V2 to the given sequence, if taken is true
+  ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V2 to the given sequence, if taken is true
+    SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V1 to the given sequence, if taken is false
+  ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V1 to the given sequence, if taken is false
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -186,5 +190,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  93 passing (151ms)
+  95 passing (146ms)
 
