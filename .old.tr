@@ -41,6 +41,12 @@
   ․ DummyObjectStore .addTransListener(handler(v1, p, u, v2, r, eff)) should call the handler on each successful call to trans()
     $inv should unapply the underlying patch
   ․ $inv should unapply the underlying patch
+    MergingObjectStore .init(type, args) should return a new version ID
+  ․ MergingObjectStore .init(type, args) should return a new version ID
+    MergingObjectStore .trans(v, p, u) -> {v,r} should apply a patch to the state
+  ․ MergingObjectStore .trans(v, p, u) -> {v,r} should apply a patch to the state
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should return the merged version of both v1 and v2
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should return the merged version of both v1 and v2
     ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
   ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
     ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
@@ -161,20 +167,18 @@
   ․ SimpleObjectStore context .self() should return the version ID of the object prior to this patch application
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
-    SimpleVersionGraph .recordTrans(v1, p, w, v2) should return a callback with no error if all is OK
-  ․ SimpleVersionGraph .recordTrans(v1, p, w, v2) should return a callback with no error if all is OK
+    SimpleVersionGraph .recordTrans(v1, p, v2) should return a callback with no error if all is OK
+  ․ SimpleVersionGraph .recordTrans(v1, p, v2) should return a callback with no error if all is OK
     SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return x as the common ancestor of v1 and v2
   ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return x as the common ancestor of v1 and v2
     SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return either v1 or v2 as V1, and the other as V2
   ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return either v1 or v2 as V1, and the other as V2
-    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false
-  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false
     SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 to be v1 and v2 respectively if resolve=true
   ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 to be v1 and v2 respectively if resolve=true
-    SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
-  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
-    SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record the overall weight on each new edge
-  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record the overall weight on each new edge
+    SimpleVersionGraph .recordMerge(mergeInfo, newV, p1, p2) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
+  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, p1, p2) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
+    SimpleVersionGraph .appendPatchesTo(mergeInfo, seq) should append all the labels along the path from x to V2 to the given sequence
+  ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq) should append all the labels along the path from x to V2 to the given sequence
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -182,5 +186,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  91 passing (152ms)
+  93 passing (152ms)
 

@@ -11,3 +11,4 @@ exports.ObjectTestBed = require('./objectTestBed.js');
 exports.examples = require('./examples/index.js');
 exports.DummyGraphDB = require('./dummyGraphDB.js');
 exports.SimpleVersionGraph = require('./simpleVersionGraph.js');
+exports.MergingObjectStore = require('./mergingObjectStore.js');

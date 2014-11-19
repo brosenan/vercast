@@ -16,6 +16,10 @@
        - [.self()](#dummyobjectstore-context-self)
      - [.addTransListener(handler(v1, p, u, v2, r, eff))](#dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff)
    - [$inv](#inv)
+   - [MergingObjectStore](#mergingobjectstore)
+     - [.init(type, args)](#mergingobjectstore-inittype-args)
+     - [.trans(v, p, u) -> {v,r}](#mergingobjectstore-transv-p-u---vr)
+     - [.merge(v1, v2, resolve=false, atomic=false)](#mergingobjectstore-mergev1-v2-resolvefalse-atomicfalse)
    - [ObjectDispatcher](#objectdispatcher)
      - [.init(type, args)](#objectdispatcher-inittype-args)
      - [.apply(ctx, obj, patch, unapply)](#objectdispatcher-applyctx-obj-patch-unapply)
@@ -52,9 +56,10 @@
        - [.self()](#simpleobjectstore-context-self)
    - [SimpleQueue](#simplequeue)
    - [SimpleVersionGraph](#simpleversiongraph)
-     - [.recordTrans(v1, p, w, v2)](#simpleversiongraph-recordtransv1-p-w-v2)
+     - [.recordTrans(v1, p, v2)](#simpleversiongraph-recordtransv1-p-v2)
      - [.getMergeStrategy(v1, v2, resolve)](#simpleversiongraph-getmergestrategyv1-v2-resolve)
-     - [.recordMerge(mergeInfo, newV, patches, confPatches)](#simpleversiongraph-recordmergemergeinfo-newv-patches-confpatches)
+     - [.recordMerge(mergeInfo, newV, p1, p2)](#simpleversiongraph-recordmergemergeinfo-newv-p1-p2)
+     - [.appendPatchesTo(mergeInfo, seq)](#simpleversiongraph-appendpatchestomergeinfo-seq)
 <a name=""></a>
  
 <a name="dummygraphdb"></a>
@@ -481,6 +486,46 @@ function* (){
 					  patch: {_type: 'add',
 						  amount: 2}});
 	assert.equal(res.r, -2);
+```
+
+<a name="mergingobjectstore"></a>
+# MergingObjectStore
+<a name="mergingobjectstore-inittype-args"></a>
+## .init(type, args)
+should return a new version ID.
+
+```js
+function* (){
+	    var v = yield* ostore.init('atom', {value: 'a'});
+	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'a');
+```
+
+<a name="mergingobjectstore-transv-p-u---vr"></a>
+## .trans(v, p, u) -> {v,r}
+should apply a patch to the state.
+
+```js
+function* (){
+	    var v = yield* ostore.init('atom', {value: 'a'});
+	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'a');
+	    v = (yield* ostore.trans(v, {_type: 'set', from: 'a', to: 'b'})).v;
+	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'b');
+```
+
+<a name="mergingobjectstore-mergev1-v2-resolvefalse-atomicfalse"></a>
+## .merge(v1, v2, resolve=false, atomic=false)
+should return the merged version of both v1 and v2.
+
+```js
+function* (){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    var vm = yield* ostore.merge(v1, v2);
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO');
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, 'BAR');
 ```
 
 <a name="objectdispatcher"></a>
@@ -1634,13 +1679,13 @@ function* (){
 
 <a name="simpleversiongraph"></a>
 # SimpleVersionGraph
-<a name="simpleversiongraph-recordtransv1-p-w-v2"></a>
-## .recordTrans(v1, p, w, v2)
+<a name="simpleversiongraph-recordtransv1-p-v2"></a>
+## .recordTrans(v1, p, v2)
 should return a callback with no error if all is OK.
 
 ```js
 function* (){
-	    yield* versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, 1, {$:'bar'});
+	    yield* versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, {$:'bar'});
 ```
 
 <a name="simpleversiongraph-getmergestrategyv1-v2-resolve"></a>
@@ -1665,16 +1710,6 @@ function* (){
 	    assert(mergeInfo.V1.$ != mergeInfo.V2.$ || v1.$ == v2.$, 'V1 and V2 should not be the same one');
 ```
 
-should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false.
-
-```js
-function* (){
-	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
-	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
-	    assert((mergeInfo.V1.$ * 1) >= (mergeInfo.V2.$ * 1), 'V2 should be the lower of the two (closer to the GCD)');
-```
-
 should set V1 and V2 to be v1 and v2 respectively if resolve=true.
 
 ```js
@@ -1691,8 +1726,8 @@ function* (){
 	    assert.equal(v2, mergeInfo.V2);
 ```
 
-<a name="simpleversiongraph-recordmergemergeinfo-newv-patches-confpatches"></a>
-## .recordMerge(mergeInfo, newV, patches, confPatches)
+<a name="simpleversiongraph-recordmergemergeinfo-newv-p1-p2"></a>
+## .recordMerge(mergeInfo, newV, p1, p2)
 should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version.
 
 ```js
@@ -1700,25 +1735,32 @@ function* (){
 	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
 	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
 	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
-	    yield* versionGraph.recordMerge(mergeInfo, {$:'newVersion'}, [], []);
+	    yield* versionGraph.recordMerge(mergeInfo, {$:'newVersion'}, '', '');
 	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}, false); // The new version should be in the graph
 ```
 
-should record the overall weight on each new edge.
+<a name="simpleversiongraph-appendpatchestomergeinfo-seq"></a>
+## .appendPatchesTo(mergeInfo, seq)
+should append all the labels along the path from x to V2 to the given sequence.
 
 ```js
 function* (){
-	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
-	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
-	    var v3 = {$:Math.floor(Math.random() * 29) + 1};
-	    var v4 = {$:Math.floor(Math.random() * 29) + 1};
+	    function Sequence() {
+		this.seq = [];
+		this.append = function*(item) {
+		    this.seq.push(item);
+		}
+	    }
+	    var v1 = {$:25};
+	    var v2 = {$:24};
 	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
-	    var v12 = {$:v1.$ * v2.$ / mergeInfo.x.$};
-	    yield* versionGraph.recordMerge(mergeInfo, v12, [], []);
-	    var mergeInfo2 = yield* versionGraph.getMergeStrategy(v3, v4, false);
-	    var v34 = {$:v3.$ * v4.$ / mergeInfo2.x.$};
-	    yield* versionGraph.recordMerge(mergeInfo2, v34, [], []);
-	    var mergeInfo3 = yield* versionGraph.getMergeStrategy(v12, v34, false);
-	    assert(mergeInfo3.V2.$ <= mergeInfo3.V1.$, 'mergeInfo3.V1 should be lower');
+	    var seq = new Sequence();
+	    yield* versionGraph.appendPatchesTo(mergeInfo, seq);
+	    
+	    var m = 1; // The GCD of 24 and 25
+	    seq.seq.forEach(function(item) {
+		m *= item;
+	    });
+	    assert.equal(m, 24);
 ```
 
