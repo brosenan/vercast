@@ -11,23 +11,39 @@ module.exports = function(ostore, versionGraph, seqFactory) {
 	yield* versionGraph.recordTrans(v, ph, res.v);
 	return res;
     };
-    this.merge = function*(v1, v2) {
+    this.merge = function*(v1, v2, resolve) {
 	var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2);
 	var seq = seqFactory.createSequenceStore();
 	yield* versionGraph.appendPatchesTo(mergeInfo, seq, true);
 	var vm = v1;
+
+	var seqTaken = seqFactory.createSequenceStore();
+	var conflictingPatches = [];
 	while(!seq.isEmpty()) {
 	    var p = yield* seq.shift();
-	    vm = (yield* ostore.trans(vm, p)).v;
+	    try {
+		vm = (yield* ostore.trans(vm, p)).v;
+		yield* seqTaken.append(p);
+	    } catch(e) {
+		if(resolve && e.isConflict) {
+		    conflictingPatches.push(p);
+		} else {
+		    throw e;
+		}
+	    }
 	}
-	var pathTaken = yield* pathHash(mergeInfo, true);
-	var pathNotTaken = yield* pathHash(mergeInfo, false);
+	var pathTaken = yield* seqTaken.hash();
+	var pathNotTaken = yield* pathNotTakenHash(mergeInfo, conflictingPatches);
 	yield* versionGraph.recordMerge(mergeInfo, vm, pathTaken, pathNotTaken);
 	return vm;
     };
-    function* pathHash(mergeInfo, taken) {
+    function* pathNotTakenHash(mergeInfo, conflictingPatches) {
 	var seq = seqFactory.createSequenceStore();
-	yield* versionGraph.appendPatchesTo(mergeInfo, seq, taken);
+	var i;
+	for(i = conflictingPatches.length - 1; i >= 0; i -= 1) {
+	    yield* seq.append({_type: 'inv', patch: conflictingPatches[i]});
+	}
+	yield* versionGraph.appendPatchesTo(mergeInfo, seq, false);
 	return yield* seq.hash();
     }
 };

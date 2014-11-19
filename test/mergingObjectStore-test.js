@@ -57,5 +57,40 @@ describe('MergingObjectStore', function(){
 	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'baz'})).r, 'BAZ');
 	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'bat'})).r, 'BAT');
 	}));
+	it('should fail on conflict, if resolve === false or omitted', asyncgen.async(function*(){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    try {
+		var vm = yield* ostore.merge(v1, v2);
+		assert(false, 'The previous statement should fail');
+	    } catch(e) {
+		assert.equal(e.message, 'Expected:  actual: FOO1');
+		assert(e.isConflict, 'this should be a conflict');
+	    }
+	}));
+	it('should pass if resolve === true, preferring v1', asyncgen.async(function*(){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    var vm = yield* ostore.merge(v1, v2, true);
+	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+	}));
+	it('should record the merge in such a way that will preserve the resolution decisions', asyncgen.async(function*(){
+	    var v = yield* ostore.init('array', {elementType: 'atom', args: {value: ''}});
+	    var v1 = v;
+	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'foo', from: '', to: 'FOO1'})).v;
+	    var v2 = v;
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'foo', from: '', to: 'FOO2'})).v;
+	    var vm = yield* ostore.merge(v1, v2, true);
+	    v2 = (yield* ostore.trans(v2, {_type: 'set', _key: 'bar', from: '', to: 'BAR'})).v;
+	    var vm2 = yield* ostore.merge(v2, vm, false); // should not be conflicting
+	    assert.equal((yield* ostore.trans(vm2, {_type: 'get', _key: 'foo'})).r, 'FOO1');
+	}));
+
     });
 });

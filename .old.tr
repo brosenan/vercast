@@ -49,6 +49,12 @@
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should return the merged version of both v1 and v2
     MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each merge so that further merges can be performed
   ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record each merge so that further merges can be performed
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should fail on conflict, if resolve === false or omitted
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should fail on conflict, if resolve === false or omitted
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should pass if resolve === true, preferring v1
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should pass if resolve === true, preferring v1
+    MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record the merge in such a way that will preserve the resolution decisions
+  ․ MergingObjectStore .merge(v1, v2, resolve=false, atomic=false) should record the merge in such a way that will preserve the resolution decisions
     ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
   ․ ObjectDispatcher .init(type, args) should return an instance of the referenced type, after calling the init() function associated with the type
     ObjectDispatcher .apply(ctx, obj, patch, unapply) should call a method corresponding to patch._type
@@ -190,5 +196,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  95 passing (146ms)
+  98 passing (154ms)
 
