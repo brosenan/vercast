@@ -1,4 +1,9 @@
 # TOC
+   - [DummyGraphDB](#dummygraphdb)
+     - [as GraphDB](#dummygraphdb-as-graphdb)
+       - [addEdge](#dummygraphdb-as-graphdb-addedge)
+       - [findCommonAncestor](#dummygraphdb-as-graphdb-findcommonancestor)
+     - [.findPath(x, y, cb(err, path))](#dummygraphdb-findpathx-y-cberr-path)
    - [DummyKeyValueStore](#dummykeyvaluestore)
    - [DummyObjectStore](#dummyobjectstore)
      - [.init(type, args)](#dummyobjectstore-inittype-args)
@@ -46,8 +51,111 @@
        - [.effect(p)](#simpleobjectstore-context-effectp)
        - [.self()](#simpleobjectstore-context-self)
    - [SimpleQueue](#simplequeue)
+   - [SimpleVersionGraph](#simpleversiongraph)
+     - [.recordTrans(v1, p, w, v2)](#simpleversiongraph-recordtransv1-p-w-v2)
+     - [.getMergeStrategy(v1, v2, resolve)](#simpleversiongraph-getmergestrategyv1-v2-resolve)
+     - [.recordMerge(mergeInfo, newV, patches, confPatches)](#simpleversiongraph-recordmergemergeinfo-newv-patches-confpatches)
 <a name=""></a>
  
+<a name="dummygraphdb"></a>
+# DummyGraphDB
+<a name="dummygraphdb-as-graphdb"></a>
+## as GraphDB
+<a name="dummygraphdb-as-graphdb-addedge"></a>
+### addEdge
+should accept an edge and add it to the graph.
+
+```js
+function* (){
+		yield* graphDB.addEdge("foo", "likes", "bar");
+		var shouldBeBar = yield* graphDB.queryEdge("foo", "likes");
+		assert.equal(shouldBeBar, 'bar');
+```
+
+should create a dual mapping, mapping also the destination to the source.
+
+```js
+function* (){
+		    yield* graphDB.addEdge("foo", "likes", "bar");
+		    var shouldBeFoo = yield* graphDB.queryBackEdge("bar", "likes"); 
+		    assert.equal(shouldBeFoo, 'foo');
+```
+
+<a name="dummygraphdb-as-graphdb-findcommonancestor"></a>
+### findCommonAncestor
+should find the common ancestor of two nodes, and the path to each of them.
+
+```js
+function* (){
+		yield* graphDB.addEdge('terah', 'p1', 'abraham');
+		yield* graphDB.addEdge('abraham', 'p2', 'isaac');
+		yield* graphDB.addEdge('isaac', 'p3', 'jacob');
+		yield* graphDB.addEdge('jacob', 'p4', 'joseph');
+		yield* graphDB.addEdge('abraham', 'p5', 'ismael');
+		yield* graphDB.addEdge('isaac', 'p6', 'esaw');
+		yield* graphDB.addEdge('jacob', 'p7', 'simon');
+		var res = yield* graphDB.findCommonAncestor('simon', 'ismael');
+		assert.equal(res.node, 'abraham');
+```
+
+should handle the case where there are also common descendants.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(4, 6);
+		assert.equal(res.node, 2);
+```
+
+should return the path from the common ancestor to both nodes.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(8, 10);
+		assert.equal(res.node, 2);
+		assert.deepEqual(res.p1, [{l:'2', n:'4'}, {l:'2', n:'8'}]);
+		assert.deepEqual(res.p2, [{l:'5', n:'10'}]);
+```
+
+<a name="dummygraphdb-findpathx-y-cberr-path"></a>
+## .findPath(x, y, cb(err, path))
+should return the labels along the edges from x to y.
+
+```js
+function* (){
+	    yield* createGraph(30);
+	    var path = yield* graphDB.findPath(3, 24);
+	    var m = 1;
+	    for(var i = 0; i < path.length; i++) {
+		m *= path[i];
+	    }
+	    assert.equal(m, 8); // 24 / 3
+```
+
+should always take the shortest path.
+
+```js
+function* (){
+		yield* graphDB.addEdge('a', 'wrong1', 'b');
+		yield* graphDB.addEdge('b', 'wrong2', 'c');
+		yield* graphDB.addEdge('a', 'right', 'c');
+		var path = yield* graphDB.findPath('a', 'c');
+		assert.deepEqual(path, ['right']);
+```
+
+should handle directed cycles correctly.
+
+```js
+function* (){
+	    yield* graphDB.addEdge('a', 'right1', 'b');
+	    yield* graphDB.addEdge('b', 'right2', 'c');
+	    yield* graphDB.addEdge('c', 'wrong', 'b');
+	    yield* graphDB.addEdge('c', 'right3', 'd');
+	    var path = yield* graphDB.findPath('a', 'd');
+	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
+```
+
 <a name="dummykeyvaluestore"></a>
 # DummyKeyValueStore
 should retrieve stored values.
@@ -1522,5 +1630,95 @@ function* (){
 	    assert.equal(n, i);
 	}
 	assert(yield* queue.isEmpty(), 'queue should be empty');
+```
+
+<a name="simpleversiongraph"></a>
+# SimpleVersionGraph
+<a name="simpleversiongraph-recordtransv1-p-w-v2"></a>
+## .recordTrans(v1, p, w, v2)
+should return a callback with no error if all is OK.
+
+```js
+function* (){
+	    yield* versionGraph.recordTrans({$:'foo'}, {_type: 'myPatch'}, 1, {$:'bar'});
+```
+
+<a name="simpleversiongraph-getmergestrategyv1-v2-resolve"></a>
+## .getMergeStrategy(v1, v2, resolve)
+should return x as the common ancestor of v1 and v2.
+
+```js
+function* (){
+	    var mergeInfo = yield* versionGraph.getMergeStrategy({$:18}, {$:14}, false);
+	    assert.equal(mergeInfo.x.$, 2);
+```
+
+should return either v1 or v2 as V1, and the other as V2.
+
+```js
+function* (){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    assert(mergeInfo.V1.$ == v1.$ || mergeInfo.V1.$ == v2.$, 'V1 should be either v1 or v2: ' + mergeInfo.V1.$);
+	    assert(mergeInfo.V2.$ == v1.$ || mergeInfo.V2.$ == v2.$, 'V2 should be either v1 or v2: ' + mergeInfo.V2.$);
+	    assert(mergeInfo.V1.$ != mergeInfo.V2.$ || v1.$ == v2.$, 'V1 and V2 should not be the same one');
+```
+
+should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false.
+
+```js
+function* (){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    assert((mergeInfo.V1.$ * 1) >= (mergeInfo.V2.$ * 1), 'V2 should be the lower of the two (closer to the GCD)');
+```
+
+should set V1 and V2 to be v1 and v2 respectively if resolve=true.
+
+```js
+function* (){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    if((v1.$*1) > (v2.$*1)) {
+		var tmp = v1;
+		v1 = v2;
+		v2 = tmp;
+	    }
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, true);
+	    assert.equal(v1, mergeInfo.V1);
+	    assert.equal(v2, mergeInfo.V2);
+```
+
+<a name="simpleversiongraph-recordmergemergeinfo-newv-patches-confpatches"></a>
+## .recordMerge(mergeInfo, newV, patches, confPatches)
+should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version.
+
+```js
+function* (){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    yield* versionGraph.recordMerge(mergeInfo, {$:'newVersion'}, [], []);
+	    yield* versionGraph.getMergeStrategy(v1, {$:'newVersion'}, false); // The new version should be in the graph
+```
+
+should record the overall weight on each new edge.
+
+```js
+function* (){
+	    var v1 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v2 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v3 = {$:Math.floor(Math.random() * 29) + 1};
+	    var v4 = {$:Math.floor(Math.random() * 29) + 1};
+	    var mergeInfo = yield* versionGraph.getMergeStrategy(v1, v2, false);
+	    var v12 = {$:v1.$ * v2.$ / mergeInfo.x.$};
+	    yield* versionGraph.recordMerge(mergeInfo, v12, [], []);
+	    var mergeInfo2 = yield* versionGraph.getMergeStrategy(v3, v4, false);
+	    var v34 = {$:v3.$ * v4.$ / mergeInfo2.x.$};
+	    yield* versionGraph.recordMerge(mergeInfo2, v34, [], []);
+	    var mergeInfo3 = yield* versionGraph.getMergeStrategy(v12, v34, false);
+	    assert(mergeInfo3.V2.$ <= mergeInfo3.V1.$, 'mergeInfo3.V1 should be lower');
 ```
 

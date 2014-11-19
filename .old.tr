@@ -1,4 +1,20 @@
 
+    DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+  ․ DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+    DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+  ․ DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+    DummyGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+  ․ DummyGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    DummyGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+  ․ DummyGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+    DummyGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+  ․ DummyGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+    DummyGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+  ․ DummyGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+    DummyGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
+  ․ DummyGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
+    DummyGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+  ․ DummyGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
     DummyKeyValueStore should retrieve stored values
   ․ DummyKeyValueStore should retrieve stored values
     DummyObjectStore .init(type, args) should return a version ID of a newly created object
@@ -145,6 +161,20 @@
   ․ SimpleObjectStore context .self() should return the version ID of the object prior to this patch application
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
+    SimpleVersionGraph .recordTrans(v1, p, w, v2) should return a callback with no error if all is OK
+  ․ SimpleVersionGraph .recordTrans(v1, p, w, v2) should return a callback with no error if all is OK
+    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return x as the common ancestor of v1 and v2
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return x as the common ancestor of v1 and v2
+    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return either v1 or v2 as V1, and the other as V2
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should return either v1 or v2 as V1, and the other as V2
+    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 such that the path between x and V2 is lighter than from x to V1, given that resolve=false
+    SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 to be v1 and v2 respectively if resolve=true
+  ․ SimpleVersionGraph .getMergeStrategy(v1, v2, resolve) should set V1 and V2 to be v1 and v2 respectively if resolve=true
+    SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
+  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record a merge using the mergeInfo object obtained from getMergeStrategy(), and a merged version
+    SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record the overall weight on each new edge
+  ․ SimpleVersionGraph .recordMerge(mergeInfo, newV, patches, confPatches) should record the overall weight on each new edge
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -152,5 +182,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  76 passing (116ms)
+  91 passing (152ms)
 
