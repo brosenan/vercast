@@ -37,25 +37,30 @@ module.exports = function(dispMap, type, args) {
 	var ostore2 = new vercast.DummyObjectStore(disp);
 	function* commutativityChecker(v1, p, u, v2, r, eff) {
 	    if(v1.$ in verMap) {
-		var prev = verMap[v1.$];
-		try {
-		    var alt = yield* ostore2.trans(prev.v1, p, u);
+		for(var i = 0; i < verMap[v1.$].length; i += 1) {
+		    var prev = verMap[v1.$][i];
 		    try {
-			alt = yield* ostore2.trans(alt.v, prev.p, prev.u);
+			var alt = yield* ostore2.trans(prev.v1, p, u);
+			try {
+			    alt = yield* ostore2.trans(alt.v, prev.p, prev.u);
+			} catch(e) {
+			    alt.v = {$:''};
+			}
+			if(alt.v.$ !== v2.$) {
+			    var obj = JSON.parse(v1.$);
+			    throw Error('Transformations "' + prev.p._type + '" and "' +
+					p._type + '" for type "' + obj._type + 
+					'" are independent but do not commute');
+			}
 		    } catch(e) {
-			alt.v = {$:''};
+			if(!e.isConflict) throw e;			
 		    }
-		    if(alt.v.$ !== v2.$) {
-			var obj = JSON.parse(v1.$);
-			throw Error('Transformations "' + prev.p._type + '" and "' +
-				    p._type + '" for type "' + obj._type + 
-				    '" are independent but do not commute');
-		    }
-		} catch(e) {
-		    if(!e.isConflict) throw e;			
 		}
 	    }
-	    verMap[v2.$] = {v1: v1, p: p, u: u, r: r};
+	    if(!(v2.$ in verMap)) {
+		verMap[v2.$] = [];
+	    }
+	    verMap[v2.$].push({v1: v1, p: p, u: u, r: r});
 	};
 	ostore.addTransListener(commutativityChecker);
     })();

@@ -111,6 +111,33 @@ describe('ObjectTestBed', function(){
 		    assert.equal(e.message, 'Transformations "change" and "change" for type "badAtom" are independent but do not commute');
 		}
 	    }));
+	    it('should fail on non-commutative independent patches even if p1 and p2 are not following one anotherp', asyncgen.async(function*(){
+		var dispMap = {
+		    badAtom: {
+			init: function*(ctx, args) { this.value = args.value; },
+			change: function*(ctx, p, u) {
+			    var from = u ? p.to : p.from;
+			    var to = u ? p.from : p.to;
+			    if(this.value > from) {
+				ctx.conflict('Expected: ' + from + ' found: ' + this.value);
+			    }
+			    this.value = to;
+			},
+			get: function*() {
+			    return this.value;
+			},
+		    },
+		};
+		var otb = new vercast.ObjectTestBed(dispMap, 'badAtom', {value: 0});
+		yield* otb.trans({_type: 'change', from: 0, to: 1});
+		assert.equal(yield* otb.trans({_type: 'get'}), 1);
+		try {
+		    yield* otb.trans({_type: 'change', from: 1, to: 2});
+		    assert(false, 'previous statement should fail');
+		} catch(e) {
+		    assert.equal(e.message, 'Transformations "change" and "change" for type "badAtom" are independent but do not commute');
+		}
+	    }));
 	});
     });
 });

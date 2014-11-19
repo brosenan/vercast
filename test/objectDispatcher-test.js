@@ -72,5 +72,53 @@ describe('ObjectDispatcher', function(){
 	    var res = yield* disp.apply(ctx, foo, {_type: 'bar', a:3});
 	    assert(called, 'patch method should have been called');
 	}));
+	it('should call the object\'s _default() method if it exists and a specific handler is not defined', asyncgen.async(function*(){
+	    var called;
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    _default: function*() { called = true; },
+		},
+	    };
+	    var  disp = new vercast.ObjectDispatcher(dispMap);
+	    var ctx = {};
+	    var foo = yield* disp.init(ctx, 'foo', {});
+	    yield* disp.apply(ctx, foo, {_type: 'somethingThatDoesNotExist'});
+	    assert(called, '_default should have been called');
+	}));
+	it('should prefer a class method over _default', asyncgen.async(function*(){
+	    var barCalled = false;
+	    var defaultCalled = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    bar: function*() { barCalled = true; },
+		    _default: function*() { defaultCalled = true; },
+		},
+	    };
+	    var  disp = new vercast.ObjectDispatcher(dispMap);
+	    var ctx = {};
+	    var foo = yield* disp.init(ctx, 'foo', {});
+	    yield* disp.apply(ctx, foo, {_type: 'bar'});
+	    assert(!defaultCalled, '_default should not have been called');
+	    assert(barCalled, 'bar should not have been called');
+	}));
+	it('should prefer a generic handler over _default', asyncgen.async(function*(){
+	    var barCalled = false;
+	    var defaultCalled = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    _default: function*() { defaultCalled = true; },
+		},
+		$bar: function*() { barCalled = true; },
+	    };
+	    var  disp = new vercast.ObjectDispatcher(dispMap);
+	    var ctx = {};
+	    var foo = yield* disp.init(ctx, 'foo', {});
+	    yield* disp.apply(ctx, foo, {_type: 'bar'});
+	    assert(!defaultCalled, '_default should not have been called');
+	    assert(barCalled, 'bar should not have been called');
+	}));
     });
 });

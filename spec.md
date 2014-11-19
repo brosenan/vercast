@@ -462,6 +462,66 @@ function* (){
 	    assert(called, 'patch method should have been called');
 ```
 
+should call the object's _default() method if it exists and a specific handler is not defined.
+
+```js
+function* (){
+	    var called;
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    _default: function*() { called = true; },
+		},
+	    };
+	    var  disp = new vercast.ObjectDispatcher(dispMap);
+	    var ctx = {};
+	    var foo = yield* disp.init(ctx, 'foo', {});
+	    yield* disp.apply(ctx, foo, {_type: 'somethingThatDoesNotExist'});
+	    assert(called, '_default should have been called');
+```
+
+should prefer a class method over _default.
+
+```js
+function* (){
+	    var barCalled = false;
+	    var defaultCalled = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    bar: function*() { barCalled = true; },
+		    _default: function*() { defaultCalled = true; },
+		},
+	    };
+	    var  disp = new vercast.ObjectDispatcher(dispMap);
+	    var ctx = {};
+	    var foo = yield* disp.init(ctx, 'foo', {});
+	    yield* disp.apply(ctx, foo, {_type: 'bar'});
+	    assert(!defaultCalled, '_default should not have been called');
+	    assert(barCalled, 'bar should not have been called');
+```
+
+should prefer a generic handler over _default.
+
+```js
+function* (){
+	    var barCalled = false;
+	    var defaultCalled = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    _default: function*() { defaultCalled = true; },
+		},
+		$bar: function*() { barCalled = true; },
+	    };
+	    var  disp = new vercast.ObjectDispatcher(dispMap);
+	    var ctx = {};
+	    var foo = yield* disp.init(ctx, 'foo', {});
+	    yield* disp.apply(ctx, foo, {_type: 'bar'});
+	    assert(!defaultCalled, '_default should not have been called');
+	    assert(barCalled, 'bar should not have been called');
+```
+
 <a name="objectmonitor"></a>
 # ObjectMonitor
 <a name="objectmonitor-proxy"></a>
@@ -829,6 +889,37 @@ function* (){
 		};
 		var otb = new vercast.ObjectTestBed(dispMap, 'badAtom', {value: 0});
 		yield* otb.trans({_type: 'change', from: 0, to: 1});
+		try {
+		    yield* otb.trans({_type: 'change', from: 1, to: 2});
+		    assert(false, 'previous statement should fail');
+		} catch(e) {
+		    assert.equal(e.message, 'Transformations "change" and "change" for type "badAtom" are independent but do not commute');
+		}
+```
+
+should fail on non-commutative independent patches even if p1 and p2 are not following one anotherp.
+
+```js
+function* (){
+		var dispMap = {
+		    badAtom: {
+			init: function*(ctx, args) { this.value = args.value; },
+			change: function*(ctx, p, u) {
+			    var from = u ? p.to : p.from;
+			    var to = u ? p.from : p.to;
+			    if(this.value > from) {
+				ctx.conflict('Expected: ' + from + ' found: ' + this.value);
+			    }
+			    this.value = to;
+			},
+			get: function*() {
+			    return this.value;
+			},
+		    },
+		};
+		var otb = new vercast.ObjectTestBed(dispMap, 'badAtom', {value: 0});
+		yield* otb.trans({_type: 'change', from: 0, to: 1});
+		assert.equal(yield* otb.trans({_type: 'get'}), 1);
 		try {
 		    yield* otb.trans({_type: 'change', from: 1, to: 2});
 		    assert(false, 'previous statement should fail');
