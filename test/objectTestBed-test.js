@@ -41,6 +41,29 @@ describe('ObjectTestBed', function(){
 		    assert.equal(e.message, 'Transformation "add" for type "badCounter" is not reversible');
 		}
 	    }));
+	    it('should consult a digest() method (if defined) to get a representation of the value', asyncgen.async(function*(){
+		var dispMap = {
+		    counter: {
+			init: function*() {
+			    this.value = 0;
+			    this.generation = 0;
+			},
+			add: function*(ctx, p, u) {
+			    this.value += (u?-1:1) * p.amount;
+			    this.generation += 1; // This is not reversible
+			    return this.value;
+			},
+			digest: function*() {
+			    return this.value; // only the value matters
+			},
+		    },
+		};
+		var otb = new vercast.ObjectTestBed(dispMap, 'counter', {});
+		var r = yield* otb.trans({_type: 'add', amount: 2});
+		assert.equal(r, 2);
+		r = yield* otb.trans({_type: 'add', amount: 3});
+		assert.equal(r, 5);
+	    }));
 	});
 	describe('commutativityChecker', function(){
 	    it('should fail for independent transformations that do not commute', asyncgen.async(function*(){
@@ -137,6 +160,33 @@ describe('ObjectTestBed', function(){
 		} catch(e) {
 		    assert.equal(e.message, 'Transformations "change" and "change" for type "badAtom" are independent but do not commute');
 		}
+	    }));
+	    it('should consult a digest() method (if exists) to determine version equivalence', asyncgen.async(function*(){
+		var dispMap = {
+		    counter: {
+			init: function*() {
+			    this.value = 0;
+			    this.history = '';
+			},
+			add: function*(ctx, p, u) {
+			    this.value += (u?-1:1) * p.amount;
+			    if(!u) {
+				this.history = this.history + ':' + this.value;
+			    } else {
+				this.history = this.history.substr(0, this.history.length - 1 - ('' + this.value).length);
+			    }
+			    return this.value;
+			},
+			digest: function*(ctx, p, u) {
+			    return this.value;
+			},
+		    },
+		};
+		var otb = new vercast.ObjectTestBed(dispMap, 'counter', {});
+		var r = yield* otb.trans({_type: 'add', amount: 2});
+		assert.equal(r, 2);
+		r = yield* otb.trans({_type: 'add', amount: 3});
+		assert.equal(r, 5);
 	    }));
 	});
     });
