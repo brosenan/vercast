@@ -49,6 +49,7 @@
        - [.append(obj)](#sequencestorefactory-createsequencestore-appendobj)
        - [.isEmpty()](#sequencestorefactory-createsequencestore-isempty)
        - [.shift()](#sequencestorefactory-createsequencestore-shift)
+       - [.pop()](#sequencestorefactory-createsequencestore-pop)
        - [.hash()](#sequencestorefactory-createsequencestore-hash)
    - [SimpleObjectStore](#simpleobjectstore)
      - [.init(type, args)](#simpleobjectstore-inittype-args)
@@ -699,6 +700,9 @@ function* (){
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
 	    // The  transaction was rolled-back due to a conflict on key foo.
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, '');
+
+	    // The transaction's failure should be recorded, so that merging v2 with vm should keep foo => FOO1
+	    v2 = yield* ostore.merge(v2, vm);
 ```
 
 <a name="objectdispatcher"></a>
@@ -1499,6 +1503,20 @@ function* (){
 		assert(seqStore.isEmpty());
 ```
 
+<a name="sequencestorefactory-createsequencestore-pop"></a>
+### .pop()
+should remove the last element from the sequence and return it.
+
+```js
+function* (){
+		var seqStore = factory.createSequenceStore();
+		yield* seqStore.append({a:1});
+		yield* seqStore.append({a:2});
+		assert.deepEqual(yield* seqStore.pop(), {a:2});
+		assert.deepEqual(yield* seqStore.pop(), {a:1});
+		assert(seqStore.isEmpty());
+```
+
 <a name="sequencestorefactory-createsequencestore-hash"></a>
 ### .hash()
 should return an empty string if the sequence is empty.
@@ -1975,8 +1993,14 @@ function* (){
 	yield* seq.append({_type: 'set', from: 'c', to: 'd'});
 	var hash = yield* seq.hash();
 	var v = yield* ostore.init('atom', {value: ''});
-	var res = yield* ostore.trans(v, {_type: 'transaction', hash: hash});
+	var transPatch = {_type: 'transaction', hash: hash};
+	var res = yield* ostore.trans(v, transPatch);
 	res = yield* ostore.trans(res.v, {_type: 'get'});
 	assert.equal(res.r, 'd');
+
+	// Apply a transaction in reverse
+	res = yield* ostore.trans(res.v, transPatch, true);
+	res = yield* ostore.trans(res.v, {_type: 'get'});
+	assert.equal(res.r, '');
 ```
 

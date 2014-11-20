@@ -60,6 +60,9 @@ function createContext(self, effSeq, v) {
 	self: function() {
 	    return v;
 	},
+	getSequenceStore: function() {
+	    return self.getSequenceStore();
+	},
     };
 }
 module.exports.createContext = createContext;

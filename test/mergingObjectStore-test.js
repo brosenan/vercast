@@ -114,6 +114,9 @@ describe('MergingObjectStore', function(){
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
 	    // The  transaction was rolled-back due to a conflict on key foo.
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, '');
+
+	    // The transaction's failure should be recorded, so that merging v2 with vm should keep foo => FOO1
+	    v2 = yield* ostore.merge(v2, vm);
 	}));
     });
 });

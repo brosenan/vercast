@@ -15,9 +15,14 @@ describe('$transaction', function(){
 	yield* seq.append({_type: 'set', from: 'c', to: 'd'});
 	var hash = yield* seq.hash();
 	var v = yield* ostore.init('atom', {value: ''});
-	var res = yield* ostore.trans(v, {_type: 'transaction', hash: hash});
+	var transPatch = {_type: 'transaction', hash: hash};
+	var res = yield* ostore.trans(v, transPatch);
 	res = yield* ostore.trans(res.v, {_type: 'get'});
 	assert.equal(res.r, 'd');
-    }));
 
+	// Apply a transaction in reverse
+	res = yield* ostore.trans(res.v, transPatch, true);
+	res = yield* ostore.trans(res.v, {_type: 'get'});
+	assert.equal(res.r, '');
+    }));
 });

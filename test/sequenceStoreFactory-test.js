@@ -64,6 +64,16 @@ describe('SequenceStoreFactory', function(){
 		assert(seqStore.isEmpty());
 	    }));
 	});
+	describe('.pop()', function(){
+	    it('should remove the last element from the sequence and return it', asyncgen.async(function*(){
+		var seqStore = factory.createSequenceStore();
+		yield* seqStore.append({a:1});
+		yield* seqStore.append({a:2});
+		assert.deepEqual(yield* seqStore.pop(), {a:2});
+		assert.deepEqual(yield* seqStore.pop(), {a:1});
+		assert(seqStore.isEmpty());
+	    }));
+	});
 	describe('.hash()', function(){
 	    it('should return an empty string if the sequence is empty', asyncgen.async(function*(){
 		var seqStore = factory.createSequenceStore();

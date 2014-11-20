@@ -18,8 +18,8 @@ module.exports = function(kvs) {
 	this.isEmpty = function() {
 	    return seq.length === 0;
 	};
-	this.shift = function*() {
-	    var first = seq.shift(); 
+	function* removeElement(op) {
+	    var first = seq[op](); 
 	    while(typeof first === 'string') {
 		var json = yield* kvs.fetch(first);
 		if(typeof json === 'undefined') {
@@ -28,7 +28,7 @@ module.exports = function(kvs) {
 		var prefix = JSON.parse(json);
 		if(Array.isArray(prefix)) {
 		    seq = prefix.concat(seq);
-		    first = seq.shift();
+		    first = seq[op]();
 		} else {
 		    if(prefix.$) {
 			delete prefix.$;
@@ -37,6 +37,12 @@ module.exports = function(kvs) {
 		}
 	    }
 	    return first;
+	}
+	this.shift = function*() {
+	    return yield* removeElement('shift');
+	};
+	this.pop = function*() {
+	    return yield* removeElement('pop');
 	};
 	this.hash = function*() {
 	    switch(seq.length) {

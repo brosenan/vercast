@@ -157,6 +157,8 @@
   ․ SequenceStoreFactory .createSequenceStore() .isEmpty() should indicate if the sequence is empty
     SequenceStoreFactory .createSequenceStore() .shift() should remove the first element from the sequence and return it
   ․ SequenceStoreFactory .createSequenceStore() .shift() should remove the first element from the sequence and return it
+    SequenceStoreFactory .createSequenceStore() .pop() should remove the last element from the sequence and return it
+  ․ SequenceStoreFactory .createSequenceStore() .pop() should remove the last element from the sequence and return it
     SequenceStoreFactory .createSequenceStore() .hash() should return an empty string if the sequence is empty
   ․ SequenceStoreFactory .createSequenceStore() .hash() should return an empty string if the sequence is empty
     SequenceStoreFactory .createSequenceStore() .hash() should return the object hash, assuming only one object in the sequence
@@ -212,5 +214,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  106 passing (168ms)
+  107 passing (188ms)
 
