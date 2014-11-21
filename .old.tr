@@ -220,5 +220,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  110 passing (200ms)
+  110 passing (271ms)
 
