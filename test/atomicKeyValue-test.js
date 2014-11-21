@@ -4,8 +4,6 @@ var assert = require('assert');
 var asyncgen = require('asyncgen');
 var vercast = require('vercast');
 
-var util = require('/home/boaz/vercast-1/util.js');
-
 module.exports = function(atomicKV) {
     describe('as AtomicKeyValue', function(){
 	beforeEach(asyncgen.async(function*() {

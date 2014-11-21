@@ -20,6 +20,10 @@
        - [.effect(p)](#dummyobjectstore-context-effectp)
        - [.self()](#dummyobjectstore-context-self)
      - [.addTransListener(handler(v1, p, u, v2, r, eff))](#dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff)
+   - [EventuallyConsistentKVS](#eventuallyconsistentkvs)
+     - [.newKey(key, value)](#eventuallyconsistentkvs-newkeykey-value)
+     - [.retrieve(key)](#eventuallyconsistentkvs-retrievekey)
+     - [.modify(key, value)](#eventuallyconsistentkvs-modifykey-value)
    - [$inv](#inv)
    - [MergingObjectStore](#mergingobjectstore)
      - [.init(type, args)](#mergingobjectstore-inittype-args)
@@ -535,6 +539,52 @@ function* (){
 	    var seq = ostore.getSequenceStore();
 	    yield* seq.append(eff_out);
 	    assert.deepEqual(yield* seq.shift(), {a:1});
+```
+
+<a name="eventuallyconsistentkvs"></a>
+# EventuallyConsistentKVS
+<a name="eventuallyconsistentkvs-newkeykey-value"></a>
+## .newKey(key, value)
+should store a new key/value pair given that the method is called only once for that key.
+
+```js
+function* (){
+	    yield* kvs.newKey('foo', 'bar');
+```
+
+<a name="eventuallyconsistentkvs-retrievekey"></a>
+## .retrieve(key)
+should return a previously-assigned value of the key, or undefined the value has not yet been regiested.
+
+```js
+function* (){
+	    yield* kvs.newKey('foo', 'bar');
+	    var value;
+	    while(!value) {
+		value = yield* kvs.retrieve('foo');
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    assert.equal(value, 'bar');
+```
+
+<a name="eventuallyconsistentkvs-modifykey-value"></a>
+## .modify(key, value)
+should change the value so that it eventually becomes the given one.
+
+```js
+function* (){
+	    yield* kvs.newKey('foo', 'bar');
+	    var value;
+	    while(!value) {
+		value = yield* kvs.retrieve('foo');
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    yield* kvs.modify('foo', 'baz');
+	    while(value === 'bar') {
+		value = yield* kvs.retrieve('foo');
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    assert.equal(value, 'baz');
 ```
 
 <a name="inv"></a>
