@@ -3,10 +3,10 @@ module.exports = function(ostore, versionGraph, seqFactory) {
     this.init = function(type, args) {
 	return ostore.init(type, args);
     };
-    this.trans = function*(v, p, u) {
+    this.trans = function*(v, p) {
 	var seq = seqFactory.createSequenceStore();
 	yield* seq.append(p);
-	var res = yield* ostore.trans(v, p, u);
+	var res = yield* ostore.trans(v, p);
 	var ph = yield* seq.hash();
 	yield* versionGraph.recordTrans(v, ph, res.v);
 	return res;

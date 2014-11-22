@@ -14,3 +14,5 @@ exports.DummyGraphDB = require('./dummyGraphDB.js');
 exports.SimpleVersionGraph = require('./simpleVersionGraph.js');
 exports.MergingObjectStore = require('./mergingObjectStore.js');
 exports.DummyECKVS = require('./dummyECKVS.js');
+exports.BranchStore = require('./branchStore.js');
+exports.DummyAtomicKVS = require('./dummyAtomicKVS.js');

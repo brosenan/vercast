@@ -1,4 +1,11 @@
 # TOC
+   - [BranchStore](#branchstore)
+     - [.init(type, args)](#branchstore-inittype-args)
+     - [.trans(v, p, u) -> {v,r}](#branchstore-transv-p-u---vr)
+     - [.fork(b, v)](#branchstore-forkb-v)
+     - [.head(b)](#branchstore-headb)
+     - [.push(b, v)](#branchstore-pushb-v)
+     - [.pull(v, b)](#branchstore-pullv-b)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
@@ -27,7 +34,7 @@
    - [$inv](#inv)
    - [MergingObjectStore](#mergingobjectstore)
      - [.init(type, args)](#mergingobjectstore-inittype-args)
-     - [.trans(v, p, u) -> {v,r}](#mergingobjectstore-transv-p-u---vr)
+     - [.trans(v, p) -> {v,r}](#mergingobjectstore-transv-p---vr)
      - [.merge(v1, v2, resolve=false, atomic=false)](#mergingobjectstore-mergev1-v2-resolvefalse-atomicfalse)
    - [ObjectDispatcher](#objectdispatcher)
      - [.init(type, args)](#objectdispatcher-inittype-args)
@@ -73,6 +80,164 @@
    - [$transaction](#transaction)
 <a name=""></a>
  
+<a name="branchstore"></a>
+# BranchStore
+<a name="branchstore-inittype-args"></a>
+## .init(type, args)
+should create a new object version, and return its ID.
+
+```js
+function* (){
+	    var v = yield* branchStore.init('atom', {value: 'foo'});
+	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'foo');
+```
+
+<a name="branchstore-transv-p-u---vr"></a>
+## .trans(v, p, u) -> {v,r}
+should transform an object version according to the given patch.
+
+```js
+function* (){
+	    var v = yield* branchStore.init('atom', {value: 'foo'});
+	    v = (yield* branchStore.trans(v, {_type: 'set', from: 'foo', to: 'bar'})).v;
+	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'bar');
+```
+
+<a name="branchstore-forkb-v"></a>
+## .fork(b, v)
+should create a new branch, starting at the given version ID.
+
+```js
+function* (){
+	    var v = yield* branchStore.init('atom', {value: 'foo'});
+	    yield* branchStore.fork('br1', v);
+```
+
+<a name="branchstore-headb"></a>
+## .head(b)
+should return the last known head of a branch (can be somewhat stale).
+
+```js
+function* (){
+	    var v1 = yield* branchStore.init('atom', {value: 'foo'});
+	    yield* branchStore.fork('br1', v1);
+	    var v2 = yield* branchStore.head('br1');
+	    assert.equal(typeof v2.$, 'string');
+```
+
+should fail gracefully if the branch has not been initialized.
+
+```js
+function* (){
+	    try {
+		yield* branchStore.head('branchThatDoesNotExist', 5); // Only try 5 times
+		assert(false, 'Previous statement should fail');
+	    } catch(e) {
+		assert.equal(e.message, 'Exhausted the number of attempts trying to fetch the head of branch branchThatDoesNotExist');
+	    }
+```
+
+<a name="branchstore-pushb-v"></a>
+## .push(b, v)
+should merge the changes made in v to branch b.
+
+```js
+function* (){
+	    var v1 = yield* branchStore.init('array', {elementType: 'atom',
+						       args: {value: ''}});
+	    yield* branchStore.fork('br1', v1);
+	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO'})).v;
+	    yield* branchStore.push('br1', v1);
+	    var head = {};
+	    while(head.$ !== v1.$) { // Wait until the head of br1 becomes v1
+		head = yield* branchStore.head('br1');
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    assert.equal(head.$, v1.$);
+```
+
+should throw an exception on a conflict.
+
+```js
+function* (){
+	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
+						       args: {value: ''}});
+	    yield* branchStore.fork('br1', v0);
+	    var v1 = v0;
+	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO1'})).v;
+	    yield* branchStore.push('br1', v1); // So far so good
+	    var v2 = v0;
+	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO2'})).v;
+	    try {
+		yield* branchStore.push('br1', v2); // This should throw
+		assert(false, 'the previos statement should fail');
+	    } catch(e) {
+		if(!e.isConflict) {
+		    throw e;
+		}
+		assert.equal(e.message, 'Expected:  actual: FOO1');
+	    }
+```
+
+<a name="branchstore-pullv-b"></a>
+## .pull(v, b)
+should return a merge between the head of b and v.
+
+```js
+function* (){
+	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
+						       args: {value: ''}});
+	    yield* branchStore.fork('br1', v0);
+	    var v1 = v0;
+	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO'})).v;
+	    yield* branchStore.push('br1', v1);
+	    var v2 = v0;
+	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
+						_key: 'bar',
+						from: '',
+						to: 'BAR'})).v;
+	    v2 = yield* branchStore.pull(v2, 'br1');
+	    assert.equal((yield* branchStore.trans(v2, {_type: 'get',
+							_key: 'foo'})).r, 'FOO');
+	    assert.equal((yield* branchStore.trans(v2, {_type: 'get',
+							_key: 'bar'})).r, 'BAR');
+```
+
+should resolve conflicts by preferring the branch.
+
+```js
+function* (){
+	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
+						       args: {value: ''}});
+	    yield* branchStore.fork('br1', v0);
+	    var v1 = v0;
+	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO1'})).v;
+	    yield* branchStore.push('br1', v1); // So far so good
+	    var v2 = v0;
+	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO2'})).v;
+	    v2 = yield* branchStore.pull(v2, 'br1');
+	    assert.equal((yield* branchStore.trans(v2, {_type: 'get',
+							_key: 'foo'})).r, 'FOO1');
+```
+
 <a name="dummyatomickvs"></a>
 # DummyAtomicKVS
 <a name="dummyatomickvs-as-atomickeyvalue"></a>
@@ -623,8 +788,8 @@ function* (){
 	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'a');
 ```
 
-<a name="mergingobjectstore-transv-p-u---vr"></a>
-## .trans(v, p, u) -> {v,r}
+<a name="mergingobjectstore-transv-p---vr"></a>
+## .trans(v, p) -> {v,r}
 should apply a patch to the state.
 
 ```js

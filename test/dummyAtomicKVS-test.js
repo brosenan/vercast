@@ -1,5 +1,6 @@
-var DummyAtomicKVS = require('../dummyAtomicKVS.js');
+"use strict";
+var vercast = require('vercast');
 
 describe('DummyAtomicKVS', function(){
-    require('./atomicKeyValue-test.js')(new DummyAtomicKVS());
+    require('./atomicKeyValue-test.js')(new vercast.DummyAtomicKVS());
 });

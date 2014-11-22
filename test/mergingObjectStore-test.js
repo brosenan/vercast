@@ -19,7 +19,7 @@ describe('MergingObjectStore', function(){
 	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'a');
 	}));
     });
-    describe('.trans(v, p, u) -> {v,r}', function(){
+    describe('.trans(v, p) -> {v,r}', function(){
 	it('should apply a patch to the state', asyncgen.async(function*(){
 	    var v = yield* ostore.init('atom', {value: 'a'});
 	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'a');
