@@ -99,18 +99,39 @@ describe('BranchStore', function(){
 		assert.equal(e.message, 'Expected:  actual: FOO1');
 	    }
 	}));
+	it('should retry the update in case of a race with another push', asyncgen.async(function*(){
+	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
+						       args: {value: ''}});
+	    yield* branchStore.fork('br1', v0);
+	    function* changeAndPush(key, value) {
+		var v = yield* branchStore.head('br1');
+		v = (yield* branchStore.trans(v, {_type: 'set', 
+						  _key: key,
+						  from: '',
+						  to: value})).v;
+		yield* branchStore.push('br1', v);
+	    }
+	    yield* asyncgen.parallel([changeAndPush('foo', 'FOO'),
+				      changeAndPush('bar', 'BAR')]);
+	    yield function(_) { setTimeout(_, 4); }; // Let the dust sattle
+	    var v = yield* branchStore.head('br1');
+	    assert.equal((yield* branchStore.trans(v, {_type: 'get',
+						       _key: 'foo'})).r, 'FOO');
+	    assert.equal((yield* branchStore.trans(v, {_type: 'get',
+						       _key: 'bar'})).r, 'BAR');
+	}));
+
     });
     describe('.pull(v, b)', function(){
 	it('should return a merge between the head of b and v', asyncgen.async(function*(){
 	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
 						       args: {value: ''}});
-	    yield* branchStore.fork('br1', v0);
 	    var v1 = v0;
 	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
 						_key: 'foo',
 						from: '',
 						to: 'FOO'})).v;
-	    yield* branchStore.push('br1', v1);
+	    yield* branchStore.fork('br1', v1);
 	    var v2 = v0;
 	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
 						_key: 'bar',
@@ -126,13 +147,12 @@ describe('BranchStore', function(){
 	it('should resolve conflicts by preferring the branch', asyncgen.async(function*(){
 	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
 						       args: {value: ''}});
-	    yield* branchStore.fork('br1', v0);
 	    var v1 = v0;
 	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
 						_key: 'foo',
 						from: '',
 						to: 'FOO1'})).v;
-	    yield* branchStore.push('br1', v1); // So far so good
+	    yield* branchStore.fork('br1', v1);
 	    var v2 = v0;
 	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
 						_key: 'foo',

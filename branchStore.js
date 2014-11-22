@@ -24,9 +24,14 @@ module.exports = function(ostore, atomicKVS, ecKVS) {
 	return {$: v};
     };
     this.push = function*(b, v) {
-	var oldVer = {$:yield* atomicKVS.retrieve(b)};
-	var newVer = yield* ostore.merge(oldVer, v);
-	yield* atomicKVS.modify(b, oldVer.$, newVer.$);
+	while(true) {
+	    var oldVer = {$:yield* atomicKVS.retrieve(b)};
+	    var newVer = yield* ostore.merge(oldVer, v);
+	    var modified = yield* atomicKVS.modify(b, oldVer.$, newVer.$);
+	    if(modified === newVer.$) {
+		break;
+	    }
+	}
 	yield* ecKVS.modify(b, newVer.$);
     };
     this.pull = function*(v, b) {

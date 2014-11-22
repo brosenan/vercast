@@ -13,6 +13,8 @@
   ․ BranchStore .push(b, v) should merge the changes made in v to branch b
     BranchStore .push(b, v) should throw an exception on a conflict
   ․ BranchStore .push(b, v) should throw an exception on a conflict
+    BranchStore .push(b, v) should retry the update in case of a race with another push
+  ․ BranchStore .push(b, v) should retry the update in case of a race with another push
     BranchStore .pull(v, b) should return a merge between the head of b and v
   ․ BranchStore .pull(v, b) should return a merge between the head of b and v
     BranchStore .pull(v, b) should resolve conflicts by preferring the branch
@@ -238,5 +240,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  119 passing (331ms)
+  120 passing (538ms)
 
