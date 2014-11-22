@@ -4,7 +4,7 @@
      - [.trans(v, p, u) -> {v,r}](#branchstore-transv-p-u---vr)
      - [.fork(b, v)](#branchstore-forkb-v)
      - [.head(b)](#branchstore-headb)
-     - [.push(b, v)](#branchstore-pushb-v)
+     - [.push(b, v, atomic=false)](#branchstore-pushb-v-atomicfalse)
      - [.pull(v, b)](#branchstore-pullv-b)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
@@ -137,8 +137,8 @@ function* (){
 	    }
 ```
 
-<a name="branchstore-pushb-v"></a>
-## .push(b, v)
+<a name="branchstore-pushb-v-atomicfalse"></a>
+## .push(b, v, atomic=false)
 should merge the changes made in v to branch b.
 
 ```js
@@ -205,12 +205,48 @@ function* (){
 	    }
 	    yield* asyncgen.parallel([changeAndPush('foo', 'FOO'),
 				      changeAndPush('bar', 'BAR')]);
-	    yield function(_) { setTimeout(_, 4); }; // Let the dust sattle
+	    yield function(_) { setTimeout(_, 4); }; // Let the dust settle
 	    var v = yield* branchStore.head('br1');
 	    assert.equal((yield* branchStore.trans(v, {_type: 'get',
 						       _key: 'foo'})).r, 'FOO');
 	    assert.equal((yield* branchStore.trans(v, {_type: 'get',
 						       _key: 'bar'})).r, 'BAR');
+```
+
+should commit all changes in v as a single atomic transaction if atomic is true.
+
+```js
+function* (){
+	    var v0 = yield* branchStore.init('array', {elementType: 'atom',
+						       args: {value: ''}});
+	    var v1 = v0;
+	    yield* branchStore.fork('br1', v1);
+	    v1 = (yield* branchStore.trans(v1, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO1'})).v;
+	    yield* branchStore.push('br1', v1);
+	    
+	    var v2 = v0;
+	    yield* branchStore.fork('br2', v2);
+	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
+						_key: 'foo',
+						from: '',
+						to: 'FOO2'})).v;
+	    v2 = (yield* branchStore.trans(v2, {_type: 'set',
+						_key: 'bar',
+						from: '',
+						to: 'BAR'})).v;
+	    yield* branchStore.push('br2', v2, true); // Atomic commit
+
+	    yield function(_) { setTimeout(_, 4); };
+	    
+	    // Now we merge br1 and br2, giving priority to br1
+	    v2 = yield* branchStore.pull(yield* branchStore.head('br2'), 'br1');
+	    assert.equal((yield* branchStore.trans(v2, {_type: 'get', 
+							_key: 'foo'})).r, 'FOO1');
+	    assert.equal((yield* branchStore.trans(v2, {_type: 'get', 
+							_key: 'bar'})).r, '');
 ```
 
 <a name="branchstore-pullv-b"></a>

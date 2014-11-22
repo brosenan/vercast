@@ -23,10 +23,10 @@ module.exports = function(ostore, atomicKVS, ecKVS) {
 	}
 	return {$: v};
     };
-    this.push = function*(b, v) {
+    this.push = function*(b, v, atomic) {
 	while(true) {
 	    var oldVer = {$:yield* atomicKVS.retrieve(b)};
-	    var newVer = yield* ostore.merge(oldVer, v);
+	    var newVer = yield* ostore.merge(oldVer, v, false, atomic);
 	    var modified = yield* atomicKVS.modify(b, oldVer.$, newVer.$);
 	    if(modified === newVer.$) {
 		break;

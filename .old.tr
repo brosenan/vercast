@@ -9,12 +9,14 @@
   ․ BranchStore .head(b) should return the last known head of a branch (can be somewhat stale)
     BranchStore .head(b) should fail gracefully if the branch has not been initialized
   ․ BranchStore .head(b) should fail gracefully if the branch has not been initialized
-    BranchStore .push(b, v) should merge the changes made in v to branch b
-  ․ BranchStore .push(b, v) should merge the changes made in v to branch b
-    BranchStore .push(b, v) should throw an exception on a conflict
-  ․ BranchStore .push(b, v) should throw an exception on a conflict
-    BranchStore .push(b, v) should retry the update in case of a race with another push
-  ․ BranchStore .push(b, v) should retry the update in case of a race with another push
+    BranchStore .push(b, v, atomic=false) should merge the changes made in v to branch b
+  ․ BranchStore .push(b, v, atomic=false) should merge the changes made in v to branch b
+    BranchStore .push(b, v, atomic=false) should throw an exception on a conflict
+  ․ BranchStore .push(b, v, atomic=false) should throw an exception on a conflict
+    BranchStore .push(b, v, atomic=false) should retry the update in case of a race with another push
+  ․ BranchStore .push(b, v, atomic=false) should retry the update in case of a race with another push
+    BranchStore .push(b, v, atomic=false) should commit all changes in v as a single atomic transaction if atomic is true
+  ․ BranchStore .push(b, v, atomic=false) should commit all changes in v as a single atomic transaction if atomic is true
     BranchStore .pull(v, b) should return a merge between the head of b and v
   ․ BranchStore .pull(v, b) should return a merge between the head of b and v
     BranchStore .pull(v, b) should resolve conflicts by preferring the branch
@@ -240,5 +242,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  120 passing (538ms)
+  121 passing (404ms)
 
