@@ -83,7 +83,20 @@ module.exports = function(createOStore) {
 	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
 	    res = yield* ostore.trans(res.v, {_type: 'query'});
 	}));
-
+	it('should handle transformation that results in null', asyncgen.async(function*(){
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    turnToNull: function*() {
+			this._replaceWith(null);
+		    }
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'turnToNull'});
+	    assert.equal(res.v, null);
+	}));
     });
     describe('context', function(){
 	describe('.init(type, args)', function(){

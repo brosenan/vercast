@@ -33,7 +33,9 @@ module.exports = function(disp, kvs) {
 	var obj = JSON.parse(json);
 	var monitor = new vercast.ObjectMonitor(obj);
 	var res = yield* disp.apply(vercast.DummyObjectStore.createContext(this, effSeq, v), monitor.proxy(), p, u);
-	if(monitor.object()._type) {
+	if(monitor.object() === null) {
+	    v = null;
+	} else if(monitor.object()._type) {
 	    v = {$:monitor.hash()};
 	    yield* kvs.store(v.$, monitor.json());
 	} else if(monitor.object().$) {
@@ -41,7 +43,9 @@ module.exports = function(disp, kvs) {
 	} else {
 	    throw Error('new version is niether a avalid object nor an ID');
 	}
-	Object.freeze(v);
+	if(v) {
+	    Object.freeze(v);
+	}
 
 	// Cache the result
 	var retVal = {v: v, r: res, eff: yield* effSeq.hash()};

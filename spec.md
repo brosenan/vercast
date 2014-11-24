@@ -568,6 +568,24 @@ function* (){
 	    res = yield* ostore.trans(res.v, {_type: 'query'});
 ```
 
+should handle transformation that results in null.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    turnToNull: function*() {
+			this._replaceWith(null);
+		    }
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'turnToNull'});
+	    assert.equal(res.v, null);
+```
+
 <a name="dummyobjectstore-context"></a>
 ## context
 <a name="dummyobjectstore-context-inittype-args"></a>
@@ -1961,6 +1979,24 @@ function* (){
 	    var v = yield* ostore.init('foo', {});
 	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
 	    res = yield* ostore.trans(res.v, {_type: 'query'});
+```
+
+should handle transformation that results in null.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    turnToNull: function*() {
+			this._replaceWith(null);
+		    }
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'turnToNull'});
+	    assert.equal(res.v, null);
 ```
 
 <a name="simpleobjectstore-context"></a>

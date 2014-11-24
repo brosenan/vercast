@@ -17,7 +17,9 @@ module.exports = function(disp, effSeqFactory) {
 	var monitor = new vercast.ObjectMonitor(obj);
 	var r = yield* disp.apply(createContext(this, effSeq, v), monitor.proxy(), p, u);
 	var v2 = v;
-	if(monitor.object()._type) {
+	if(monitor.object() === null) {
+	    v2 = null;
+	} else if(monitor.object()._type) {
 	    v2 = {$:monitor.json()};
 	} else if(monitor.object().$) {
 	    v2 = monitor.object();
