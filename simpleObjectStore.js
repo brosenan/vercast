@@ -33,8 +33,8 @@ module.exports = function(disp, kvs) {
 	var obj = JSON.parse(json);
 	var monitor = new vercast.ObjectMonitor(obj);
 	var res = yield* disp.apply(vercast.DummyObjectStore.createContext(this, effSeq, v), monitor.proxy(), p, u);
-	if(monitor.object() === null) {
-	    v = null;
+	if(!monitor.object()) {
+	    throw Error("A patch cannot transform an object to null or undefined");
 	} else if(monitor.object()._type) {
 	    v = {$:monitor.hash()};
 	    yield* kvs.store(v.$, monitor.json());

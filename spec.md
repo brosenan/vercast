@@ -568,7 +568,7 @@ function* (){
 	    res = yield* ostore.trans(res.v, {_type: 'query'});
 ```
 
-should handle transformation that results in null.
+should throw an exception in case of a transformation that results in null.
 
 ```js
 function* (){
@@ -582,8 +582,12 @@ function* (){
 	    };
 	    var ostore = createOStore(dispMap);
 	    var v = yield* ostore.init('foo', {});
-	    var res = yield* ostore.trans(v, {_type: 'turnToNull'});
-	    assert.equal(res.v, null);
+	    try {
+		yield* ostore.trans(v, {_type: 'turnToNull'});
+		assert(false, "the previous statement should fail");
+	    } catch(e) {
+		assert.equal(e.message, "A patch cannot transform an object to null or undefined");
+	    }
 ```
 
 <a name="dummyobjectstore-context"></a>
@@ -1981,7 +1985,7 @@ function* (){
 	    res = yield* ostore.trans(res.v, {_type: 'query'});
 ```
 
-should handle transformation that results in null.
+should throw an exception in case of a transformation that results in null.
 
 ```js
 function* (){
@@ -1995,8 +1999,12 @@ function* (){
 	    };
 	    var ostore = createOStore(dispMap);
 	    var v = yield* ostore.init('foo', {});
-	    var res = yield* ostore.trans(v, {_type: 'turnToNull'});
-	    assert.equal(res.v, null);
+	    try {
+		yield* ostore.trans(v, {_type: 'turnToNull'});
+		assert(false, "the previous statement should fail");
+	    } catch(e) {
+		assert.equal(e.message, "A patch cannot transform an object to null or undefined");
+	    }
 ```
 
 <a name="simpleobjectstore-context"></a>

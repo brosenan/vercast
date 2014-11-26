@@ -57,8 +57,8 @@
   ․ DummyObjectStore .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
     DummyObjectStore .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
   ․ DummyObjectStore .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
-    DummyObjectStore .trans(v, p, u) -> {v, r, eff} should handle transformation that results in null
-  ․ DummyObjectStore .trans(v, p, u) -> {v, r, eff} should handle transformation that results in null
+    DummyObjectStore .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
+  ․ DummyObjectStore .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
     DummyObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
   ․ DummyObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
     DummyObjectStore context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
@@ -207,8 +207,8 @@
   ․ SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
     SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
   ․ SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
-    SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should handle transformation that results in null
-  ․ SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should handle transformation that results in null
+    SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
+  ․ SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
     SimpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
   ․ SimpleObjectStore context .init(type, args) should initialize an object with the given type and args and return its version ID
     SimpleObjectStore context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
@@ -246,5 +246,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  123 passing (402ms)
+  123 passing (382ms)
 

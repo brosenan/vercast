@@ -83,7 +83,7 @@ module.exports = function(createOStore) {
 	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
 	    res = yield* ostore.trans(res.v, {_type: 'query'});
 	}));
-	it('should handle transformation that results in null', asyncgen.async(function*(){
+	it('should throw an exception in case of a transformation that results in null', asyncgen.async(function*(){
 	    var dispMap = {
 		foo: {
 		    init: function*() {},
@@ -94,8 +94,12 @@ module.exports = function(createOStore) {
 	    };
 	    var ostore = createOStore(dispMap);
 	    var v = yield* ostore.init('foo', {});
-	    var res = yield* ostore.trans(v, {_type: 'turnToNull'});
-	    assert.equal(res.v, null);
+	    try {
+		yield* ostore.trans(v, {_type: 'turnToNull'});
+		assert(false, "the previous statement should fail");
+	    } catch(e) {
+		assert.equal(e.message, "A patch cannot transform an object to null or undefined");
+	    }
 	}));
     });
     describe('context', function(){
