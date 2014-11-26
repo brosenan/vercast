@@ -48,7 +48,11 @@ function createContext(self, effSeq, v) {
 	},
 	trans: function*(v, p, u) {
 	    var res = yield* self.trans(v, p, u);
-	    yield* effSeq.append(res.eff);
+	    if(typeof effSeq !== 'undefined') {
+		yield* effSeq.append(res.eff);
+	    } else if(res.eff !== '') {
+		throw Error('Effects are not allowed here');
+	    }
 	    return res;
 	},
 	conflict: function(reason) {

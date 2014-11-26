@@ -51,6 +51,8 @@
   ․ DummyKeyValueStore should retrieve stored values
     DummyObjectStore .init(type, args) should return a version ID of a newly created object
   ․ DummyObjectStore .init(type, args) should return a version ID of a newly created object
+    DummyObjectStore .init(type, args) should support queries to other objects during the initialization
+  ․ DummyObjectStore .init(type, args) should support queries to other objects during the initialization
     DummyObjectStore .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
   ․ DummyObjectStore .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
     DummyObjectStore .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
@@ -201,6 +203,8 @@
   ․ SimpleObjectStore should avoid running the patch method again if the patch has already been applied on an identical object
     SimpleObjectStore .init(type, args) should return a version ID of a newly created object
   ․ SimpleObjectStore .init(type, args) should return a version ID of a newly created object
+    SimpleObjectStore .init(type, args) should support queries to other objects during the initialization
+  ․ SimpleObjectStore .init(type, args) should support queries to other objects during the initialization
     SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
   ․ SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
     SimpleObjectStore .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
@@ -246,5 +250,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  123 passing (382ms)
+  125 passing (393ms)
 

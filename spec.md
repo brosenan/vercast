@@ -495,6 +495,26 @@ function* (done){
 	    assert(called, 'The constructor should have been called');
 ```
 
+should support queries to other objects during the initialization.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*(ctx, args) {
+			assert.equal((yield* ctx.trans(args.bar, {_type: 'get'})).r, 'BAR');
+		    },
+		},
+		bar: {
+		    init: function*() {},
+		    get: function*() { return 'BAR'; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var bar = yield* ostore.init('bar', {});
+	    var v = yield* ostore.init('foo', {bar: bar});
+```
+
 <a name="dummyobjectstore-transv-p-u---v-r-eff"></a>
 ## .trans(v, p, u) -> {v, r, eff}
 should return the value returned from the method corresponding to patch p.
@@ -1910,6 +1930,26 @@ function* (done){
 	    var v = yield* ostore.init('foo', {});
 	    assert.equal(typeof v.$, 'string');
 	    assert(called, 'The constructor should have been called');
+```
+
+should support queries to other objects during the initialization.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*(ctx, args) {
+			assert.equal((yield* ctx.trans(args.bar, {_type: 'get'})).r, 'BAR');
+		    },
+		},
+		bar: {
+		    init: function*() {},
+		    get: function*() { return 'BAR'; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var bar = yield* ostore.init('bar', {});
+	    var v = yield* ostore.init('foo', {bar: bar});
 ```
 
 <a name="simpleobjectstore-transv-p-u---v-r-eff"></a>

@@ -22,6 +22,23 @@ module.exports = function(createOStore) {
 	    assert.equal(typeof v.$, 'string');
 	    assert(called, 'The constructor should have been called');
 	}));
+	it('should support queries to other objects during the initialization', asyncgen.async(function*(){
+	    var dispMap = {
+		foo: {
+		    init: function*(ctx, args) {
+			assert.equal((yield* ctx.trans(args.bar, {_type: 'get'})).r, 'BAR');
+		    },
+		},
+		bar: {
+		    init: function*() {},
+		    get: function*() { return 'BAR'; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var bar = yield* ostore.init('bar', {});
+	    var v = yield* ostore.init('foo', {bar: bar});
+	}));
+
     });
     describe('.trans(v, p, u) -> {v, r, eff}', function(){
 	it('should return the value returned from the method corresponding to patch p', asyncgen.async(function*(done){
