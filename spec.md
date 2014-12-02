@@ -793,9 +793,29 @@ function* (){
 		var foo = yield* ostore.init('foo', {value: 42});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.equal(val, 42);
+
 		foo = yield* ostore.init('foo', {value: [42]});
 		res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.deepEqual(val, [42]);
+```
+
+should properly handle null.
+
+```js
+function* (){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: null});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, null);
 ```
 
 <a name="dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff"></a>
@@ -2278,9 +2298,29 @@ function* (){
 		var foo = yield* ostore.init('foo', {value: 42});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.equal(val, 42);
+
 		foo = yield* ostore.init('foo', {value: [42]});
 		res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.deepEqual(val, [42]);
+```
+
+should properly handle null.
+
+```js
+function* (){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: null});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, null);
 ```
 
 <a name="simplequeue"></a>

@@ -75,6 +75,8 @@
   ․ DummyObjectStore context .self() should return the version ID of the object prior to this patch application
     DummyObjectStore context .clone(obj) should return a value equivalent to obj but not a reference
   ․ DummyObjectStore context .clone(obj) should return a value equivalent to obj but not a reference
+    DummyObjectStore context .clone(obj) should properly handle null
+  ․ DummyObjectStore context .clone(obj) should properly handle null
     DummyObjectStore .addTransListener(handler(v1, p, u, v2, r, eff)) should call the handler on each successful call to trans()
   ․ DummyObjectStore .addTransListener(handler(v1, p, u, v2, r, eff)) should call the handler on each successful call to trans()
     EventuallyConsistentKVS .newKey(key, value) should store a new key/value pair given that the method is called only once for that key
@@ -233,6 +235,8 @@
   ․ SimpleObjectStore context .self() should return the version ID of the object prior to this patch application
     SimpleObjectStore context .clone(obj) should return a value equivalent to obj but not a reference
   ․ SimpleObjectStore context .clone(obj) should return a value equivalent to obj but not a reference
+    SimpleObjectStore context .clone(obj) should properly handle null
+  ․ SimpleObjectStore context .clone(obj) should properly handle null
     SimpleQueue should retrieve elements in the same order they were entered
   ․ SimpleQueue should retrieve elements in the same order they were entered
     SimpleVersionGraph .recordTrans(v1, p, v2) should return a callback with no error if all is OK
@@ -258,5 +262,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  129 passing (397ms)
+  131 passing (421ms)
 

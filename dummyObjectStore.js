@@ -70,7 +70,8 @@ function createContext(self, effSeq, v) {
 	    return self.getSequenceStore();
 	},
 	clone: function(obj) {
-	    if(typeof obj === 'object' && typeof obj.clone === 'function') {
+	    if(typeof obj === 'object' && obj && 
+	       typeof obj.clone === 'function') {
 		return obj.clone();
 	    } else {
 		return obj;
