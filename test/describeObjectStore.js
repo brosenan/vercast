@@ -253,8 +253,26 @@ module.exports = function(createOStore) {
 		var foo = yield* ostore.init('foo', {});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 	    }));
-
 	});
-
+	describe('.clone(obj)', function(){
+	    it('should return a value equivalent to obj but not a reference', asyncgen.async(function*(){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: 42});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, 42);
+		foo = yield* ostore.init('foo', {value: [42]});
+		res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.deepEqual(val, [42]);
+	    }));
+	});
     });
 }

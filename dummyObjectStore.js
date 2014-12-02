@@ -69,6 +69,13 @@ function createContext(self, effSeq, v) {
 	getSequenceStore: function() {
 	    return self.getSequenceStore();
 	},
+	clone: function(obj) {
+	    if(typeof obj === 'object' && typeof obj.clone === 'function') {
+		return obj.clone();
+	    } else {
+		return obj;
+	    }
+	},
     };
 }
 module.exports.createContext = createContext;

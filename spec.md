@@ -26,6 +26,7 @@
        - [.conflict(msg)](#dummyobjectstore-context-conflictmsg)
        - [.effect(p)](#dummyobjectstore-context-effectp)
        - [.self()](#dummyobjectstore-context-self)
+       - [.clone(obj)](#dummyobjectstore-context-cloneobj)
      - [.addTransListener(handler(v1, p, u, v2, r, eff))](#dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff)
    - [EventuallyConsistentKVS](#eventuallyconsistentkvs)
      - [.newKey(key, value)](#eventuallyconsistentkvs-newkeykey-value)
@@ -73,6 +74,7 @@
        - [.conflict(msg)](#simpleobjectstore-context-conflictmsg)
        - [.effect(p)](#simpleobjectstore-context-effectp)
        - [.self()](#simpleobjectstore-context-self)
+       - [.clone(obj)](#simpleobjectstore-context-cloneobj)
    - [SimpleQueue](#simplequeue)
    - [SimpleVersionGraph](#simpleversiongraph)
      - [.recordTrans(v1, p, v2)](#simpleversiongraph-recordtransv1-p-v2)
@@ -770,6 +772,30 @@ function* (){
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
+```
+
+<a name="dummyobjectstore-context-cloneobj"></a>
+### .clone(obj)
+should return a value equivalent to obj but not a reference.
+
+```js
+function* (){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: 42});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, 42);
+		foo = yield* ostore.init('foo', {value: [42]});
+		res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.deepEqual(val, [42]);
 ```
 
 <a name="dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff"></a>
@@ -2231,6 +2257,30 @@ function* (){
 		var ostore = createOStore(dispMap);
 		var foo = yield* ostore.init('foo', {});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
+```
+
+<a name="simpleobjectstore-context-cloneobj"></a>
+### .clone(obj)
+should return a value equivalent to obj but not a reference.
+
+```js
+function* (){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: 42});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, 42);
+		foo = yield* ostore.init('foo', {value: [42]});
+		res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.deepEqual(val, [42]);
 ```
 
 <a name="simplequeue"></a>
