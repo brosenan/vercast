@@ -105,6 +105,17 @@ describe('ObjectMonitor', function(){
 		clone[1] = 5;
 		assert.equal(obj.a[1], 2); // obj.a should not be affected
 	    });
+	});
+	describe('[map-proxy].keys()', function(){
+	    it('should return an array of the keys in the map', function(){
+		var obj = {a:[1, 2, 3], b: {x:1, y:2, z:3}};
+		var monitor = new vercast.ObjectMonitor(obj);
+		var proxy = monitor.proxy();
+		var keys1 = proxy.a.keys();
+		assert.deepEqual(keys1, ['0', '1', '2']);
+		var keys2 = proxy.b.keys();
+		assert.deepEqual(keys2, ['x', 'y', 'z']);
+	    });
 
 	});
 

@@ -139,6 +139,8 @@
   ․ ObjectMonitor .proxy() ._replaceWith(obj) should replace the underlying object with the given one
     ObjectMonitor .proxy() [map-proxy].clone() should return a deep-copy clone of the object
   ․ ObjectMonitor .proxy() [map-proxy].clone() should return a deep-copy clone of the object
+    ObjectMonitor .proxy() [map-proxy].keys() should return an array of the keys in the map
+  ․ ObjectMonitor .proxy() [map-proxy].keys() should return an array of the keys in the map
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     ObjectMonitor .hash() should return a unique string representing the content of the object
@@ -262,5 +264,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  131 passing (421ms)
+  132 passing (379ms)
 

@@ -44,6 +44,7 @@
      - [.proxy()](#objectmonitor-proxy)
        - [._replaceWith(obj)](#objectmonitor-proxy-_replacewithobj)
        - [[map-proxy].clone()](#objectmonitor-proxy-map-proxyclone)
+       - [[map-proxy].keys()](#objectmonitor-proxy-map-proxykeys)
      - [.isDirty()](#objectmonitor-isdirty)
      - [.hash()](#objectmonitor-hash)
      - [.seal(obj) [static]](#objectmonitor-sealobj-static)
@@ -1349,6 +1350,20 @@ var clone = proxy.a.clone();
 assert.deepEqual(clone, obj.a);
 clone[1] = 5;
 assert.equal(obj.a[1], 2); // obj.a should not be affected
+```
+
+<a name="objectmonitor-proxy-map-proxykeys"></a>
+### [map-proxy].keys()
+should return an array of the keys in the map.
+
+```js
+var obj = {a:[1, 2, 3], b: {x:1, y:2, z:3}};
+var monitor = new vercast.ObjectMonitor(obj);
+var proxy = monitor.proxy();
+var keys1 = proxy.a.keys();
+assert.deepEqual(keys1, ['0', '1', '2']);
+var keys2 = proxy.b.keys();
+assert.deepEqual(keys2, ['x', 'y', 'z']);
 ```
 
 <a name="objectmonitor-isdirty"></a>

@@ -90,6 +90,9 @@ module.exports = function(obj) {
 	this.clone = function() {
 	    return JSON.parse(JSON.stringify(obj));
 	};
+	this.keys = function() {
+	    return Object.keys(obj);
+	};
 	Object.freeze(this);
     }
 }
