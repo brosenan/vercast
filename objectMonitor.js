@@ -86,7 +86,10 @@ module.exports = function(obj) {
 	this.put = function(key, value) {
 	    obj[key] = value;
 	    dirtyCounter += 1;
-	}
+	};
+	this.clone = function() {
+	    return JSON.parse(JSON.stringify(obj));
+	};
 	Object.freeze(this);
     }
 }

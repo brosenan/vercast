@@ -133,6 +133,8 @@
   ․ ObjectMonitor .proxy() should not provide a map proxy for id-like nested objects
     ObjectMonitor .proxy() ._replaceWith(obj) should replace the underlying object with the given one
   ․ ObjectMonitor .proxy() ._replaceWith(obj) should replace the underlying object with the given one
+    ObjectMonitor .proxy() [map-proxy].clone() should return a deep-copy clone of the object
+  ․ ObjectMonitor .proxy() [map-proxy].clone() should return a deep-copy clone of the object
     ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
   ․ ObjectMonitor .isDirty() should indicate if a change to the object has been made since the last time it has been called
     ObjectMonitor .hash() should return a unique string representing the content of the object
@@ -252,5 +254,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  126 passing (406ms)
+  127 passing (384ms)
 

@@ -95,6 +95,19 @@ describe('ObjectMonitor', function(){
 		assert.equal(monitor.json(), '{"x":1,"y":2}');
 	    });
 	});
+	describe('[map-proxy].clone()', function(){
+	    it('should return a deep-copy clone of the object', function(){
+		var obj = {a:[1, 2, 3], b:4};
+		var monitor = new vercast.ObjectMonitor(obj);
+		var proxy = monitor.proxy();
+		var clone = proxy.a.clone();
+		assert.deepEqual(clone, obj.a);
+		clone[1] = 5;
+		assert.equal(obj.a[1], 2); // obj.a should not be affected
+	    });
+
+	});
+
     });
     describe('.isDirty()', function(){
 	it('should indicate if a change to the object has been made since the last time it has been called', function(){
