@@ -169,6 +169,8 @@
   ․ ObjectTestBed .trans(p) commutativityChecker should fail on non-commutative independent patches even if p1 and p2 are not following one anotherp
     ObjectTestBed .trans(p) commutativityChecker should consult a digest() method (if exists) to determine version equivalence
   ․ ObjectTestBed .trans(p) commutativityChecker should consult a digest() method (if exists) to determine version equivalence
+    ObjectTestBed .trans(p) .objectStore() should return the underlying obejct store
+  ․ ObjectTestBed .trans(p) .objectStore() should return the underlying obejct store
     RootStore .init(type, args) should return an initial version ID of a new object
   ․ RootStore .init(type, args) should return an initial version ID of a new object
     RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
@@ -250,5 +252,5 @@
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
 
-  125 passing (393ms)
+  126 passing (406ms)
 

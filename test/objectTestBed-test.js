@@ -189,5 +189,11 @@ describe('ObjectTestBed', function(){
 		assert.equal(r, 5);
 	    }));
 	});
+	describe('.objectStore()', function(){
+	    it('should return the underlying obejct store', asyncgen.async(function*(){
+		var otb = new vercast.ObjectTestBed(vercast.examples, 'array', {elementType: 'counter', args: {}});
+		var foo = yield* otb.objectStore().init('counter', {});
+	    }));
+	});
     });
 });

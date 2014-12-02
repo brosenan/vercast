@@ -52,6 +52,7 @@
      - [.trans(p)](#objecttestbed-transp)
        - [reversibilityChecker](#objecttestbed-transp-reversibilitychecker)
        - [commutativityChecker](#objecttestbed-transp-commutativitychecker)
+       - [.objectStore()](#objecttestbed-transp-objectstore)
    - [RootStore](#rootstore)
      - [.init(type, args)](#rootstore-inittype-args)
      - [.trans(v, p, u) -> {v,r}](#rootstore-transv-p-u---vr)
@@ -1630,6 +1631,16 @@ function* (){
 		assert.equal(r, 2);
 		r = yield* otb.trans({_type: 'add', amount: 3});
 		assert.equal(r, 5);
+```
+
+<a name="objecttestbed-transp-objectstore"></a>
+### .objectStore()
+should return the underlying obejct store.
+
+```js
+function* (){
+		var otb = new vercast.ObjectTestBed(vercast.examples, 'array', {elementType: 'counter', args: {}});
+		var foo = yield* otb.objectStore().init('counter', {});
 ```
 
 <a name="rootstore"></a>
