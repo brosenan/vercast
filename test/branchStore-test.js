@@ -5,7 +5,8 @@ var asyncgen = require('asyncgen');
 var vercast = require('vercast');
 
 var seqFactory = new vercast.SequenceStoreFactory(new vercast.DummyKeyValueStore());
-var ostore = new vercast.DummyObjectStore(new vercast.ObjectDispatcher(vercast.examples), seqFactory);
+var dispMap = Object.create(vercast.examples);
+var ostore = new vercast.DummyObjectStore(new vercast.ObjectDispatcher(dispMap), seqFactory);
 ostore = new vercast.RootStore(ostore);
 var graphDB = new vercast.DummyGraphDB();
 var versionGraph = new vercast.SimpleVersionGraph(graphDB);
@@ -14,6 +15,13 @@ ostore = new vercast.MergingObjectStore(ostore, versionGraph, seqFactory);
 var atomicKVS = new vercast.DummyAtomicKVS();
 var ecKVS = new vercast.DummyECKVS();
 var branchStore = new vercast.BranchStore(ostore, atomicKVS, ecKVS);
+
+dispMap.echo = {
+    init: function*() {},
+    echo: function*(ctx, p, u) {
+	return p.whatToReturn;
+    },
+};
 
 describe('BranchStore', function(){
     beforeEach(asyncgen.async(function*() {
@@ -33,6 +41,13 @@ describe('BranchStore', function(){
 	    var v = yield* branchStore.init('atom', {value: 'foo'});
 	    v = (yield* branchStore.trans(v, {_type: 'set', from: 'foo', to: 'bar'})).v;
 	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'bar');
+	}));
+	it('should reapply patches returned by other patches in the _reapply field', asyncgen.async(function*(){
+	    var v = yield* branchStore.init('echo', {});
+	    var res = yield* branchStore.trans(v, {_type: 'echo', whatToReturn: {
+		_reapply: {_type: 'echo', whatToReturn: 42},
+	    }});
+	    assert.equal(res.r, 42);
 	}));
     });
     describe('.fork(b, v)', function(){

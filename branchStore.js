@@ -4,7 +4,12 @@ module.exports = function(ostore, atomicKVS, ecKVS) {
 	return yield* ostore.init(type, args);
     };
     this.trans = function*(v, p) {
-	return yield* ostore.trans(v, p);
+	var res = yield* ostore.trans(v, p);
+	if(typeof res.r === 'object' && '_reapply' in res.r) {
+	    return yield* this.trans(v, res.r._reapply);
+	} else {
+	    return res;
+	}
     };
     this.fork = function*(b, v) {
 	yield* ecKVS.newKey(b, v.$);

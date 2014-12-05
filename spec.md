@@ -108,6 +108,17 @@ function* (){
 	    assert.equal((yield* ostore.trans(v, {_type: 'get'})).r, 'bar');
 ```
 
+should reapply patches returned by other patches in the _reapply field.
+
+```js
+function* (){
+	    var v = yield* branchStore.init('echo', {});
+	    var res = yield* branchStore.trans(v, {_type: 'echo', whatToReturn: {
+		_reapply: {_type: 'echo', whatToReturn: 42},
+	    }});
+	    assert.equal(res.r, 42);
+```
+
 <a name="branchstore-forkb-v"></a>
 ## .fork(b, v)
 should create a new branch, starting at the given version ID.
