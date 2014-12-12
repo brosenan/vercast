@@ -1525,6 +1525,25 @@ function* (){
 	    assert.equal(r, 5);
 ```
 
+should reapply patches returned by other patches in the _reapply field.
+
+```js
+function* (){
+	    var dispMap = {
+		echo: {
+		    init: function*() {},
+		    echo: function*(ctx, p, u) {
+			return p.whatToReturn;
+		    },
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'echo', {});
+	    var r = yield* otb.trans({_type: 'echo', whatToReturn: {
+		_reapply: {_type: 'echo', whatToReturn: 42},
+	    }});
+	    assert.equal(r, 42);
+```
+
 <a name="objecttestbed-transp-reversibilitychecker"></a>
 ### reversibilityChecker
 should fail for non-reversible transformations.

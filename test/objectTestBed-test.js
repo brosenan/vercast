@@ -22,6 +22,22 @@ describe('ObjectTestBed', function(){
 	    r = yield* otb.trans({_type: 'add', amount: 3});
 	    assert.equal(r, 5);
 	}));
+	it('should reapply patches returned by other patches in the _reapply field', asyncgen.async(function*(){
+	    var dispMap = {
+		echo: {
+		    init: function*() {},
+		    echo: function*(ctx, p, u) {
+			return p.whatToReturn;
+		    },
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'echo', {});
+	    var r = yield* otb.trans({_type: 'echo', whatToReturn: {
+		_reapply: {_type: 'echo', whatToReturn: 42},
+	    }});
+	    assert.equal(r, 42);
+	}));
+
 	describe('reversibilityChecker', function(){
 	    it('should fail for non-reversible transformations', asyncgen.async(function*(){
 		var dispMap = {

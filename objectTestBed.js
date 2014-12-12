@@ -20,6 +20,9 @@ module.exports = function(dispMap, type, args) {
     this.trans = function*(p) {
 	yield* initialize();
 	var res = yield* ostore.trans(v, p);
+	if(typeof res.r === 'object' && '_reapply' in res.r) {
+	    return yield* this.trans(res.r._reapply);
+	}
 	v = res.v;
 	return res.r;
     };

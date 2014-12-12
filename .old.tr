@@ -165,6 +165,8 @@
   ․ ObjectMonitor .object() should provide an unprovisioned access to the object
     ObjectTestBed .trans(p) should apply a patch, returning the result
   ․ ObjectTestBed .trans(p) should apply a patch, returning the result
+    ObjectTestBed .trans(p) should reapply patches returned by other patches in the _reapply field
+  ․ ObjectTestBed .trans(p) should reapply patches returned by other patches in the _reapply field
     ObjectTestBed .trans(p) reversibilityChecker should fail for non-reversible transformations
   ․ ObjectTestBed .trans(p) reversibilityChecker should fail for non-reversible transformations
     ObjectTestBed .trans(p) reversibilityChecker should consult a digest() method (if defined) to get a representation of the value
@@ -263,8 +265,14 @@
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
   ․ atom should allow setting and getting a value
+    atom put{value} should cause the atom to change to the given value
+  ․ atom put{value} should cause the atom to change to the given value
     counter should add the given amount to the counter and return the value
   ․ counter should add the given amount to the counter and return the value
+    counter get should return the counter's value
+  ․ counter get should return the counter's value
+    counter put{value} should reset the counter to the given value
+  ․ counter put{value} should reset the counter to the given value
 
-  133 passing (406ms)
+  137 passing (393ms)
 

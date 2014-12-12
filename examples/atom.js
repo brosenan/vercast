@@ -12,6 +12,15 @@ exports.set = function*(ctx, p, u) {
     }
     this.value = p.to;
 };
+
 exports.get = function*() {
     return this.value;
+};
+
+exports.put = function*(ctx, p, u) {
+    return {_reapply: {
+	_type: 'set',
+	from: this.value,
+	to: p.value,
+    }};
 };

@@ -12,4 +12,21 @@ describe('counter', function(){
 	var r = yield* otb.trans({_type: 'add', amount: 2});
 	assert.equal(r, 5);
     }));
+    describe('get', function(){
+	it('should return the counter\'s value', asyncgen.async(function*(){
+	    var otb = new vercast.ObjectTestBed({counter: vercast.examples.counter}, 'counter', {});
+	    yield* otb.trans({_type: 'add', amount: 3});
+	    assert.equal(yield* otb.trans({_type: 'get'}), 3);
+	}));
+
+    });
+
+    describe('put{value}', function(){
+	it('should reset the counter to the given value', asyncgen.async(function*(){
+	    var otb = new vercast.ObjectTestBed({counter: vercast.examples.counter}, 'counter', {});
+	    yield* otb.trans({_type: 'add', amount: 20});
+	    yield* otb.trans({_type: 'put', value: 3});
+	    assert.equal(yield* otb.trans({_type: 'get'}), 3);
+	}));
+    });
 });
