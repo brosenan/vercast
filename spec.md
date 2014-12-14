@@ -56,6 +56,7 @@
        - [reversibilityChecker](#objecttestbed-transp-reversibilitychecker)
        - [commutativityChecker](#objecttestbed-transp-commutativitychecker)
        - [.objectStore()](#objecttestbed-transp-objectstore)
+       - [.current()](#objecttestbed-transp-current)
    - [RootStore](#rootstore)
      - [.init(type, args)](#rootstore-inittype-args)
      - [.trans(v, p, u) -> {v,r}](#rootstore-transv-p-u---vr)
@@ -1747,6 +1748,19 @@ should return the underlying obejct store.
 function* (){
 		var otb = new vercast.ObjectTestBed(vercast.examples, 'array', {elementType: 'counter', args: {}});
 		var foo = yield* otb.objectStore().init('counter', {});
+```
+
+<a name="objecttestbed-transp-current"></a>
+### .current()
+should return the current version.
+
+```js
+function* (){
+		var otb = new vercast.ObjectTestBed(vercast.examples, 'array', {elementType: 'counter', args: {}});
+		yield* otb.trans({_type: 'put', _key: 'x', value: 3});
+		var v = otb.current();
+		assert.equal((yield* otb.objectStore().trans(v, {_type: 'get',
+								 _key: 'x'})).r, 3);
 ```
 
 <a name="rootstore"></a>

@@ -37,7 +37,6 @@ describe('ObjectTestBed', function(){
 	    }});
 	    assert.equal(r, 42);
 	}));
-
 	describe('reversibilityChecker', function(){
 	    it('should fail for non-reversible transformations', asyncgen.async(function*(){
 		var dispMap = {
@@ -211,5 +210,16 @@ describe('ObjectTestBed', function(){
 		var foo = yield* otb.objectStore().init('counter', {});
 	    }));
 	});
+	describe('.current()', function(){
+	    it('should return the current version', asyncgen.async(function*(){
+		var otb = new vercast.ObjectTestBed(vercast.examples, 'array', {elementType: 'counter', args: {}});
+		yield* otb.trans({_type: 'put', _key: 'x', value: 3});
+		var v = otb.current();
+		assert.equal((yield* otb.objectStore().trans(v, {_type: 'get',
+								 _key: 'x'})).r, 3);
+	    }));
+
+	});
+
     });
 });

@@ -29,6 +29,10 @@ module.exports = function(dispMap, type, args) {
     this.objectStore = function() {
 	return ostore;
     };
+    
+    this.current = function() {
+	return v;
+    };
 
     (function() {
 	var ostore2 = new vercast.DummyObjectStore(disp);

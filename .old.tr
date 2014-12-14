@@ -183,6 +183,8 @@
   ․ ObjectTestBed .trans(p) commutativityChecker should consult a digest() method (if exists) to determine version equivalence
     ObjectTestBed .trans(p) .objectStore() should return the underlying obejct store
   ․ ObjectTestBed .trans(p) .objectStore() should return the underlying obejct store
+    ObjectTestBed .trans(p) .current() should return the current version
+  ․ ObjectTestBed .trans(p) .current() should return the current version
     RootStore .init(type, args) should return an initial version ID of a new object
   ․ RootStore .init(type, args) should return an initial version ID of a new object
     RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
@@ -274,5 +276,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  137 passing (393ms)
+  138 passing (335ms)
 
