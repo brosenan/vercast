@@ -26,4 +26,7 @@ module.exports = function(ostore) {
     this.addTransListener = function(listener) {
 	ostore.addTransListener(listener);
     };
+    this.getSequenceStore = function() {
+	return ostore.getSequenceStore();
+    }
 };
