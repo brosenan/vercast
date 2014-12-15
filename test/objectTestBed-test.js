@@ -37,7 +37,7 @@ describe('ObjectTestBed', function(){
 	    }});
 	    assert.equal(r, 42);
 	}));
-	it('should handle effects properly', asyncgen.async(function*(){
+	it('should handle effects properly when useEffect is true', asyncgen.async(function*(){
 	    var dispMap = {
 		effCounter: {
 		    init: function*() { this.value = 0; },
@@ -52,7 +52,7 @@ describe('ObjectTestBed', function(){
 		    }
 		},
 	    };
-	    var otb = new vercast.ObjectTestBed(dispMap, 'effCounter', {});
+	    var otb = new vercast.ObjectTestBed(dispMap, 'effCounter', {}, true);
 	    yield* otb.trans({_type: 'effect', patch: {_type: 'inc'}});
 	    assert.equal(yield* otb.trans({_type: 'get'}), 1);
 	}));

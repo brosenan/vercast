@@ -2,9 +2,12 @@
 
 var vercast = require('vercast');
 
-module.exports = function(dispMap, type, args) {
+module.exports = function(dispMap, type, args, useEffect) {
     var disp = new vercast.ObjectDispatcher(dispMap);
-    var ostore = new vercast.RootStore(new vercast.DummyObjectStore(disp));
+    var ostore = new vercast.DummyObjectStore(disp);
+    if(useEffect) {
+	ostore = new vercast.RootStore(ostore);
+    }
     var v;
 
     dispMap.$digest = function*(ctx, p, u) {

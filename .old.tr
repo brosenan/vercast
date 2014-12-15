@@ -167,8 +167,8 @@
   ․ ObjectTestBed .trans(p) should apply a patch, returning the result
     ObjectTestBed .trans(p) should reapply patches returned by other patches in the _reapply field
   ․ ObjectTestBed .trans(p) should reapply patches returned by other patches in the _reapply field
-    ObjectTestBed .trans(p) should handle effects properly
-  ․ ObjectTestBed .trans(p) should handle effects properly
+    ObjectTestBed .trans(p) should handle effects properly when useEffect is true
+  ․ ObjectTestBed .trans(p) should handle effects properly when useEffect is true
     ObjectTestBed .trans(p) reversibilityChecker should fail for non-reversible transformations
   ․ ObjectTestBed .trans(p) reversibilityChecker should fail for non-reversible transformations
     ObjectTestBed .trans(p) reversibilityChecker should consult a digest() method (if defined) to get a representation of the value
@@ -278,5 +278,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  139 passing (426ms)
+  139 passing (418ms)
 
