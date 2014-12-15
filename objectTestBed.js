@@ -4,7 +4,7 @@ var vercast = require('vercast');
 
 module.exports = function(dispMap, type, args) {
     var disp = new vercast.ObjectDispatcher(dispMap);
-    var ostore = new vercast.DummyObjectStore(disp);
+    var ostore = new vercast.RootStore(new vercast.DummyObjectStore(disp));
     var v;
 
     dispMap.$digest = function*(ctx, p, u) {

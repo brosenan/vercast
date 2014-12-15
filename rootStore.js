@@ -23,4 +23,7 @@ module.exports = function(ostore) {
 	res.r = retVal;
 	return res;
     };
+    this.addTransListener = function(listener) {
+	ostore.addTransListener(listener);
+    };
 };

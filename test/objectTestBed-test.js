@@ -37,6 +37,25 @@ describe('ObjectTestBed', function(){
 	    }});
 	    assert.equal(r, 42);
 	}));
+	it('should handle effects properly', asyncgen.async(function*(){
+	    var dispMap = {
+		effCounter: {
+		    init: function*() { this.value = 0; },
+		    effect: function*(ctx, p, u) {
+			yield* ctx.effect(p.patch);
+		    },
+		    inc: function*(ctx, p, u) {
+			this.value += (u?-1:1);
+		    },
+		    get: function*() {
+			return this.value;
+		    }
+		},
+	    };
+	    var otb = new vercast.ObjectTestBed(dispMap, 'effCounter', {});
+	    yield* otb.trans({_type: 'effect', patch: {_type: 'inc'}});
+	    assert.equal(yield* otb.trans({_type: 'get'}), 1);
+	}));
 	describe('reversibilityChecker', function(){
 	    it('should fail for non-reversible transformations', asyncgen.async(function*(){
 		var dispMap = {
