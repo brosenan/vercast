@@ -1,6 +1,6 @@
 {
   "name": "vercast",
-  "version": "0.1.14",
+  "version": "0.1.15",
   "description": "VERsion Controlled Application STate: A version control system for application state.",
   "main": "index.js",
   "scripts": {
@@ -24,6 +24,7 @@
     "mocha": "^2.0.1"
   },
   "dependencies": {
-    "asyncgen": "^1.0.6"
+    "asyncgen": "^1.0.7",
+    "neo4j": "^1.1.1"
   }
 }
