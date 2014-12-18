@@ -27,7 +27,8 @@ function SimpleObjectStorage(kvs) {
 
 	return v2;
     };
-    this.checkCache = function*(v, pHash) {
+    this.checkCache = function*(v, p) {
+	var pHash = vercast.ObjectMonitor.seal(p);
 	var cachedKey = v + '>' + pHash;
 	var cachedResult = yield* kvs.fetch(cachedKey);
 	if(typeof cachedResult === 'string') {
