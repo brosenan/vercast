@@ -30,7 +30,8 @@ describe('DummyObjectStore', function(){
 	    ostore.addTransListener(function*(v1, p, u, v2, r, eff) {
 		called = true;
 		assert.equal(v1.$, foo.$);
-		assert.deepEqual(p, {_type: 'bar', x: 2});
+		assert.equal(p._type, 'bar');
+		assert.equal(p.x, 2);
 		assert.equal(u, false);
 		v2_out = v2;
 		assert.equal(r, 99);

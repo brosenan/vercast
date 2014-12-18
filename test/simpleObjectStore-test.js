@@ -32,7 +32,7 @@ describe('SimpleObjectStore', function(){
 	assert.equal(count, 1);
 	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar'})).v;
 	assert.equal(v1.$, v1Prime.$);
-	// This should not 
+	// This should not have required a call to the patch handler
 	assert.equal(count, 1);
     }));
 });
