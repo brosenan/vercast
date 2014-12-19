@@ -179,6 +179,10 @@
   ․ ObjectMonitor .json() should return a JSON representation of the object
     ObjectMonitor .object() should provide an unprovisioned access to the object
   ․ ObjectMonitor .object() should provide an unprovisioned access to the object
+    ObjectStore should pass an initially empty context object to the storage object
+  ․ ObjectStore should pass an initially empty context object to the storage object
+    ObjectStore should pass to underlying calls the derived context
+  ․ ObjectStore should pass to underlying calls the derived context
     ObjectTestBed .trans(p) should apply a patch, returning the result
   ․ ObjectTestBed .trans(p) should apply a patch, returning the result
     ObjectTestBed .trans(p) should reapply patches returned by other patches in the _reapply field
@@ -294,5 +298,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  147 passing (4s)
+  149 passing (6s)
 

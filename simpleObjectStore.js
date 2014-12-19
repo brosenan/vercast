@@ -11,7 +11,7 @@ function SimpleObjectStorage(kvs) {
     this.retrieve = function*(ctx, hash) {
 	var json = yield* kvs.fetch(hash);
 	if(typeof json === 'undefined') {
-	    throw Error('No object version matching id: ' + v.$);
+	    throw Error('No object version matching id: ' + hash);
 	}
 	var obj = JSON.parse(json);
 	return new vercast.ObjectMonitor(obj);
@@ -27,7 +27,7 @@ function SimpleObjectStorage(kvs) {
 
 	return v2;
     };
-    this.checkCache = function*(v, p) {
+    this.checkCache = function*(ctx, v, p) {
 	var pHash = vercast.ObjectMonitor.seal(p);
 	var cachedKey = v + '>' + pHash;
 	var cachedResult = yield* kvs.fetch(cachedKey);
@@ -35,6 +35,7 @@ function SimpleObjectStorage(kvs) {
 	    return JSON.parse(cachedResult);
 	}
     };
+    this.deriveContext = function() {};
 }
 
 module.exports = function(disp, kvs) {

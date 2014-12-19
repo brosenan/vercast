@@ -15,6 +15,7 @@ var DummyObjectStorage = function() {
 	return monitor.json();
     };
     this.checkCache = function*() {};
+    this.deriveContext = function() {};
 };
 
 module.exports = function(disp, effSeqFactory) {
