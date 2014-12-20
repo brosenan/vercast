@@ -11,6 +11,7 @@
        - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
        - [.retrieve(key))](#dummyatomickvs-as-atomickeyvalue-retrievekey)
        - [.modify(key, oldVal, newVal)](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval)
+   - [DummyBucketStore](#dummybucketstore)
    - [DummyGraphDB](#dummygraphdb)
      - [as GraphDB](#dummygraphdb-as-graphdb)
        - [addEdge](#dummygraphdb-as-graphdb-addedge)
@@ -379,6 +380,19 @@ function* (){
 		assert.equal(valAfterMod, 'bar'); // The value before the change
 		var val = yield* atomicKV.retrieve('foo');
 		assert.equal(val, 'bar');
+```
+
+<a name="dummybucketstore"></a>
+# DummyBucketStore
+should retrieve, all at once, the elements that were individually appended to a given bucket.
+
+```js
+function* (){
+	yield* bucketStore.append('foo', [{a:1}, {a:2}]);
+	yield* bucketStore.append('foo', [{a:3}]);
+	yield* bucketStore.append('foo', [{a:4}]);
+	assert.deepEqual(yield* bucketStore.retrieve('foo'), 
+			 [{a:1}, {a:2}, {a:3}, {a:4}]);
 ```
 
 <a name="dummygraphdb"></a>

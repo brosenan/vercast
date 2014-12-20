@@ -49,6 +49,8 @@
   ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should change the value under key to newVal, given that the previous value was oldVal
     DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should not change the value under key if the current value does not equal oldVal
   ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should not change the value under key if the current value does not equal oldVal
+    DummyBucketStore should retrieve, all at once, the elements that were individually appended to a given bucket
+  ․ DummyBucketStore should retrieve, all at once, the elements that were individually appended to a given bucket
     DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
   ․ DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
     DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
@@ -298,5 +300,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  149 passing (6s)
+  150 passing (6s)
 
