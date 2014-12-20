@@ -6,6 +6,9 @@
      - [.head(b)](#branchstore-headb)
      - [.push(b, v, atomic=false)](#branchstore-pushb-v-atomicfalse)
      - [.pull(v, b)](#branchstore-pullv-b)
+   - [BucketObjectStorage](#bucketobjectstorage)
+     - [.deriveContext(ctx, v, p)](#bucketobjectstorage-derivecontextctx-v-p)
+     - [.storeNewObject(ctx, obj)](#bucketobjectstorage-storenewobjectctx-obj)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
@@ -316,6 +319,62 @@ function* (){
 							_key: 'foo'})).r, 'FOO1');
 ```
 
+<a name="bucketobjectstorage"></a>
+# BucketObjectStorage
+should create a new bucket object by calling createBucket() when using a new bucket ID.
+
+```js
+function* (){
+	var called = false;
+	function createBucket() {
+	    called = true;
+	    return {
+		store: function() {},
+	    };
+	}
+	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	yield* storage.storeNewObject({bucket: 'xyz'}, {_type: 'someObject'});
+	assert(called, 'should be called');
+
+	called = false;
+	yield* storage.storeNewObject({bucket: 'xyz'}, {_type: 'someOtherObject'});
+	assert(!called, 'should not have been called again');
+```
+
+<a name="bucketobjectstorage-derivecontextctx-v-p"></a>
+## .deriveContext(ctx, v, p)
+should store the version's bucket ID in  the context.
+
+```js
+function* (){
+	    var storage = new vercast.BucketObjectStorage();
+	    var newCtx = storage.deriveContext({}, "1234-5678", {});
+	    assert.equal(newCtx.bucket, '1234');
+```
+
+<a name="bucketobjectstorage-storenewobjectctx-obj"></a>
+## .storeNewObject(ctx, obj)
+should invoke the .store() method of the corresponding bucket object .
+
+```js
+function* (){
+	    var called = false;
+	    var theObjectToCreate = {_type: 'obj', x: 42};
+	    function createBucket() {
+		return {
+		    store: function(obj) {
+			called = true;
+			assert.deepEqual(obj, theObjectToCreate);
+			return 'foo';
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	    var id = yield* storage.storeNewObject({bucket: 'abcd'}, theObjectToCreate);
+	    assert(called, 'should have been called');
+	    assert.equal(id, 'abcd-foo');
+```
+
 <a name="dummyatomickvs"></a>
 # DummyAtomicKVS
 <a name="dummyatomickvs-as-atomickeyvalue"></a>
@@ -393,6 +452,13 @@ function* (){
 	yield* bucketStore.append('foo', [{a:4}]);
 	assert.deepEqual(yield* bucketStore.retrieve('foo'), 
 			 [{a:1}, {a:2}, {a:3}, {a:4}]);
+```
+
+should retrieve an empty array for a bucket that has never been appended to.
+
+```js
+function* (){
+	assert.deepEqual(yield* bucketStore.retrieve('bar'), []);
 ```
 
 <a name="dummygraphdb"></a>

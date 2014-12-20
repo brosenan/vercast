@@ -19,3 +19,4 @@ exports.DummyAtomicKVS = require('./dummyAtomicKVS.js');
 exports.Neo4jGraphDB = require('./neo4j/neo4jGraphDB.js');
 exports.ObjectStore = require('./objectStore.js');
 exports.DummyBucketStore = require('./dummyBucketStore.js');
+exports.BucketObjectStorage = require('./bucketObjectStorage.js');

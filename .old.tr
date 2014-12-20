@@ -39,6 +39,12 @@
   ․ BranchStore .pull(v, b) should return a merge between the head of b and v
     BranchStore .pull(v, b) should resolve conflicts by preferring the branch
   ․ BranchStore .pull(v, b) should resolve conflicts by preferring the branch
+    BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
+  ․ BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
+    BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
+  ․ BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
+    BucketObjectStorage .storeNewObject(ctx, obj) should invoke the .store() method of the corresponding bucket object 
+  ․ BucketObjectStorage .storeNewObject(ctx, obj) should invoke the .store() method of the corresponding bucket object 
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists
@@ -51,6 +57,8 @@
   ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should not change the value under key if the current value does not equal oldVal
     DummyBucketStore should retrieve, all at once, the elements that were individually appended to a given bucket
   ․ DummyBucketStore should retrieve, all at once, the elements that were individually appended to a given bucket
+    DummyBucketStore should retrieve an empty array for a bucket that has never been appended to
+  ․ DummyBucketStore should retrieve an empty array for a bucket that has never been appended to
     DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
   ․ DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
     DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
@@ -300,5 +308,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  150 passing (6s)
+  154 passing (5s)
 

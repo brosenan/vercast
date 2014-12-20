@@ -16,7 +16,6 @@ module.exports = function() {
 	});
     };
     this.retrieve = function*(bucketName) {
-	return buckets[bucketName];
-
+	return buckets[bucketName] || [];
     };
 };

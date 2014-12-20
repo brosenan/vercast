@@ -17,4 +17,7 @@ describe('DummyBucketStore', function(){
 	assert.deepEqual(yield* bucketStore.retrieve('foo'), 
 			 [{a:1}, {a:2}, {a:3}, {a:4}]);
     }));
+    it('should retrieve an empty array for a bucket that has never been appended to', asyncgen.async(function*(){
+	assert.deepEqual(yield* bucketStore.retrieve('bar'), []);
+    }));
 });
