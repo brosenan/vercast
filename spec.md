@@ -10,6 +10,7 @@
      - [.deriveContext(ctx, v, p)](#bucketobjectstorage-derivecontextctx-v-p)
      - [.storeNewObject(ctx, obj)](#bucketobjectstorage-storenewobjectctx-obj)
      - [.storeVersion(ctx, v1, p, monitor, r, eff)](#bucketobjectstorage-storeversionctx-v1-p-monitor-r-eff)
+     - [.retrieve(ctx, id)](#bucketobjectstorage-retrievectx-id)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
@@ -433,7 +434,8 @@ function* (){
 	    }
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 	    var ctx = {bucket: '1234', tuid: 'xxxyyy'};
-	    var v2 = yield* storage.storeVersion(ctx, '1234-5678', {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj'}), 123, 'someEff');
+	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
+	    var v2 = yield* storage.storeVersion(ctx, '1234-5678', {_type: 'somePatch'}, monitor, 123, 'someEff');
 	    assert(called, 'storeInternal() should have been called');
 	    assert.equal(v2, '1234-zyx');
 ```
@@ -477,10 +479,30 @@ function* (){
 	       var ctx = {bucket: '1234', tuid: 'xxxyyy'};
 	       yield* bucketStore.append('1234', [{this_is: '1234'}]);
 	       yield* bucketStore.append('2345', [{this_is: '2345'}]);
-	       var v2 = yield* storage.storeVersion(ctx, '2345-6789', {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj'}), 123, 'someEff');
+	       var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
+	       var v2 = yield* storage.storeVersion(ctx, '2345-6789', {_type: 'somePatch'}, monitor, 123, 'someEff');
 	       assert(calledIncoming, 'storeIncoming() should have been called');
 	       assert(calledOutgoing, 'storeOutgoing() should have been called');
 	       assert.equal(v2, "2345-foo");
+```
+
+<a name="bucketobjectstorage-retrievectx-id"></a>
+## .retrieve(ctx, id)
+should invoke the bucket's retrieve() method and return the monitor provided by it.
+
+```js
+function* (){
+	    function createBucket() {
+		return {
+		    retrieve: function(id) {
+			return new vercast.ObjectMonitor({my_id_is: id});
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	    var ctx = {bucket: '4444', tuid: 'xxxx-yyyy'};
+	    var monitor = yield* storage.retrieve(ctx, "1234-5678");
+	    assert.equal(monitor.proxy().my_id_is, '5678');
 ```
 
 <a name="dummyatomickvs"></a>

@@ -47,4 +47,9 @@ module.exports = function(bucketStore, createBucket) {
 	}
 	return [targetBucketID, internalID].join('-');
     };
+    this.retrieve = function*(ctx, id) {
+	var split = id.split('-');
+	var bucket = yield* getBucket(split[0]);
+	return bucket.retrieve(split[1]);
+    };
 };

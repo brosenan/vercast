@@ -53,6 +53,8 @@
   ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the bucket's storeInternal() if the context bucket id matches the one in v1
     BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the storeIncoming() and storeOutgoing() methods of the corresponding two buckets if the call is made from one bucket to another 
   ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the storeIncoming() and storeOutgoing() methods of the corresponding two buckets if the call is made from one bucket to another 
+    BucketObjectStorage .retrieve(ctx, id) should invoke the bucket's retrieve() method and return the monitor provided by it
+  ․ BucketObjectStorage .retrieve(ctx, id) should invoke the bucket's retrieve() method and return the monitor provided by it
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists
@@ -316,5 +318,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  158 passing (6s)
+  159 passing (6s)
 
