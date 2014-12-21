@@ -26,6 +26,22 @@ describe('BucketObjectStorage', function(){
 	yield* storage.storeNewObject({bucket: 'xyz'}, {_type: 'someOtherObject'});
 	assert(!called, 'should not have been called again');
     }));
+    it('should call the new bucket object\'s add() method with every existing element in the bucket', asyncgen.async(function*(){
+	var elements = [{a:1}, {a:2}, {a:3}];
+	yield* bucketStore.append('foo', elements);
+	var received = [];
+	function createBucket() {
+	    return {
+		store: function() {},
+		add: function(elem) {
+		    received.push(elem);
+		},
+	    };
+	}
+	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	yield* storage.storeNewObject({bucket: 'foo'}, {_type: 'someObject'});
+	assert.deepEqual(received, elements);
+    }));
 
     describe('.deriveContext(ctx, v, p)', function(){
 	it('should store the version\'s bucket ID in  the context', asyncgen.async(function*(){
@@ -33,7 +49,18 @@ describe('BucketObjectStorage', function(){
 	    var newCtx = storage.deriveContext({}, "1234-5678", {});
 	    assert.equal(newCtx.bucket, '1234');
 	}));
-   });
+	it('should assign a time-uuid to the context if entering a new bucket', asyncgen.async(function*(){
+	    var storage = new vercast.BucketObjectStorage();
+	    var ctx1 = storage.deriveContext({}, "1234-5678", {});
+	    assert.equal(typeof ctx1.tuid, 'string');
+	    // within the same bucket
+	    var ctx2 = storage.deriveContext(ctx1, "1234-9999", {}); 
+	    assert.equal(ctx2.tuid, ctx1.tuid);
+	    // going to another bucket
+	    var ctx3 = storage.deriveContext(ctx1, "3456-9999", {}); 
+	    assert(ctx3.tuid > ctx2.tuid, "new tuid must be greater than previous");
+	}));
+    });
     describe('.storeNewObject(ctx, obj)', function(){
 	it('should invoke the .store() method of the corresponding bucket object ', asyncgen.async(function*(){
 	    var called = false;
@@ -53,4 +80,71 @@ describe('BucketObjectStorage', function(){
 	    assert.equal(id, 'abcd-foo');
 	}));
     });
+    describe('.storeVersion(ctx, v1, p, monitor, r, eff)', function(){
+	it('should invoke the bucket\'s storeInternal() if the context bucket id matches the one in v1', asyncgen.async(function*(){
+	    var called = false;
+	    function createBucket() {
+		return {
+		    storeInternal: function(v1, p, monitor, r, eff) {
+			called = true;
+			assert.equal(v1, '1234-5678');
+			assert.equal(p._type, 'somePatch');
+			assert.equal(monitor.proxy()._type, 'someObj');
+			assert.equal(r, 123);
+			assert.equal(eff, 'someEff');
+			return 'zyx';
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	    var ctx = {bucket: '1234', tuid: 'xxxyyy'};
+	    var v2 = yield* storage.storeVersion(ctx, '1234-5678', {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj'}), 123, 'someEff');
+	    assert(called, 'storeInternal() should have been called');
+	    assert.equal(v2, '1234-zyx');
+	}));
+	it('should invoke the storeIncoming() and storeOutgoing() methods of the corresponding two buckets if the call is made from one bucket to another ', 
+	   asyncgen.async(function*(){
+	       var calledIncoming = false, calledOutgoing = false;
+	       function createBucket() {
+		   return {
+		       storeIncoming: function(v1, p, monitor, r, eff) {
+			   calledIncoming = true;
+			   assert.equal(v1, '2345-6789');
+			   assert.equal(p._type, 'somePatch');
+			   assert.equal(monitor.proxy()._type, 'someObj');
+			   assert.equal(r, 123);
+			   assert.equal(eff, 'someEff');
+			   assert.equal(this.this_is, '2345');
+			   return "foo";
+		       },
+		       storeOutgoing: function(v1, p, monitor, r, eff) {
+			   calledOutgoing = true;
+			   assert.equal(v1, '2345-6789');
+			   assert.equal(p._type, 'somePatch');
+			   assert.equal(monitor.proxy()._type, 'someObj');
+			   assert.equal(r, 123);
+			   assert.equal(eff, 'someEff');
+			   assert.equal(this.this_is, '1234');
+			   return "bar";
+		       },
+		       storeInternal: function() {
+			   assert(false, 'storeInternal() should not have been called');
+		       },
+		       add: function(elem) {
+			   this.this_is = elem.this_is;
+		       },
+		   };
+	       }
+	       var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	       var ctx = {bucket: '1234', tuid: 'xxxyyy'};
+	       yield* bucketStore.append('1234', [{this_is: '1234'}]);
+	       yield* bucketStore.append('2345', [{this_is: '2345'}]);
+	       var v2 = yield* storage.storeVersion(ctx, '2345-6789', {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj'}), 123, 'someEff');
+	       assert(calledIncoming, 'storeIncoming() should have been called');
+	       assert(calledOutgoing, 'storeOutgoing() should have been called');
+	       assert.equal(v2, "2345-foo");
+	   }));
+
+    });
+
 });

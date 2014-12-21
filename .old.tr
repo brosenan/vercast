@@ -41,10 +41,18 @@
   ․ BranchStore .pull(v, b) should resolve conflicts by preferring the branch
     BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
   ․ BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
+    BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
+  ․ BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
     BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
   ․ BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
+    BucketObjectStorage .deriveContext(ctx, v, p) should assign a time-uuid to the context if entering a new bucket
+  ․ BucketObjectStorage .deriveContext(ctx, v, p) should assign a time-uuid to the context if entering a new bucket
     BucketObjectStorage .storeNewObject(ctx, obj) should invoke the .store() method of the corresponding bucket object 
   ․ BucketObjectStorage .storeNewObject(ctx, obj) should invoke the .store() method of the corresponding bucket object 
+    BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the bucket's storeInternal() if the context bucket id matches the one in v1
+  ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the bucket's storeInternal() if the context bucket id matches the one in v1
+    BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the storeIncoming() and storeOutgoing() methods of the corresponding two buckets if the call is made from one bucket to another 
+  ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the storeIncoming() and storeOutgoing() methods of the corresponding two buckets if the call is made from one bucket to another 
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists
@@ -308,5 +316,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  154 passing (5s)
+  158 passing (6s)
 
