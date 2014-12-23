@@ -43,10 +43,16 @@
   ․ BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
     BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
   ․ BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
+    BucketObjectStorage should store to the bucket all elements emitted by the bucket object, and adds them back
+  ․ BucketObjectStorage should store to the bucket all elements emitted by the bucket object, and adds them back
+    BucketObjectStorage should store emitions from underlying operations
+  ․ BucketObjectStorage should store emitions from underlying operations
+    BucketObjectStorage should not store emitions from underlying operations if the top level operation retained the version ID
+  ․ BucketObjectStorage should not store emitions from underlying operations if the top level operation retained the version ID
     BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
   ․ BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
-    BucketObjectStorage .deriveContext(ctx, v, p) should assign a time-uuid to the context if entering a new bucket
-  ․ BucketObjectStorage .deriveContext(ctx, v, p) should assign a time-uuid to the context if entering a new bucket
+    BucketObjectStorage .deriveContext(ctx, v, p) should assign the originator version-patch ID for a new bucket
+  ․ BucketObjectStorage .deriveContext(ctx, v, p) should assign the originator version-patch ID for a new bucket
     BucketObjectStorage .storeNewObject(ctx, obj) should invoke the .store() method of the corresponding bucket object 
   ․ BucketObjectStorage .storeNewObject(ctx, obj) should invoke the .store() method of the corresponding bucket object 
     BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the bucket's storeInternal() if the context bucket id matches the one in v1
@@ -318,5 +324,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  159 passing (6s)
+  162 passing (6s)
 

@@ -363,6 +363,96 @@ function* (){
 	assert.deepEqual(received, elements);
 ```
 
+should store to the bucket all elements emitted by the bucket object, and adds them back.
+
+```js
+function* (){
+	var added = [];
+	function createBucket() {
+	    return {
+		storeIncoming: function(v1, p, monitor, r, eff, emit) {
+		    emit({a:1});
+		    emit({a:2});
+		},
+		storeOutgoing: function() {},
+		add: function(elem) {
+		    added.push(elem);
+		},
+	    };
+	}
+	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	yield* storage.storeVersion({bucket: 'xyz'}, 
+				    '1234-5678', 
+				    {_type: 'somePatch'},
+				    new vercast.ObjectMonitor({_type: 'someObject'}),
+				    123, 'someEff');
+	assert.deepEqual([{a:1}, {a:2}], added);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), added);
+
+	// And again...
+	yield* storage.storeVersion({bucket: 'xyz'}, 
+				    '1234-5678', 
+				    {_type: 'somePatch'},
+				    new vercast.ObjectMonitor({_type: 'someObject'}),
+				    123, 'someEff');
+	assert.deepEqual([{a:1}, {a:2}, {a:1}, {a:2}], added);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), added);
+```
+
+should store emitions from underlying operations.
+
+```js
+function* (){
+	var added = [];
+	function createBucket(emit) {
+	    return {
+		add: function(elem) {
+		    added.push(elem);
+		},
+		store: function(obj, emit) {
+		    emit({a:3});
+		    emit({a:4});
+		},
+		storeIncoming: function() { return 'newver'; },
+		storeOutgoing: function() {},
+	    };
+	}
+	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
+	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
+	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
+	yield* storage.storeVersion({}, '1234-5678', {_type: 'someOtherPatch'}, monitor, undefined, '');
+	assert.deepEqual(added, []); // should not store events for unrelated application
+	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
+	assert.deepEqual(added, [{a:3}, {a:4}]);
+```
+
+should not store emitions from underlying operations if the top level operation retained the version ID.
+
+```js
+function* (){
+	var added = [];
+	function createBucket(emit) {
+	    return {
+		add: function(elem) {
+		    added.push(elem);
+		},
+		store: function(obj, emit) {
+		    emit({a:3});
+		    emit({a:4});
+		},
+		storeIncoming: function() { return 'newver'; },
+		storeOutgoing: function() {},
+	    };
+	}
+	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
+	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
+	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
+	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
+	assert.deepEqual(added, [{a:3}, {a:4}]);
+```
+
 <a name="bucketobjectstorage-derivecontextctx-v-p"></a>
 ## .deriveContext(ctx, v, p)
 should store the version's bucket ID in  the context.
@@ -374,19 +464,22 @@ function* (){
 	    assert.equal(newCtx.bucket, '1234');
 ```
 
-should assign a time-uuid to the context if entering a new bucket.
+should assign the originator version-patch ID for a new bucket.
 
 ```js
 function* (){
 	    var storage = new vercast.BucketObjectStorage();
-	    var ctx1 = storage.deriveContext({}, "1234-5678", {});
-	    assert.equal(typeof ctx1.tuid, 'string');
+	    var ctx1 = storage.deriveContext({}, "1234-5678", {_type: 'foo'});
+	    assert.equal(ctx1.originator.substr(0, 5), '5678-');
 	    // within the same bucket
-	    var ctx2 = storage.deriveContext(ctx1, "1234-9999", {}); 
-	    assert.equal(ctx2.tuid, ctx1.tuid);
+	    var ctx2 = storage.deriveContext(ctx1, "1234-9999", {_type: 'bar'}); 
+	    assert.equal(ctx2.originator, ctx1.originator);
 	    // going to another bucket
-	    var ctx3 = storage.deriveContext(ctx1, "3456-9999", {}); 
-	    assert(ctx3.tuid > ctx2.tuid, "new tuid must be greater than previous");
+	    var ctx3 = storage.deriveContext(ctx1, "3456-9999", {_type: 'baz'}); 
+	    assert.notEqual(ctx3.originator, ctx2.originator);
+	    // same version, different patch
+	    var ctx4 = storage.deriveContext({}, "1234-5678", {_type: 'bar'});
+	    assert.notEqual(ctx4.originator, ctx1.originator);
 ```
 
 <a name="bucketobjectstorage-storenewobjectctx-obj"></a>

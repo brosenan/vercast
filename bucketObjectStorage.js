@@ -1,17 +1,19 @@
 "use strict";
 
-var uuid = require('node-uuid');
+var vercast = require('vercast');
 
 module.exports = function(bucketStore, createBucket) {
     var buckets = Object.create(null);
+    var emits = Object.create(null);
 
     this.deriveContext = function(ctx, v, p) {
-	var bucket = bucketID(v);
-	if(bucket === ctx.bucket) {
+	var split = v.split('-');
+	if(split[0] === ctx.bucket) {
 	    return ctx;
 	} else {
-	    return {bucket: bucket, 
-		    tuid: uuid.v1()};
+	    var pHash = vercast.ObjectMonitor.seal(p);
+	    return {bucket: split[0],
+		    originator: [split[1], pHash].join('-')};
 	}
     };
     function bucketID(v) {
@@ -19,7 +21,7 @@ module.exports = function(bucketStore, createBucket) {
     }
     this.storeNewObject = function*(ctx, obj) {
 	var bucket = yield* getBucket(ctx.bucket);
-	return [ctx.bucket, bucket.store(obj)].join('-');
+	return [ctx.bucket, bucket.store(obj, emitFunc(ctx))].join('-');
     };
     function* getBucket(id) {
 	var bucket = buckets[id];
@@ -34,6 +36,21 @@ module.exports = function(bucketStore, createBucket) {
 	return bucket;
     }
 
+    function emitionKey(ctx) {
+	return [ctx.bucket, ctx.originator].join('-');
+    }
+    function emitFunc(ctx) {
+	var key = emitionKey(ctx);
+	return function (elem) {
+	    var emitsForBucket = emits[key];
+	    if(!emitsForBucket) {
+		emitsForBucket = [];
+		emits[key] = emitsForBucket;
+	    }
+	    emitsForBucket.push(elem);
+	};
+    }
+
     this.storeVersion = function*(ctx, v1, p, monitor, r, eff) {
 	var ctxBucket = yield* getBucket(ctx.bucket);
 	var targetBucketID = bucketID(v1);
@@ -43,7 +60,16 @@ module.exports = function(bucketStore, createBucket) {
 	} else {
 	    var targetBucket = yield* getBucket(targetBucketID);
 	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff);
-	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff);
+	    var childCtx = this.deriveContext(ctx, v1, p);
+	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx));
+	    var key = emitionKey(childCtx);
+	    if(emits[key]) {
+		emits[key].forEach(function(elem) {
+		    targetBucket.add(elem);
+		});
+		yield* bucketStore.append(targetBucketID, emits[key]);
+		delete emits[key];
+	    }
 	}
 	return [targetBucketID, internalID].join('-');
     };

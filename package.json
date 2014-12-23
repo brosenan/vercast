@@ -25,7 +25,6 @@
   },
   "dependencies": {
     "asyncgen": "^1.0.7",
-    "neo4j": "^1.1.1",
-    "node-uuid": "^1.4.2"
+    "neo4j": "^1.1.1"
   }
 }
