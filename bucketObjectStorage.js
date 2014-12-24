@@ -46,6 +46,7 @@ module.exports = function(bucketStore, createBucket, options) {
 	if(!bucket) {
 	    bucket = createBucket();
 	    buckets[id] = bucket;
+	    bucketSizes[id] = 0;
 	    var elements = yield* bucketStore.retrieve(id);
 	    elements.forEach(function(elem) {
 		bucket.add(elem);
@@ -69,17 +70,25 @@ module.exports = function(bucketStore, createBucket, options) {
 	};
     }
 
+    function replaceBucketID(v, id) {
+	return [id, v.split('-')[1]].join('-');
+    }
+
     this.storeVersion = function*(ctx, v1, p, monitor, r, eff) {
 	var ctxBucket = yield* getBucket(ctx.bucket);
-	var targetBucketID = bucketID(v1);
 	var internalID;
 	var oldInternalID = v1.split('-')[1];
+	var targetBucketID = bucketID(v1);
 	if(targetBucketID === ctx.bucket) {
 	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff);
 	} else {
+	    var childCtx = this.deriveContext(ctx, v1, p);
+	    if(bucketSizes[targetBucketID] >= maxBucketSize) {
+		targetBucketID = monitor.hash();
+		childCtx = this.deriveContext(ctx, replaceBucketID(v1, targetBucketID), p);
+	    }
 	    var targetBucket = yield* getBucket(targetBucketID);
 	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff, emitFunc(ctx));
-	    var childCtx = this.deriveContext(ctx, v1, p);
 	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx));
 	    var key = emitionKey(childCtx);
 	    if(emits[key]) {
@@ -88,7 +97,6 @@ module.exports = function(bucketStore, createBucket, options) {
 			targetBucket.add(elem);
 		    });
 		    yield* bucketStore.append(targetBucketID, emits[key]);
-		    bucketSizes[targetBucketID] = bucketSizes[targetBucketID] || 0;
 		    bucketSizes[targetBucketID] += emits[key].length;
 		}
 		delete emits[key];

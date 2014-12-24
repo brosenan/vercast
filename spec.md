@@ -623,6 +623,38 @@ function* (){
 	       assert.equal(v2, "2345-foo");
 ```
 
+should store the object under a new bucket if the bucket size has been exceeded.
+
+```js
+function* (){
+	    var added = [];
+	    function createBucket() {
+		return {
+		    storeIncoming: function(v, p, monitor, r, eff, emit) {
+			emit({a:1});
+		    },
+		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    add: function(elem) {
+			added.push(elem);
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
+	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
+	    var v1 = '1234-5678';
+	    var p = {_type: 'somePatch'};
+	    var ctx = storage.deriveContext({}, v1, p);
+	    for(let i = 0; i < 5; i++) {
+		yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
+	    }
+	    added = [];
+	    var res = yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
+	    assert.notEqual(res.split('-')[0], ctx.bucket);
+	    // Emitions by store() should go to the new bucket
+	    assert.deepEqual(yield* bucketStore.retrieve(res.split('-')[0]), [{a:1}]);
+	    assert.deepEqual(added, [{a:1}]);
+```
+
 <a name="bucketobjectstorage-retrievectx-id"></a>
 ## .retrieve(ctx, id)
 should invoke the bucket's retrieve() method and return the monitor provided by it.
