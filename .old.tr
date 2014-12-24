@@ -43,8 +43,8 @@
   ․ BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
     BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
   ․ BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
-    BucketObjectStorage should store to the bucket all elements emitted by the bucket object, and adds them back
-  ․ BucketObjectStorage should store to the bucket all elements emitted by the bucket object, and adds them back
+    BucketObjectStorage should store to the bucket all elements emitted by the bucket object, and add them back
+  ․ BucketObjectStorage should store to the bucket all elements emitted by the bucket object, and add them back
     BucketObjectStorage should store emitions from underlying operations
   ․ BucketObjectStorage should store emitions from underlying operations
     BucketObjectStorage should not store emitions from underlying operations if the top level operation retained the version ID

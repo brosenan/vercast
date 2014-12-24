@@ -55,19 +55,22 @@ module.exports = function(bucketStore, createBucket) {
 	var ctxBucket = yield* getBucket(ctx.bucket);
 	var targetBucketID = bucketID(v1);
 	var internalID;
+	var oldInternalID = v1.split('-')[1];
 	if(targetBucketID === ctx.bucket) {
 	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff);
 	} else {
 	    var targetBucket = yield* getBucket(targetBucketID);
-	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff);
+	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff, emitFunc(ctx));
 	    var childCtx = this.deriveContext(ctx, v1, p);
 	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx));
 	    var key = emitionKey(childCtx);
 	    if(emits[key]) {
-		emits[key].forEach(function(elem) {
-		    targetBucket.add(elem);
-		});
-		yield* bucketStore.append(targetBucketID, emits[key]);
+		if(internalID !== oldInternalID) {
+		    emits[key].forEach(function(elem) {
+			targetBucket.add(elem);
+		    });
+		    yield* bucketStore.append(targetBucketID, emits[key]);
+		}
 		delete emits[key];
 	    }
 	}

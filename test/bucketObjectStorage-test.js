@@ -42,7 +42,7 @@ describe('BucketObjectStorage', function(){
 	yield* storage.storeNewObject({bucket: 'foo'}, {_type: 'someObject'});
 	assert.deepEqual(received, elements);
     }));
-    it('should store to the bucket all elements emitted by the bucket object, and adds them back', asyncgen.async(function*(){
+    it('should store to the bucket all elements emitted by the bucket object, and add them back', asyncgen.async(function*(){
 	var added = [];
 	function createBucket() {
 	    return {
@@ -86,17 +86,21 @@ describe('BucketObjectStorage', function(){
 		    emit({a:4});
 		},
 		storeIncoming: function() { return 'newver'; },
-		storeOutgoing: function() {},
+		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		    emit({a:5});
+		    emit({a:6});
+		},
 	    };
 	}
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 	var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
+	yield* storage.storeVersion(ctx, '2345-6789', {_type: 'somePatch'}, monitor, undefined, '');
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'someOtherPatch'}, monitor, undefined, '');
 	assert.deepEqual(added, []); // should not store events for unrelated application
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, [{a:3}, {a:4}]);
+	assert.deepEqual(added, [{a:3}, {a:4}, {a:5}, {a:6}]);
     }));
 
     it('should not store emitions from underlying operations if the top level operation retained the version ID', asyncgen.async(function*(){
@@ -110,8 +114,11 @@ describe('BucketObjectStorage', function(){
 		    emit({a:3});
 		    emit({a:4});
 		},
-		storeIncoming: function() { return 'newver'; },
-		storeOutgoing: function() {},
+		storeIncoming: function(v, p, monitor, r, eff, emit) { return v.split('-')[1]; },
+		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		    emit({a:5});
+		    emit({a:6});
+		},
 	    };
 	}
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
@@ -119,7 +126,7 @@ describe('BucketObjectStorage', function(){
 	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, [{a:3}, {a:4}]);
+	assert.deepEqual(added, []);
     }));
 
 
@@ -143,7 +150,6 @@ describe('BucketObjectStorage', function(){
 	    var ctx4 = storage.deriveContext({}, "1234-5678", {_type: 'bar'});
 	    assert.notEqual(ctx4.originator, ctx1.originator);
 	}));
-
     });
     describe('.storeNewObject(ctx, obj)', function(){
 	it('should invoke the .store() method of the corresponding bucket object ', asyncgen.async(function*(){

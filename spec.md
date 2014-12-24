@@ -363,7 +363,7 @@ function* (){
 	assert.deepEqual(received, elements);
 ```
 
-should store to the bucket all elements emitted by the bucket object, and adds them back.
+should store to the bucket all elements emitted by the bucket object, and add them back.
 
 ```js
 function* (){
@@ -414,17 +414,21 @@ function* (){
 		    emit({a:4});
 		},
 		storeIncoming: function() { return 'newver'; },
-		storeOutgoing: function() {},
+		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		    emit({a:5});
+		    emit({a:6});
+		},
 	    };
 	}
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 	var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
+	yield* storage.storeVersion(ctx, '2345-6789', {_type: 'somePatch'}, monitor, undefined, '');
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'someOtherPatch'}, monitor, undefined, '');
 	assert.deepEqual(added, []); // should not store events for unrelated application
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, [{a:3}, {a:4}]);
+	assert.deepEqual(added, [{a:3}, {a:4}, {a:5}, {a:6}]);
 ```
 
 should not store emitions from underlying operations if the top level operation retained the version ID.
@@ -441,8 +445,11 @@ function* (){
 		    emit({a:3});
 		    emit({a:4});
 		},
-		storeIncoming: function() { return 'newver'; },
-		storeOutgoing: function() {},
+		storeIncoming: function(v, p, monitor, r, eff, emit) { return v.split('-')[1]; },
+		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		    emit({a:5});
+		    emit({a:6});
+		},
 	    };
 	}
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
@@ -450,7 +457,7 @@ function* (){
 	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, [{a:3}, {a:4}]);
+	assert.deepEqual(added, []);
 ```
 
 <a name="bucketobjectstorage-derivecontextctx-v-p"></a>
