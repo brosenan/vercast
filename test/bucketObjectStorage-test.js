@@ -76,7 +76,7 @@ describe('BucketObjectStorage', function(){
     }));
     it('should store emitions from underlying operations', asyncgen.async(function*(){
 	var added = [];
-	function createBucket(emit) {
+	function createBucket() {
 	    return {
 		add: function(elem) {
 		    added.push(elem);
@@ -105,7 +105,7 @@ describe('BucketObjectStorage', function(){
 
     it('should not store emitions from underlying operations if the top level operation retained the version ID', asyncgen.async(function*(){
 	var added = [];
-	function createBucket(emit) {
+	function createBucket() {
 	    return {
 		add: function(elem) {
 		    added.push(elem);
@@ -128,7 +128,6 @@ describe('BucketObjectStorage', function(){
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
 	assert.deepEqual(added, []);
     }));
-
 
     describe('.deriveContext(ctx, v, p)', function(){
 	it('should store the version\'s bucket ID in  the context', asyncgen.async(function*(){
@@ -168,6 +167,38 @@ describe('BucketObjectStorage', function(){
 	    var id = yield* storage.storeNewObject({bucket: 'abcd'}, theObjectToCreate);
 	    assert(called, 'should have been called');
 	    assert.equal(id, 'abcd-foo');
+	}));
+	it('should store the object under a new bucket if the bucket size has been exceeded', asyncgen.async(function*(){
+	    var added = [];
+	    function createBucket() {
+		return {
+		    store: function(obj, emit) {
+			emit({a:1});
+			return '3333';
+		    },
+		    storeIncoming: function(v, p, monitor, r, eff, emit) {
+			emit({foo:'bar'});
+		    },
+		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    add: function(elem) {
+			added.push(elem);
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
+	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
+	    var v1 = '1234-5678';
+	    var p = {_type: 'somePatch'};
+	    var ctx = storage.deriveContext({}, v1, p);
+	    for(let i = 0; i < 5; i++) {
+		yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
+	    }
+	    added = [];
+	    var res = yield* storage.storeNewObject(ctx, {_type: 'someOtherObject'});
+	    assert.notEqual(res.split('-')[0], ctx.bucket);
+	    // Emitions by store() should go to the new bucket
+	    assert.deepEqual(yield* bucketStore.retrieve(res.split('-')[0]), [{a:1}]);
+	    assert.deepEqual(added, [{a:1}]);
 	}));
     });
     describe('.storeVersion(ctx, v1, p, monitor, r, eff)', function(){
@@ -247,9 +278,25 @@ describe('BucketObjectStorage', function(){
 		};
 	    }
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
-	    var ctx = {bucket: '4444', tuid: 'xxxx-yyyy'};
+	    var ctx = {bucket: '4444'};
 	    var monitor = yield* storage.retrieve(ctx, "1234-5678");
 	    assert.equal(monitor.proxy().my_id_is, '5678');
+	}));
+    });
+    describe('.checkCache(ctx, v, p)', function(){
+	it('should invoke the bucket object\'s checkCache() method', asyncgen.async(function*(){
+	    function createBucket() {
+		return {
+		    checkCache: function(v, p) {
+			return {v: v, r: p, eff: 'someEff'};
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	    var ctx = {bucket: '4444'};
+	    var result = yield* storage.checkCache(ctx, '4444-2222', {_type: 'somePatch'});
+	    assert.equal(result.v, '4444-2222');
+	    assert.equal(result.r._type, 'somePatch');
 	}));
     });
 });

@@ -2,9 +2,12 @@
 
 var vercast = require('vercast');
 
-module.exports = function(bucketStore, createBucket) {
+module.exports = function(bucketStore, createBucket, options) {
     var buckets = Object.create(null);
+    var bucketSizes = Object.create(null);
     var emits = Object.create(null);
+    options = options || {};
+    var maxBucketSize = options.maxBucketSize || 100;
 
     this.deriveContext = function(ctx, v, p) {
 	var split = v.split('-');
@@ -20,8 +23,23 @@ module.exports = function(bucketStore, createBucket) {
 	return v.split('-')[0];
     }
     this.storeNewObject = function*(ctx, obj) {
-	var bucket = yield* getBucket(ctx.bucket);
-	return [ctx.bucket, bucket.store(obj, emitFunc(ctx))].join('-');
+	var bucketID = ctx.bucket;
+	var emit = emitFunc(ctx);
+	var emits = [];
+	if(bucketSizes[bucketID] >= maxBucketSize) {
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    bucketID = monitor.hash();
+	    emit = function(elem) {
+		emits.push(elem);
+	    }
+	}
+	var bucket = yield* getBucket(bucketID);
+	var internalID = bucket.store(obj, emit);
+	for(let i = 0; i < emits.length; i++) {
+	    bucket.add(emits[i]);
+	}
+	yield* bucketStore.append(bucketID, emits);
+	return [bucketID, internalID].join('-');
     };
     function* getBucket(id) {
 	var bucket = buckets[id];
@@ -70,6 +88,8 @@ module.exports = function(bucketStore, createBucket) {
 			targetBucket.add(elem);
 		    });
 		    yield* bucketStore.append(targetBucketID, emits[key]);
+		    bucketSizes[targetBucketID] = bucketSizes[targetBucketID] || 0;
+		    bucketSizes[targetBucketID] += emits[key].length;
 		}
 		delete emits[key];
 	    }
@@ -80,5 +100,10 @@ module.exports = function(bucketStore, createBucket) {
 	var split = id.split('-');
 	var bucket = yield* getBucket(split[0]);
 	return bucket.retrieve(split[1]);
+    };
+    this.checkCache = function*(ctx, v, p) {
+	var split = v.split('-');
+	var bucket = yield* getBucket(split[0]);
+	return bucket.checkCache(v, p);
     };
 };
