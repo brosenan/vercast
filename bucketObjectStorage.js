@@ -35,9 +35,9 @@ module.exports = function(bucketStore, createBucket, options) {
 	}
 	var bucket = yield* getBucket(bucketID);
 	var internalID = bucket.store(obj, emit);
-	for(let i = 0; i < emits.length; i++) {
-	    bucket.add(emits[i]);
-	}
+	emits.forEach(function(elem) {
+	    bucket.add(elem);
+	});
 	yield* bucketStore.append(bucketID, emits);
 	return [bucketID, internalID].join('-');
     };
@@ -52,6 +52,7 @@ module.exports = function(bucketStore, createBucket, options) {
 		bucket.add(elem);
 	    });
 	}
+	bucket.name = id;
 	return bucket;
     }
 
@@ -73,6 +74,33 @@ module.exports = function(bucketStore, createBucket, options) {
     function replaceBucketID(v, id) {
 	return [id, v.split('-')[1]].join('-');
     }
+    
+    function copyObject(internalID, bucketFrom, bucketTo, emit) {
+	var monitor = bucketFrom.retrieve(internalID);
+	var obj = copyMembers(monitor.object(), bucketFrom, bucketTo, emit);
+	return bucketTo.store(obj, emit);
+    }
+
+    function copyMembers(objIn, bucketFrom, bucketTo, emit) {
+	var objOut = Object.create(null);
+	Object.keys(objIn).forEach(function(key) {
+	    if(typeof objIn[key] === 'object') {
+		if('$' in objIn[key]) {
+		    var split = objIn[key].$.split('-');
+		    if(split[0] === bucketFrom.name) {
+			objOut[key] = {$: bucketTo.name + '-' + copyObject(split[1], bucketFrom, bucketTo, emit)};
+		    } else {
+			objOut[key] = objIn[key];
+		    }
+		} else {
+		    objOut[key] = copyMembers(objIn[key], bucketFrom, bucketTo, emit);
+		}
+	    } else {
+		objOut[key] = objIn[key];
+	    }
+	});
+	return objOut;
+    }
 
     this.storeVersion = function*(ctx, v1, p, monitor, r, eff) {
 	var ctxBucket = yield* getBucket(ctx.bucket);
@@ -83,10 +111,6 @@ module.exports = function(bucketStore, createBucket, options) {
 	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff);
 	} else {
 	    var childCtx = this.deriveContext(ctx, v1, p);
-	    if(bucketSizes[targetBucketID] >= maxBucketSize) {
-		targetBucketID = monitor.hash();
-		childCtx = this.deriveContext(ctx, replaceBucketID(v1, targetBucketID), p);
-	    }
 	    var targetBucket = yield* getBucket(targetBucketID);
 	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff, emitFunc(ctx));
 	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx));
@@ -100,6 +124,20 @@ module.exports = function(bucketStore, createBucket, options) {
 		    bucketSizes[targetBucketID] += emits[key].length;
 		}
 		delete emits[key];
+	    }
+	    if(bucketSizes[targetBucketID] >= maxBucketSize) {
+		var copyEmits = [];
+		function copyEmit(elem) {
+		    copyEmits.push(elem);
+		}
+		var newTargetBucketID = monitor.hash();
+		var newTargetBucket = yield* getBucket(newTargetBucketID);
+		internalID = copyObject(internalID, targetBucket, newTargetBucket, copyEmit);
+		copyEmits.forEach(function(elem) {
+		    newTargetBucket.add(elem);
+		});
+		yield* bucketStore.append(newTargetBucket, copyEmits);
+		targetBucketID = newTargetBucketID;
 	    }
 	}
 	return [targetBucketID, internalID].join('-');

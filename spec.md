@@ -531,6 +531,9 @@ function* (){
 		    add: function(elem) {
 			added.push(elem);
 		    },
+		    retrieve: function() {
+			return new vercast.ObjectMonitor({_type: 'someObj'});
+		    },
 		};
 	    }
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
@@ -627,15 +630,35 @@ should store the object under a new bucket if the bucket size has been exceeded.
 
 ```js
 function* (){
-	    var added = [];
 	    function createBucket() {
+		var index = 0;
+		var kvs = Object.create(null);
 		return {
 		    storeIncoming: function(v, p, monitor, r, eff, emit) {
 			emit({a:1});
+			return 'foo';
 		    },
 		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
 		    add: function(elem) {
-			added.push(elem);
+			if(elem.obj) {
+			    kvs[elem.i] = elem.obj;
+			}
+		    },
+		    store: function(obj, emit) {
+			index += 1;
+			emit({i: index, obj: obj});
+			return index;
+		    },
+		    retrieve: function(v) {
+			if(v === 'foo') {
+			    return new vercast.ObjectMonitor({_type: 'someObj'});
+			}
+			var obj = kvs[v];
+			if(obj) {
+			    return new vercast.ObjectMonitor(obj);
+			} else {
+			    throw Error('Could not find object for key ' + v);
+			}
 		    },
 		};
 	    }
@@ -647,12 +670,64 @@ function* (){
 	    for(let i = 0; i < 5; i++) {
 		yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
 	    }
-	    added = [];
-	    var res = yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
-	    assert.notEqual(res.split('-')[0], ctx.bucket);
-	    // Emitions by store() should go to the new bucket
-	    assert.deepEqual(yield* bucketStore.retrieve(res.split('-')[0]), [{a:1}]);
-	    assert.deepEqual(added, [{a:1}]);
+	    var v2 = yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
+	    assert.notEqual(v2.split('-')[0], ctx.bucket);
+	    // The object must be reachable
+	    assert.equal(typeof (yield* storage.retrieve({}, v2)).proxy, 'function');
+	    assert.equal((yield* storage.retrieve({}, v2)).proxy()._type, 'someObj');
+```
+
+should recursively copy all reachable objects in the current bucket to the new one.
+
+```js
+function* (){
+	    function createBucket() {
+		var index = 0;
+		var kvs = Object.create(null);
+		return {
+		    storeIncoming: function(v, p, monitor, r, eff, emit) {
+			index += 1;
+			emit({i: index, obj: monitor.object()});
+			return index;
+		    },
+		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    add: function(elem) {
+			if(elem.obj) {
+			    kvs[elem.i] = elem.obj;
+			}
+		    },
+		    store: function(obj, emit) {
+			index += 1;
+			emit({i: index, obj: obj});
+			return index;
+		    },
+		    retrieve: function(v) {
+			var obj = kvs[v];
+			if(obj) {
+			    return new vercast.ObjectMonitor(obj);
+			} else {
+			    throw Error('Could not find object for key ' + v);
+			}
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
+	    var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
+	    var last = yield* storage.storeNewObject(ctx, {_type: 'someObj'});
+	    for(let i = 0; i < 2; i++) {
+		last = yield* storage.storeNewObject(ctx, {_type: 'someObj', next: {$:last}});
+	    }
+	    var v = yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj', next: {$:last}}), undefined, '');
+	    assert.equal(last.split('-')[0], '1234');
+	    // The next change should create a new bucket
+	    v = yield* storage.storeVersion({}, v, {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj', next: {$:last}, foo: 2}), undefined, '');
+	    var monitor = yield* storage.retrieve({}, v);
+	    for(let i = 0; i < 3; i++) {
+		assert.notEqual(v.split('-')[0], '1234');
+		assert.equal(monitor.proxy()._type, 'someObj');
+		v = monitor.proxy().next.$;
+		monitor = yield* storage.retrieve({}, v);
+	    }
 ```
 
 <a name="bucketobjectstorage-retrievectx-id"></a>

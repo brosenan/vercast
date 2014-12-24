@@ -1,20 +1,6 @@
 
     Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-  ․ Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-    Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-  ․ Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-    Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-  ․ Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-  ․ Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-    Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-  ․ Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
-  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+  1) Neo4jGraphDB "before each" hook
     BranchStore .init(type, args) should create a new object version, and return its ID
   ․ BranchStore .init(type, args) should create a new object version, and return its ID
     BranchStore .trans(v, p, u) -> {v,r} should transform an object version according to the given patch
@@ -63,6 +49,8 @@
   ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should invoke the storeIncoming() and storeOutgoing() methods of the corresponding two buckets if the call is made from one bucket to another 
     BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should store the object under a new bucket if the bucket size has been exceeded
   ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should store the object under a new bucket if the bucket size has been exceeded
+    BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should recursively copy all reachable objects in the current bucket to the new one
+  ․ BucketObjectStorage .storeVersion(ctx, v1, p, monitor, r, eff) should recursively copy all reachable objects in the current bucket to the new one
     BucketObjectStorage .retrieve(ctx, id) should invoke the bucket's retrieve() method and return the monitor provided by it
   ․ BucketObjectStorage .retrieve(ctx, id) should invoke the bucket's retrieve() method and return the monitor provided by it
     BucketObjectStorage .checkCache(ctx, v, p) should invoke the bucket object's checkCache() method
@@ -330,5 +318,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  165 passing (7s)
+  158 passing (388ms)
 
