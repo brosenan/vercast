@@ -318,5 +318,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  158 passing (388ms)
+  158 passing (2s)
 
