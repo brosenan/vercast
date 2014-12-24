@@ -1,6 +1,20 @@
 
     Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-  1) Neo4jGraphDB "before each" hook
+  ․ Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+    Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+  ․ Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+    Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+  ․ Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+  ․ Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+    Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+  ․ Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+    Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+    Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
+  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
+    Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
     BranchStore .init(type, args) should create a new object version, and return its ID
   ․ BranchStore .init(type, args) should create a new object version, and return its ID
     BranchStore .trans(v, p, u) -> {v,r} should transform an object version according to the given patch
@@ -310,5 +324,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  154 passing (2s)
+  162 passing (6s)
 
