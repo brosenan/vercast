@@ -26,10 +26,10 @@ module.exports = function(bucketStore, createBucket, options) {
 	return v.split('-')[0];
     }
     this.storeNewObject = function*(ctx, obj) {
-	var bucketID = ctx.bucket;
+	var bucketID = ctx.bucket || '';
 	var emit = emitFunc(ctx);
 	var emits = [];
-	if(bucketSizes[bucketID] >= maxBucketSize) {
+	if(bucketSizes[bucketID] >= maxBucketSize || bucketID === '') {
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    bucketID = monitor.hash();
 	    emit = function(elem) {

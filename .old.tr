@@ -273,6 +273,36 @@
   ․ SequenceStoreFactory .createSequenceStore() .hash() should return a hash unique to the sequence for sequence size larger than 1
     SequenceStoreFactory .createSequenceStore() .hash() should provide the same hash if the only element in a sequence is a hash of another sequence
   ․ SequenceStoreFactory .createSequenceStore() .hash() should provide the same hash if the only element in a sequence is a hash of another sequence
+    SimpleBucketStorage should avoid running the patch method again if the patch has already been applied on an identical object
+  ․ SimpleBucketStorage should avoid running the patch method again if the patch has already been applied on an identical object
+    SimpleBucketStorage .init(type, args) should return a version ID of a newly created object
+  ․ SimpleBucketStorage .init(type, args) should return a version ID of a newly created object
+    SimpleBucketStorage .init(type, args) should support queries to other objects during the initialization
+  ․ SimpleBucketStorage .init(type, args) should support queries to other objects during the initialization
+    SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
+  ․ SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
+    SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
+  ․ SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
+    SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
+  ․ SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
+    SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
+  ․ SimpleBucketStorage .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
+    SimpleBucketStorage context .init(type, args) should initialize an object with the given type and args and return its version ID
+  ․ SimpleBucketStorage context .init(type, args) should initialize an object with the given type and args and return its version ID
+    SimpleBucketStorage context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
+  ․ SimpleBucketStorage context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
+    SimpleBucketStorage context .conflict(msg) should throw an exception with .isConflict set to true
+  ․ SimpleBucketStorage context .conflict(msg) should throw an exception with .isConflict set to true
+    SimpleBucketStorage context .effect(p) should add patch p to the effect sequence
+  ․ SimpleBucketStorage context .effect(p) should add patch p to the effect sequence
+    SimpleBucketStorage context .effect(p) should add patches to the effect set even when called from a nested transformation
+  ․ SimpleBucketStorage context .effect(p) should add patches to the effect set even when called from a nested transformation
+    SimpleBucketStorage context .self() should return the version ID of the object prior to this patch application
+  ․ SimpleBucketStorage context .self() should return the version ID of the object prior to this patch application
+    SimpleBucketStorage context .clone(obj) should return a value equivalent to obj but not a reference
+  ․ SimpleBucketStorage context .clone(obj) should return a value equivalent to obj but not a reference
+    SimpleBucketStorage context .clone(obj) should properly handle null
+  ․ SimpleBucketStorage context .clone(obj) should properly handle null
     SimpleObjectStore should avoid running the patch method again if the patch has already been applied on an identical object
   ․ SimpleObjectStore should avoid running the patch method again if the patch has already been applied on an identical object
     SimpleObjectStore .init(type, args) should return a version ID of a newly created object
@@ -334,5 +364,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  167 passing (7s)
+  182 passing (7s)
 
