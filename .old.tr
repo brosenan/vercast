@@ -49,6 +49,8 @@
   ․ BucketObjectStorage should store emitions from underlying operations
     BucketObjectStorage should not store emitions from underlying operations if the top level operation retained the version ID
   ․ BucketObjectStorage should not store emitions from underlying operations if the top level operation retained the version ID
+    BucketObjectStorage should use LRU policy to limit the number of buckets open simultaneously
+  ․ BucketObjectStorage should use LRU policy to limit the number of buckets open simultaneously
     BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
   ․ BucketObjectStorage .deriveContext(ctx, v, p) should store the version's bucket ID in  the context
     BucketObjectStorage .deriveContext(ctx, v, p) should assign the originator version-patch ID for a new bucket
@@ -332,5 +334,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  166 passing (7s)
+  167 passing (7s)
 

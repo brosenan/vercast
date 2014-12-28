@@ -1,13 +1,16 @@
 "use strict";
 
 var vercast = require('vercast');
+var LRU = require('lru-cache');
 
 module.exports = function(bucketStore, createBucket, options) {
-    var buckets = Object.create(null);
     var bucketSizes = Object.create(null);
     var emits = Object.create(null);
     options = options || {};
     var maxBucketSize = options.maxBucketSize || 100;
+    var maxOpenBuckets = options.maxOpenBuckets || 1000;
+
+    var buckets = LRU(maxOpenBuckets);
 
     this.deriveContext = function(ctx, v, p) {
 	var split = v.split('-');
@@ -42,10 +45,10 @@ module.exports = function(bucketStore, createBucket, options) {
 	return [bucketID, internalID].join('-');
     };
     function* getBucket(id) {
-	var bucket = buckets[id];
+	var bucket = buckets.get(id);
 	if(!bucket) {
 	    bucket = createBucket();
-	    buckets[id] = bucket;
+	    buckets.set(id, bucket);
 	    bucketSizes[id] = 0;
 	    var elements = yield* bucketStore.retrieve(id);
 	    elements.forEach(function(elem) {
@@ -108,7 +111,7 @@ module.exports = function(bucketStore, createBucket, options) {
 	var oldInternalID = v1.split('-')[1];
 	var targetBucketID = bucketID(v1);
 	if(targetBucketID === ctx.bucket) {
-	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff);
+	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff, emitFunc(ctx));
 	} else {
 	    var childCtx = this.deriveContext(ctx, v1, p);
 	    var targetBucket = yield* getBucket(targetBucketID);

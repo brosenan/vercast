@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "asyncgen": "^1.0.7",
+    "lru-cache": "^2.5.0",
     "neo4j": "^1.1.1"
   }
 }

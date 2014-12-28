@@ -90,17 +90,22 @@ describe('BucketObjectStorage', function(){
 		    emit({a:5});
 		    emit({a:6});
 		},
+		storeInternal: function(v, p, monitor, r, eff, emit) {
+		    emit({a:7});
+		    emit({a:8});
+		},
 	    };
 	}
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 	var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
 	yield* storage.storeVersion(ctx, '2345-6789', {_type: 'somePatch'}, monitor, undefined, '');
+	yield* storage.storeVersion(ctx, '1234-9999', {_type: 'somePatch'}, monitor, undefined, '');
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'someOtherPatch'}, monitor, undefined, '');
 	assert.deepEqual(added, []); // should not store events for unrelated application
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, [{a:3}, {a:4}, {a:5}, {a:6}]);
+	assert.deepEqual(added, [{a:3}, {a:4}, {a:5}, {a:6}, {a:7}, {a:8}]);
     }));
 
     it('should not store emitions from underlying operations if the top level operation retained the version ID', asyncgen.async(function*(){
@@ -128,6 +133,33 @@ describe('BucketObjectStorage', function(){
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
 	assert.deepEqual(added, []);
     }));
+    it('should use LRU policy to limit the number of buckets open simultaneously', asyncgen.async(function*(){
+	yield* bucketStore.append('x', [{this_is: 'x'}]);
+	yield* bucketStore.append('y', [{this_is: 'y'}]);
+	yield* bucketStore.append('z', [{this_is: 'z'}]);
+	var lastExtracted;
+	function createBucket() {
+	    return {
+		add: function(elem) {
+		    lastExtracted = elem.this_is;
+		},
+		checkCache: function() {},
+	    };
+	}
+
+	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxOpenBuckets: 2});
+	yield* storage.checkCache({}, 'x-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({}, 'y-aaa', {_type: 'somePatch'});
+	// The following statement will replace x with z
+	yield* storage.checkCache({}, 'z-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({}, 'y-aaa', {_type: 'somePatch'});
+	// y should still be in cache; z was the last one extracted
+	assert.equal(lastExtracted, 'z');
+	// Now we need to re-extract x
+	yield* storage.checkCache({}, 'x-aaa', {_type: 'somePatch'});
+	assert.equal(lastExtracted, 'x');
+    }));
+
 
     describe('.deriveContext(ctx, v, p)', function(){
 	it('should store the version\'s bucket ID in  the context', asyncgen.async(function*(){
