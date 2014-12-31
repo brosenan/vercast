@@ -387,6 +387,14 @@
   ․ createValidatingBucket(createBucket) .storeOutgoing(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
     createValidatingBucket(createBucket) .storeInternal(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
   ․ createValidatingBucket(createBucket) .storeInternal(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
+    createValidatingBucket(createBucket) .checkCache(v, p) should consult the underlying .checkCache() method
+  ․ createValidatingBucket(createBucket) .checkCache(v, p) should consult the underlying .checkCache() method
+    createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method
+  ․ createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method
+    createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
+  ․ createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
+    createValidatingBucket(createBucket) .add(elem) should consult the underlying .add() method
+  ․ createValidatingBucket(createBucket) .add(elem) should consult the underlying .add() method
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -400,5 +408,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  200 passing (6s)
+  204 passing (6s)
 

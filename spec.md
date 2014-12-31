@@ -117,6 +117,9 @@
      - [.storeIncoming(v, p, monitor, r, eff, emit)](#createvalidatingbucketcreatebucket-storeincomingv-p-monitor-r-eff-emit)
      - [.storeOutgoing(v, p, monitor, r, eff, emit)](#createvalidatingbucketcreatebucket-storeoutgoingv-p-monitor-r-eff-emit)
      - [.storeInternal(v, p, monitor, r, eff, emit)](#createvalidatingbucketcreatebucket-storeinternalv-p-monitor-r-eff-emit)
+     - [.checkCache(v, p)](#createvalidatingbucketcreatebucket-checkcachev-p)
+     - [.retrieve(id)](#createvalidatingbucketcreatebucket-retrieveid)
+     - [.add(elem)](#createvalidatingbucketcreatebucket-addelem)
 <a name=""></a>
  
 <a name="branchstore"></a>
@@ -3900,7 +3903,8 @@ function createBucket() {
 		    store: function(obj, emit) {
 			emit({a:1});
 			return {obj: obj};
-		    }
+		    },
+		    add: function() {},
 		};
 }
 var emitted = [];
@@ -3925,6 +3929,7 @@ function createBucket() {
 			emit({a:2});
 			return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
 		    },
+		    add: function() {},
 		};
 }
 var emitted = [];
@@ -3956,6 +3961,7 @@ function createBucket() {
 			emit({a:3});
 			return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
 		    },
+		    add: function() {},
 		};
 }
 var emitted = [];
@@ -3987,6 +3993,7 @@ function createBucket() {
 			emit({a:4});
 			return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
 		    },
+		    add: function() {},
 		};
 }
 var emitted = [];
@@ -4005,5 +4012,125 @@ assert.deepEqual(res.obj, {_type: 'someObj'});
 assert.equal(res.r, 123);
 assert.equal(res.eff, 'someEff');
 assert.deepEqual(emitted, [{a:4}]);
+```
+
+<a name="createvalidatingbucketcreatebucket-checkcachev-p"></a>
+## .checkCache(v, p)
+should consult the underlying .checkCache() method.
+
+```js
+function createBucket() {
+		return {
+		    checkCache: function(v, p) {
+			return {v: v, p: p};
+		    },
+		};
+}
+var validatingBucket = vercast.createValidatingBucket(createBucket);
+var res = validatingBucket.checkCache('1234-5678', {_type: 'somePatch'});
+
+assert.equal(res.v, '1234-5678');
+assert.deepEqual(res.p, {_type: 'somePatch'});
+```
+
+<a name="createvalidatingbucketcreatebucket-retrieveid"></a>
+## .retrieve(id)
+should consult the underlying .retrieve() method.
+
+```js
+function createBucket() {
+		return {
+		    retrieve: function(id) {
+			return new vercast.ObjectMonitor({id: id});
+		    },
+		};
+}
+var validatingBucket = vercast.createValidatingBucket(createBucket);
+var res = validatingBucket.retrieve('1234');
+
+assert.equal(res.proxy().id, '1234');
+```
+
+should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle.
+
+```js
+function createBucket() {
+		var kvs = {};
+		return {
+		    store: function(obj, emit) {
+			// Bad: changes own state but does not emit
+			var key = obj._type;
+			kvs[key] = obj;
+			return key;
+		    },
+		    storeIncoming: function(v, p, monitor, r, eff, emit) {
+			emit(monitor.object()); // good
+			var id = this.store(monitor.object());
+			return id;
+		    },
+		    storeOutgoing: function(v, p, monitor, r, eff, emit) {
+			// Bad: does not change own state
+			emit(monitor.object()); 
+		    },
+		    storeInternal: function(v, p, monitor, r, eff, emit) {
+			// Bad: Emits one thing, changes state to another
+			emit({_type: 'someObj2', bar: 4});
+			var id = this.store(monitor.object());
+			return id;
+		    },
+		    retrieve: function(id) {
+			return new vercast.ObjectMonitor(kvs[id]);
+		    },
+		    add: function(elem) {
+			this.store(elem);
+		    },
+		};
+}
+function emit(elem) {};
+var validatingBucket = vercast.createValidatingBucket(createBucket);
+var id = validatingBucket.store({_type: 'someObj'}, emit);
+assert.throws(function() {
+		var monitor = validatingBucket.retrieve(id);
+}, /Mismatch in return value between stored and added state/);
+id = validatingBucket.storeIncoming('1234', 
+						{_type: 'somePatch'}, 
+						new vercast.ObjectMonitor({_type: 'someOtherObj'}),
+						undefined, '', emit);
+validatingBucket.retrieve(id); // should be OK
+validatingBucket.storeOutgoing('1234', 
+					   {_type: 'somePatch'}, 
+					   new vercast.ObjectMonitor({_type: 'someObj1', foo: 2}),
+					   undefined, '', emit);
+assert.throws(function() {
+		validatingBucket.retrieve('someObj1');
+}, /Mismatch in return value between stored and added state/);
+
+validatingBucket.storeInternal('1234', 
+					   {_type: 'somePatch'}, 
+					   new vercast.ObjectMonitor({_type: 'someObj2'}),
+					   undefined, '', emit);
+assert.throws(function() {
+		validatingBucket.retrieve('someObj2');
+}, /Mismatch in return value between stored and added state/);
+```
+
+<a name="createvalidatingbucketcreatebucket-addelem"></a>
+## .add(elem)
+should consult the underlying .add() method.
+
+```js
+var added = [];
+function createBucket() {
+		return {
+		    add: function(elem) {
+			added.push(elem);
+		    },
+		};
+}
+var validatingBucket = vercast.createValidatingBucket(createBucket);
+validatingBucket.add({a:1});
+validatingBucket.add({a:2});
+
+assert.deepEqual(added, [{a:1}, {a:2}]);
 ```
 
