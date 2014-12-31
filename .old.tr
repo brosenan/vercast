@@ -379,6 +379,14 @@
   ․ SimpleVersionGraph .appendPatchesTo(mergeInfo, seq, taken) should append all the labels along the path from x to V1 to the given sequence, if taken is false
     $transaction should apply all patches enclosed in the hash that it holds as a single transaction
   ․ $transaction should apply all patches enclosed in the hash that it holds as a single transaction
+    createValidatingBucket(createBucket) .store(obj, emit) should consult the underlying .store() method
+  ․ createValidatingBucket(createBucket) .store(obj, emit) should consult the underlying .store() method
+    createValidatingBucket(createBucket) .storeIncoming(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
+  ․ createValidatingBucket(createBucket) .storeIncoming(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
+    createValidatingBucket(createBucket) .storeOutgoing(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
+  ․ createValidatingBucket(createBucket) .storeOutgoing(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
+    createValidatingBucket(createBucket) .storeInternal(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
+  ․ createValidatingBucket(createBucket) .storeInternal(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -392,5 +400,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  196 passing (6s)
+  200 passing (6s)
 
