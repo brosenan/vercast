@@ -1,15 +1,18 @@
 "use strict";
 var vercast = require('vercast');
+var assert = require('assert');
 
-function SimpleObjectStorage(kvs) {
+exports.SimpleObjectStorage = function(kvs, prefix) {
+    prefix = prefix || '';
+
     this.storeNewObject = function*(ctx, obj) {
 	var monitor = new vercast.ObjectMonitor(obj);
 	var id = monitor.hash();
 	yield* kvs.store(id, monitor.json());
-	return id;
+	return addPrefix(id);
     };
     this.retrieve = function*(ctx, hash) {
-	var json = yield* kvs.fetch(hash);
+	var json = yield* kvs.fetch(removePrefix(hash));
 	if(typeof json === 'undefined') {
 	    throw Error('No object version matching id: ' + hash);
 	}
@@ -22,10 +25,10 @@ function SimpleObjectStorage(kvs) {
 
 	var pHash = vercast.ObjectMonitor.seal(p);
 	var cachedKey = v1 + '>' + pHash;
-	var retVal = {v: {$:v2}, r: r, eff: eff};
+	var retVal = {v: {$:addPrefix(v2)}, r: r, eff: eff};
 	yield* kvs.store(cachedKey, JSON.stringify(retVal));
 
-	return v2;
+	return addPrefix(v2);
     };
     this.checkCache = function*(ctx, v, p) {
 	var pHash = vercast.ObjectMonitor.seal(p);
@@ -36,9 +39,20 @@ function SimpleObjectStorage(kvs) {
 	}
     };
     this.deriveContext = function() {};
+
+    function addPrefix(id) {
+	return prefix + id;
+    }
+    function removePrefix(id) {
+	if(id.substr(0, prefix.length) === prefix) {
+	    return id.substr(prefix.length);
+	} else {
+	    return id;
+	}
+    }
 }
 
-module.exports = function(disp, kvs) {
+exports.SimpleObjectStore = function(disp, kvs) {
     var factory = new vercast.SequenceStoreFactory(kvs);
-    return new vercast.ObjectStore(disp, factory, new SimpleObjectStorage(kvs));
+    return new vercast.ObjectStore(disp, factory, new exports.SimpleObjectStorage(kvs));
 };

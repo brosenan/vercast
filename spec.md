@@ -6,6 +6,16 @@
      - [.head(b)](#branchstore-headb)
      - [.push(b, v, atomic=false)](#branchstore-pushb-v-atomicfalse)
      - [.pull(v, b)](#branchstore-pullv-b)
+   - [BucketExtractionStorage](#bucketextractionstorage)
+     - [.init(type, args)](#bucketextractionstorage-inittype-args)
+     - [.trans(v, p, u) -> {v, r, eff}](#bucketextractionstorage-transv-p-u---v-r-eff)
+     - [context](#bucketextractionstorage-context)
+       - [.init(type, args)](#bucketextractionstorage-context-inittype-args)
+       - [.trans(v, p, u) -> {v,r,eff}](#bucketextractionstorage-context-transv-p-u---vreff)
+       - [.conflict(msg)](#bucketextractionstorage-context-conflictmsg)
+       - [.effect(p)](#bucketextractionstorage-context-effectp)
+       - [.self()](#bucketextractionstorage-context-self)
+       - [.clone(obj)](#bucketextractionstorage-context-cloneobj)
    - [BucketObjectStorage](#bucketobjectstorage)
      - [.deriveContext(ctx, v, p)](#bucketobjectstorage-derivecontextctx-v-p)
      - [.storeNewObject(ctx, obj)](#bucketobjectstorage-storenewobjectctx-obj)
@@ -332,6 +342,347 @@ function* (){
 							_key: 'foo'})).r, 'FOO1');
 ```
 
+<a name="bucketextractionstorage"></a>
+# BucketExtractionStorage
+<a name="bucketextractionstorage-inittype-args"></a>
+## .init(type, args)
+should return a version ID of a newly created object.
+
+```js
+function* (done){
+	    var called = false;
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			called = true;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    assert.equal(typeof v.$, 'string');
+	    assert(called, 'The constructor should have been called');
+```
+
+should support queries to other objects during the initialization.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*(ctx, args) {
+			assert.equal((yield* ctx.trans(args.bar, {_type: 'get'})).r, 'BAR');
+		    },
+		},
+		bar: {
+		    init: function*() {},
+		    get: function*() { return 'BAR'; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var bar = yield* ostore.init('bar', {});
+	    var v = yield* ostore.init('foo', {bar: bar});
+```
+
+<a name="bucketextractionstorage-transv-p-u---v-r-eff"></a>
+## .trans(v, p, u) -> {v, r, eff}
+should return the value returned from the method corresponding to patch p.
+
+```js
+function* (done){
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			this.baz = 0;
+		    },
+		    bar: function*() {
+			//yield sleep(1);
+			this.baz += 1;
+			return this.baz;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var pair = yield* ostore.trans(v, {_type: 'bar'});
+	    assert.equal(pair.r, 1);
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar'});
+	    assert.equal(pair.r, 2);
+```
+
+should pass the patch and u flag as parameters to the called method.
+
+```js
+function* (done){
+	    var dispMap = {
+		foo: {
+		    init: function*() {
+			this.baz = 0;
+		    },
+		    bar: function*(ctx, p, u) {
+			var amount = p.amount;
+			if(u) amount = -amount;
+			this.baz += amount;
+			return this.baz;
+		    },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var pair = yield* ostore.trans(v, {_type: 'bar', amount: 3});
+	    assert.equal(pair.r, 3);
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar', amount: 2}, true);
+	    assert.equal(pair.r, 1);
+```
+
+should replace the object with another if replaced with its ID.
+
+```js
+function* (){
+	    var dispMap = {
+		foo:{
+		    init: function*() {},
+		    changeToBar: function*(ctx) {
+			this._replaceWith(yield* ctx.init('bar', {}));
+		    },
+		},
+		bar:{
+		    init: function*() {},
+		    query: function*() { return 555; },
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    var res = yield* ostore.trans(v, {_type: 'changeToBar'});
+	    res = yield* ostore.trans(res.v, {_type: 'query'});
+```
+
+should throw an exception in case of a transformation that results in null.
+
+```js
+function* (){
+	    var dispMap = {
+		foo: {
+		    init: function*() {},
+		    turnToNull: function*() {
+			this._replaceWith(null);
+		    }
+		},
+	    };
+	    var ostore = createOStore(dispMap);
+	    var v = yield* ostore.init('foo', {});
+	    try {
+		yield* ostore.trans(v, {_type: 'turnToNull'});
+		assert(false, "the previous statement should fail");
+	    } catch(e) {
+		assert.equal(e.message, "A patch cannot transform an object to null or undefined");
+	    }
+```
+
+<a name="bucketextractionstorage-context"></a>
+## context
+<a name="bucketextractionstorage-context-inittype-args"></a>
+### .init(type, args)
+should initialize an object with the given type and args and return its version ID.
+
+```js
+function* (){
+		var dispMap = {
+		    creator: {
+			init: function*(ctx, args) {},
+			create: function*(ctx, p, u) {
+			    return yield* ctx.init(p.type, p.args);
+			},
+		    },
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			get: function*() { return this.value; },
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var creator = yield* ostore.init('creator', {});
+		var foo1 = yield* ostore.trans(creator, {_type: 'create', type: 'foo', args: {value: 3}});
+		var res = yield* ostore.trans(foo1.r, {_type: 'get'});
+		assert.equal(res.r, 3);
+```
+
+<a name="bucketextractionstorage-context-transv-p-u---vreff"></a>
+### .trans(v, p, u) -> {v,r,eff}
+should transform a version and return the new version ID and result.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) {
+			    this.bar = yield* ctx.init('bar', {});
+			},
+			add: function*(ctx, p, u) {
+			    var pair = yield* ctx.trans(this.bar, p, u);
+			    this.bar = pair.v;
+			    return pair.r;
+			},
+		    },
+		    bar: {
+			init: function*() {
+			    this.value = 0;
+			},
+			add: function*(ctx, p, u) {
+			    this.value += (u?-1:1) * p.amount;
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var pair = yield* ostore.trans(foo, {_type: 'add', amount: 3});
+		assert.equal(pair.r, 3);
+		pair = yield* ostore.trans(pair.v, {_type: 'add', amount: 2}, true);
+		assert.equal(pair.r, 1);
+```
+
+<a name="bucketextractionstorage-context-conflictmsg"></a>
+### .conflict(msg)
+should throw an exception with .isConflict set to true.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			raise: function*(ctx, p, u) { ctx.conflict('foo raises a conflict'); },
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		try {
+		    yield* ostore.trans(foo, {_type: 'raise'});
+		    assert(false, 'should not be here');
+		} catch(e) {
+		    if(!e.isConflict) {
+			throw e;
+		    }
+		}
+```
+
+<a name="bucketextractionstorage-context-effectp"></a>
+### .effect(p)
+should add patch p to the effect sequence.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert(!seqStore.isEmpty(), 'sequence should contain an element');
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
+```
+
+should add patches to the effect set even when called from a nested transformation.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*(ctx) { this.bar = yield* ctx.init('bar', {}); },
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect({p:333});
+			    this.bar = (yield* ctx.trans(this.bar, p, u)).v;
+			},
+		    },
+		    bar: {
+			init: function*() {},
+			eff: function*(ctx, p, u) {
+			    yield* ctx.effect(p.patch);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var res = yield* ostore.trans(foo, {_type: 'eff', patch: {p:123}}, false);
+		var seqStore = ostore.getSequenceStore();
+		yield* seqStore.append(res.eff);
+		assert.deepEqual(yield* seqStore.shift(), {p:333});
+		assert.deepEqual(yield* seqStore.shift(), {p:123});
+```
+
+<a name="bucketextractionstorage-context-self"></a>
+### .self()
+should return the version ID of the object prior to this patch application.
+
+```js
+function* (){
+		var dispMap = {
+		    foo: {
+			init: function*() { this.value = 44; },
+			bar: function*(ctx, p, u) {
+			    this.value = 999;
+			    return yield* ctx.trans(ctx.self(), {_type: 'baz'});
+			},
+			baz: function*(ctx, p, u) {
+			    return this.value;
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+```
+
+<a name="bucketextractionstorage-context-cloneobj"></a>
+### .clone(obj)
+should return a value equivalent to obj but not a reference.
+
+```js
+function* (){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: 42});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, 42);
+
+		foo = yield* ostore.init('foo', {value: [42]});
+		res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.deepEqual(val, [42]);
+```
+
+should properly handle null.
+
+```js
+function* (){
+		var val;
+		var dispMap = {
+		    foo: {
+			init: function*(ctx, args) { this.value = args.value; },
+			bar: function*(ctx, p, u) {
+			    val = ctx.clone(this.value);
+			},
+		    },
+		};
+		var ostore = createOStore(dispMap);
+		var foo = yield* ostore.init('foo', {value: null});
+		var res = yield* ostore.trans(foo, {_type: 'bar'});
+		assert.equal(val, null);
+```
+
 <a name="bucketobjectstorage"></a>
 # BucketObjectStorage
 should create a new bucket object by calling createBucket() when using a new bucket ID.
@@ -442,9 +793,9 @@ function* (){
 	yield* storage.storeVersion(ctx, '1234-9999', {_type: 'somePatch'}, monitor, undefined, '');
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'someOtherPatch'}, monitor, undefined, '');
-	assert.deepEqual(added, []); // should not store events for unrelated application
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), []); // should not store events for unrelated application
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, [{a:3}, {a:4}, {a:5}, {a:6}, {a:7}, {a:8}]);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), [{a:3}, {a:4}, {a:5}, {a:6}, {a:7}, {a:8}]);
 ```
 
 should not store emitions from underlying operations if the top level operation retained the version ID.
@@ -473,7 +824,7 @@ function* (){
 	yield* storage.storeNewObject(ctx, {_type: 'someObj'});
 	var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, monitor, undefined, '');
-	assert.deepEqual(added, []);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), []);
 ```
 
 should use LRU policy to limit the number of buckets open simultaneously.
@@ -494,15 +845,15 @@ function* (){
 	}
 
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxOpenBuckets: 2});
-	yield* storage.checkCache({}, 'x-aaa', {_type: 'somePatch'});
-	yield* storage.checkCache({}, 'y-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({bucket: 'x'}, 'x-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({bucket: 'y'}, 'y-aaa', {_type: 'somePatch'});
 	// The following statement will replace x with z
-	yield* storage.checkCache({}, 'z-aaa', {_type: 'somePatch'});
-	yield* storage.checkCache({}, 'y-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({bucket: 'z'}, 'z-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({bucket: 'y'}, 'y-aaa', {_type: 'somePatch'});
 	// y should still be in cache; z was the last one extracted
 	assert.equal(lastExtracted, 'z');
 	// Now we need to re-extract x
-	yield* storage.checkCache({}, 'x-aaa', {_type: 'somePatch'});
+	yield* storage.checkCache({bucket: 'x'}, 'x-aaa', {_type: 'somePatch'});
 	assert.equal(lastExtracted, 'x');
 ```
 
@@ -1064,7 +1415,7 @@ function* (done){
 			this.baz = 0;
 		    },
 		    bar: function*() {
-			yield sleep(1);
+			//yield sleep(1);
 			this.baz += 1;
 			return this.baz;
 		    },
@@ -1074,7 +1425,7 @@ function* (done){
 	    var v = yield* ostore.init('foo', {});
 	    var pair = yield* ostore.trans(v, {_type: 'bar'});
 	    assert.equal(pair.r, 1);
-	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar'});
 	    assert.equal(pair.r, 2);
 ```
 
@@ -2725,7 +3076,7 @@ function* (done){
 			this.baz = 0;
 		    },
 		    bar: function*() {
-			yield sleep(1);
+			//yield sleep(1);
 			this.baz += 1;
 			return this.baz;
 		    },
@@ -2735,7 +3086,7 @@ function* (done){
 	    var v = yield* ostore.init('foo', {});
 	    var pair = yield* ostore.trans(v, {_type: 'bar'});
 	    assert.equal(pair.r, 1);
-	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar'});
 	    assert.equal(pair.r, 2);
 ```
 
@@ -3090,7 +3441,7 @@ function* (done){
 			this.baz = 0;
 		    },
 		    bar: function*() {
-			yield sleep(1);
+			//yield sleep(1);
 			this.baz += 1;
 			return this.baz;
 		    },
@@ -3100,7 +3451,7 @@ function* (done){
 	    var v = yield* ostore.init('foo', {});
 	    var pair = yield* ostore.trans(v, {_type: 'bar'});
 	    assert.equal(pair.r, 1);
-	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar'});
 	    assert.equal(pair.r, 2);
 ```
 

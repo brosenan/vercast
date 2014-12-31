@@ -8,7 +8,7 @@ module.exports = function(disp, effSeqFactory, storage) {
     var transListeners = [];
     effSeqFactory = effSeqFactory || new vercast.SequenceStoreFactory(new vercast.DummyKeyValueStore());
     this.init = function*(type, args, ctx) {
-	ctx = ctx || {};
+	ctx = ctx || Object.create(null);
 	var obj = yield* disp.init(createContext(this), type, args);
 	return {$: yield* storage.storeNewObject(ctx, obj)};
     };

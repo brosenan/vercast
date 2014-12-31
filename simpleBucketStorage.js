@@ -34,7 +34,7 @@ function createBucket() {
 	    cacheResult(v, p, monitor, this.name, r, eff);
 	},
 	storeIncoming: function(v, p, monitor, r, eff, emit) {
-	    cacheResult(v, p, monitor, this.name, r, eff);
+	    //cacheResult(v, p, monitor, this.name, r, eff);
 	    return store(monitor, emit);
 	},
 	storeInternal: function(v, p, monitor, r, eff, emit) {
@@ -47,7 +47,8 @@ function createBucket() {
     };
 
     function cacheResult(v, p, monitor, name, r, eff) {
-	cache[cacheKey(v, p)] = {v: {$:name + '-' + monitor.hash()}, 
+	var split = v.split('-');
+	cache[cacheKey(v, p)] = {v: {$: split[0] + '-' + monitor.hash()}, 
 				 r: r, eff: eff};
     }
 }

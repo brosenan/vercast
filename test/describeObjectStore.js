@@ -48,7 +48,7 @@ module.exports = function(createOStore) {
 			this.baz = 0;
 		    },
 		    bar: function*() {
-			yield sleep(1);
+			//yield sleep(1);
 			this.baz += 1;
 			return this.baz;
 		    },
@@ -58,7 +58,7 @@ module.exports = function(createOStore) {
 	    var v = yield* ostore.init('foo', {});
 	    var pair = yield* ostore.trans(v, {_type: 'bar'});
 	    assert.equal(pair.r, 1);
-	    pair = (yield* ostore.trans(pair.v, {_type: 'bar'}));
+	    pair = yield* ostore.trans(pair.v, {_type: 'bar'});
 	    assert.equal(pair.r, 2);
 	}));
 	it('should pass the patch and u flag as parameters to the called method', asyncgen.async(function*(done){

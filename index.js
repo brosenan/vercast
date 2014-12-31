@@ -1,7 +1,8 @@
 exports.ObjectDispatcher = require('./objectDispatcher.js');
 exports.DummyObjectStore = require('./dummyObjectStore.js');
 exports.SimpleQueue = require('./simpleQueue.js');
-exports.SimpleObjectStore = require('./simpleObjectStore.js');
+exports.SimpleObjectStore = require('./simpleObjectStore.js').SimpleObjectStore;
+exports.SimpleObjectStorage = require('./simpleObjectStore.js').SimpleObjectStorage;
 exports.ObjectMonitor = require('./objectMonitor.js');
 exports.DummyKeyValueStore = require('./dummyKeyValueStore.js');
 exports.SequenceStoreFactory = require('./sequenceStoreFactory.js');
@@ -21,3 +22,4 @@ exports.ObjectStore = require('./objectStore.js');
 exports.DummyBucketStore = require('./dummyBucketStore.js');
 exports.BucketObjectStorage = require('./bucketObjectStorage.js');
 exports.createSimpleBucketStorage = require('./simpleBucketStorage.js');
+exports.createBucketExtractionStorage = require('./bucketExtractionStorage.js');

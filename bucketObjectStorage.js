@@ -27,27 +27,28 @@ module.exports = function(bucketStore, createBucket, options) {
     }
     this.storeNewObject = function*(ctx, obj) {
 	var bucketID = ctx.bucket || '';
-	var emit = emitFunc(ctx);
+	var bucket = yield* getBucket(bucketID);
+	var emit = emitFunc(ctx, bucket);
 	var emits = [];
 	if(bucketSizes[bucketID] >= maxBucketSize || bucketID === '') {
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    bucketID = monitor.hash();
 	    emit = function(elem) {
 		emits.push(elem);
+		bucket.add(elem);
 	    }
 	}
-	var bucket = yield* getBucket(bucketID);
 	var internalID = bucket.store(obj, emit);
-	emits.forEach(function(elem) {
-	    bucket.add(elem);
-	});
+//	emits.forEach(function(elem) {
+//	    bucket.add(elem);
+//	});
 	yield* bucketStore.append(bucketID, emits);
 	return [bucketID, internalID].join('-');
     };
     function* getBucket(id) {
 	var bucket = buckets.get(id);
 	if(!bucket) {
-	    bucket = createBucket();
+	    bucket = createBucket(id);
 	    buckets.set(id, bucket);
 	    bucketSizes[id] = 0;
 	    var elements = yield* bucketStore.retrieve(id);
@@ -62,7 +63,7 @@ module.exports = function(bucketStore, createBucket, options) {
     function emitionKey(ctx) {
 	return [ctx.bucket, ctx.originator].join('-');
     }
-    function emitFunc(ctx) {
+    function emitFunc(ctx, bucket) {
 	var key = emitionKey(ctx);
 	return function (elem) {
 	    var emitsForBucket = emits[key];
@@ -71,6 +72,7 @@ module.exports = function(bucketStore, createBucket, options) {
 		emits[key] = emitsForBucket;
 	    }
 	    emitsForBucket.push(elem);
+	    bucket.add(elem);
 	};
     }
 
@@ -106,23 +108,24 @@ module.exports = function(bucketStore, createBucket, options) {
     }
 
     this.storeVersion = function*(ctx, v1, p, monitor, r, eff) {
-	var ctxBucket = yield* getBucket(ctx.bucket);
+	var ctxBucketID = ctx.bucket || '';
+	var ctxBucket = yield* getBucket(ctxBucketID);
 	var internalID;
 	var oldInternalID = v1.split('-')[1];
 	var targetBucketID = bucketID(v1);
-	if(targetBucketID === ctx.bucket) {
-	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff, emitFunc(ctx));
+	var targetBucket = yield* getBucket(targetBucketID);
+	if(targetBucketID === ctxBucketID) {
+	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff, emitFunc(ctx, targetBucket));
 	} else {
 	    var childCtx = this.deriveContext(ctx, v1, p);
-	    var targetBucket = yield* getBucket(targetBucketID);
-	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff, emitFunc(ctx));
-	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx));
+	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff, emitFunc(ctx, ctxBucket));
+	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx, targetBucket));
 	    var key = emitionKey(childCtx);
 	    if(emits[key]) {
 		if(internalID !== oldInternalID) {
-		    emits[key].forEach(function(elem) {
-			targetBucket.add(elem);
-		    });
+//		    emits[key].forEach(function(elem) {
+//			targetBucket.add(elem);
+//		    });
 		    yield* bucketStore.append(targetBucketID, emits[key]);
 		    bucketSizes[targetBucketID] += emits[key].length;
 		}
@@ -132,13 +135,14 @@ module.exports = function(bucketStore, createBucket, options) {
 		var copyEmits = [];
 		function copyEmit(elem) {
 		    copyEmits.push(elem);
+		    newTargetBucket.add(elem);
 		}
 		var newTargetBucketID = monitor.hash();
 		var newTargetBucket = yield* getBucket(newTargetBucketID);
 		internalID = copyObject(internalID, targetBucket, newTargetBucket, copyEmit);
-		copyEmits.forEach(function(elem) {
-		    newTargetBucket.add(elem);
-		});
+//		copyEmits.forEach(function(elem) {
+//		    newTargetBucket.add(elem);
+//		});
 		yield* bucketStore.append(newTargetBucket, copyEmits);
 		targetBucketID = newTargetBucketID;
 	    }
@@ -151,8 +155,8 @@ module.exports = function(bucketStore, createBucket, options) {
 	return bucket.retrieve(split[1]);
     };
     this.checkCache = function*(ctx, v, p) {
-	var split = v.split('-');
-	var bucket = yield* getBucket(split[0]);
+	var bucketID = ctx.bucket || '';
+	var bucket = yield* getBucket(bucketID);
 	return bucket.checkCache(v, p);
     };
 };

@@ -1,20 +1,6 @@
 
     Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-  ․ Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-    Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-  ․ Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-    Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-  ․ Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-  ․ Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-    Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-  ․ Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
-  ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+  1) Neo4jGraphDB "before each" hook
     BranchStore .init(type, args) should create a new object version, and return its ID
   ․ BranchStore .init(type, args) should create a new object version, and return its ID
     BranchStore .trans(v, p, u) -> {v,r} should transform an object version according to the given patch
@@ -39,6 +25,34 @@
   ․ BranchStore .pull(v, b) should return a merge between the head of b and v
     BranchStore .pull(v, b) should resolve conflicts by preferring the branch
   ․ BranchStore .pull(v, b) should resolve conflicts by preferring the branch
+    BucketExtractionStorage .init(type, args) should return a version ID of a newly created object
+  ․ BucketExtractionStorage .init(type, args) should return a version ID of a newly created object
+    BucketExtractionStorage .init(type, args) should support queries to other objects during the initialization
+  ․ BucketExtractionStorage .init(type, args) should support queries to other objects during the initialization
+    BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
+  ․ BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should return the value returned from the method corresponding to patch p
+    BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
+  ․ BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should pass the patch and u flag as parameters to the called method
+    BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
+  ․ BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should replace the object with another if replaced with its ID
+    BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
+  ․ BucketExtractionStorage .trans(v, p, u) -> {v, r, eff} should throw an exception in case of a transformation that results in null
+    BucketExtractionStorage context .init(type, args) should initialize an object with the given type and args and return its version ID
+  ․ BucketExtractionStorage context .init(type, args) should initialize an object with the given type and args and return its version ID
+    BucketExtractionStorage context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
+  ․ BucketExtractionStorage context .trans(v, p, u) -> {v,r,eff} should transform a version and return the new version ID and result
+    BucketExtractionStorage context .conflict(msg) should throw an exception with .isConflict set to true
+  ․ BucketExtractionStorage context .conflict(msg) should throw an exception with .isConflict set to true
+    BucketExtractionStorage context .effect(p) should add patch p to the effect sequence
+  ․ BucketExtractionStorage context .effect(p) should add patch p to the effect sequence
+    BucketExtractionStorage context .effect(p) should add patches to the effect set even when called from a nested transformation
+  ․ BucketExtractionStorage context .effect(p) should add patches to the effect set even when called from a nested transformation
+    BucketExtractionStorage context .self() should return the version ID of the object prior to this patch application
+  ․ BucketExtractionStorage context .self() should return the version ID of the object prior to this patch application
+    BucketExtractionStorage context .clone(obj) should return a value equivalent to obj but not a reference
+  ․ BucketExtractionStorage context .clone(obj) should return a value equivalent to obj but not a reference
+    BucketExtractionStorage context .clone(obj) should properly handle null
+  ․ BucketExtractionStorage context .clone(obj) should properly handle null
     BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
   ․ BucketObjectStorage should create a new bucket object by calling createBucket() when using a new bucket ID
     BucketObjectStorage should call the new bucket object's add() method with every existing element in the bucket
@@ -364,5 +378,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  182 passing (7s)
+  188 passing (409ms)
 
