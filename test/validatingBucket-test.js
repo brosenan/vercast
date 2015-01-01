@@ -129,6 +129,63 @@ describe('createValidatingBucket(createBucket)', function(){
 	    assert.equal(res.v, '1234-5678');
 	    assert.deepEqual(res.p, {_type: 'somePatch'});
 	});
+	it('should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle', function(){
+	    function calcKey(v, p) {
+		return v + ">" + vercast.ObjectMonitor.seal(p);
+	    }
+	    function createBucket() {
+		var kvs = {};
+		return {
+		    storeIncoming: function(v, p, monitor, r, eff, emit) {
+			var key = calcKey(v, p);
+			emit({key: key, obj: monitor.object()}); // good
+			kvs[key] = monitor.object();
+			return '1234';
+		    },
+		    storeOutgoing: function(v, p, monitor, r, eff, emit) {
+			// Bad: does not change own state
+			var key = calcKey(v, p);
+			emit({key: key, obj: monitor.object()});
+		    },
+		    storeInternal: function(v, p, monitor, r, eff, emit) {
+			// Bad: Does not emit
+			var key = calcKey(v, p);
+			kvs[key] = monitor.object();
+			return '1234';
+		    },
+		    add: function(elem) {
+			kvs[elem.key] = elem.obj;
+		    },
+		    checkCache: function(v, p) {
+			return kvs[calcKey(v, p)];
+		    },
+		};
+	    }
+	    function emit(elem) {};
+	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    validatingBucket.storeIncoming('1234', 
+					   {_type: 'somePatch'}, 
+					   new vercast.ObjectMonitor({_type: 'someObj'}),
+					   undefined, '', emit);
+	    var obj = validatingBucket.checkCache('1234', {_type: 'somePatch'});
+	    assert.equal(obj._type, 'someObj');
+	    validatingBucket.storeOutgoing('1234', 
+					   {_type: 'somePatch'}, 
+					   new vercast.ObjectMonitor({_type: 'someObj1', foo: 2}),
+					   undefined, '', emit);
+	    assert.throws(function() {
+		validatingBucket.checkCache('1234', {_type: 'somePatch'});
+	    }, /Mismatch in return value between stored and added state/);
+
+	    validatingBucket.storeInternal('1234', 
+					   {_type: 'somePatch'}, 
+					   new vercast.ObjectMonitor({_type: 'someObj2'}),
+					   undefined, '', emit);
+	    assert.throws(function() {
+		validatingBucket.checkCache('1234', {_type: 'somePatch'});
+	    }, /Mismatch in return value between stored and added state/);
+	    
+	});
     });
     describe('.retrieve(id)', function(){
 	it('should consult the underlying .retrieve() method', function(){

@@ -389,6 +389,8 @@
   ․ createValidatingBucket(createBucket) .storeInternal(v, p, monitor, r, eff, emit) should consult the underlying .storeIncoming() method
     createValidatingBucket(createBucket) .checkCache(v, p) should consult the underlying .checkCache() method
   ․ createValidatingBucket(createBucket) .checkCache(v, p) should consult the underlying .checkCache() method
+    createValidatingBucket(createBucket) .checkCache(v, p) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
+  ․ createValidatingBucket(createBucket) .checkCache(v, p) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
     createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method
   ․ createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method
     createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
@@ -408,5 +410,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  204 passing (6s)
+  205 passing (6s)
 

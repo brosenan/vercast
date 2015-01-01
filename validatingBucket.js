@@ -25,7 +25,10 @@ exports.createValidatingBucket = function(createBucket) {
 	    return bucket1.storeInternal(v, p, monitor, r, eff, emitFunc(emit));
 	},
 	checkCache: function(v, p) {
-	    return bucket1.checkCache(v, p);
+	    var res1 = bucket1.checkCache(v, p);
+	    var res2 = bucket2.checkCache(v, p);
+	    assert.deepEqual(res1, res2, 'Mismatch in return value between stored and added state');
+	    return res1;
 	},
 	retrieve: function(id) {
 	    var monitor1 = bucket1.retrieve(id);
