@@ -184,7 +184,6 @@ describe('createValidatingBucket(createBucket)', function(){
 	    assert.throws(function() {
 		validatingBucket.checkCache('1234', {_type: 'somePatch'});
 	    }, /Mismatch in return value between stored and added state/);
-	    
 	});
     });
     describe('.retrieve(id)', function(){
@@ -265,7 +264,7 @@ describe('createValidatingBucket(createBucket)', function(){
 
     });
     describe('.add(elem)', function(){
-	it('should consult the underlying .add() method', function(){
+	it('should forward elem to two instances of this bucket', function(){
 	    var added = [];
 	    function createBucket() {
 		return {
@@ -278,7 +277,7 @@ describe('createValidatingBucket(createBucket)', function(){
 	    validatingBucket.add({a:1});
 	    validatingBucket.add({a:2});
 
-	    assert.deepEqual(added, [{a:1}, {a:2}]);
+	    assert.deepEqual(added, [{a:1}, {a:1}, {a:2}, {a:2}]);
 	});
     });
 });

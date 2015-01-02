@@ -3,10 +3,10 @@
 var vercast = require('vercast');
 var asyncgen = require('asyncgen');
 
-module.exports = function(bucketStore, disp) {
+module.exports = function(bucketStore, disp, testing) {
     var ctx = {};
 
-    function createBucket(name) {
+    var createBucket = function(name) {
 	var kvs = new vercast.DummyKeyValueStore();
 	var seq = new vercast.SequenceStoreFactory(kvs);
 	var internalStorage = new vercast.SimpleObjectStorage(kvs);
@@ -15,8 +15,10 @@ module.exports = function(bucketStore, disp) {
 
 	return {
 	    store: function(obj, emit) {
-		obj = removeBucketID(obj, this.name);
 		emit({type: 'seed', obj: obj});
+		asyncgen.runSync(function*() {
+		    yield* internalStorage.storeNewObject(ctx, obj);
+		});
 		var monitor = new vercast.ObjectMonitor(obj);
 		return monitor.hash();
 	    },
@@ -51,14 +53,25 @@ module.exports = function(bucketStore, disp) {
 	    },
 	    storeOutgoing: function(v, p, monitor, r, eff, emit) {
 		var split = v.split('-');
+		var v2 = [split[0], monitor.hash()].join('-');
 		emit({type: 'cache', 
 		      v: v, 
-		      v2 : [split[0], monitor.hash()].join('-'), 
+		      v2 : v2, 
 		      p: p, r: r, eff: eff});
+		asyncgen.runSync(function*() {
+		    var pHash = vercast.ObjectMonitor.seal(p);
+		    var cachedKey = v + '>' + pHash;
+		    var retVal = {v: {$:v2}, r: r, eff: eff};
+		    yield* kvs.store(cachedKey, JSON.stringify(retVal));
+		});
 	    },
 	    storeIncoming: function(v, p, monitor, r, eff, emit) {
 		var split = v.split('-');
 		emit({type: 'patch', v: split[1], p: p});
+		asyncgen.runSync(function*() {
+		    yield* internalStorage.storeVersion(ctx, v, p, monitor, r, eff);
+		});
+		
 		return monitor.hash();
 	    },
 	    storeInternal: function(v, p, monitor, r, eff, emit) {
@@ -67,6 +80,12 @@ module.exports = function(bucketStore, disp) {
 	};
     }
 
+    if(testing) {
+	var oldCreateBucket = createBucket;
+	createBucket = function() {
+	    return vercast.createValidatingBucket(oldCreateBucket);
+	}
+    }
     return new vercast.BucketObjectStorage(bucketStore, createBucket);
 };
 

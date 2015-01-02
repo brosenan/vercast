@@ -62,8 +62,7 @@ describe('BucketObjectStorage', function(){
 				    {_type: 'somePatch'},
 				    new vercast.ObjectMonitor({_type: 'someObject'}),
 				    123, 'someEff');
-	assert.deepEqual([{a:1}, {a:2}], added);
-	assert.deepEqual(yield* bucketStore.retrieve('1234'), added);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), [{a:1}, {a:2}]);
 
 	// And again...
 	yield* storage.storeVersion({bucket: 'xyz'}, 
@@ -71,8 +70,7 @@ describe('BucketObjectStorage', function(){
 				    {_type: 'somePatch'},
 				    new vercast.ObjectMonitor({_type: 'someObject'}),
 				    123, 'someEff');
-	assert.deepEqual([{a:1}, {a:2}, {a:1}, {a:2}], added);
-	assert.deepEqual(yield* bucketStore.retrieve('1234'), added);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), [{a:1}, {a:2}, {a:1}, {a:2}]);
     }));
     it('should store emitions from underlying operations', asyncgen.async(function*(){
 	var added = [];
@@ -233,7 +231,6 @@ describe('BucketObjectStorage', function(){
 	    assert.notEqual(res.split('-')[0], ctx.bucket);
 	    // Emitions by store() should go to the new bucket
 	    assert.deepEqual(yield* bucketStore.retrieve(res.split('-')[0]), [{a:1}]);
-	    assert.deepEqual(added, [{a:1}]);
 	}));
     });
     describe('.storeVersion(ctx, v1, p, monitor, r, eff)', function(){
@@ -320,6 +317,7 @@ describe('BucketObjectStorage', function(){
 		    store: function(obj, emit) {
 			index += 1;
 			emit({i: index, obj: obj});
+			kvs[index] = obj;
 			return index;
 		    },
 		    retrieve: function(v) {
@@ -357,6 +355,7 @@ describe('BucketObjectStorage', function(){
 		    storeIncoming: function(v, p, monitor, r, eff, emit) {
 			index += 1;
 			emit({i: index, obj: monitor.object()});
+			kvs[index] = monitor.object();
 			return index;
 		    },
 		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
@@ -368,6 +367,7 @@ describe('BucketObjectStorage', function(){
 		    store: function(obj, emit) {
 			index += 1;
 			emit({i: index, obj: obj});
+			kvs[index] = obj;
 			return index;
 		    },
 		    retrieve: function(v) {

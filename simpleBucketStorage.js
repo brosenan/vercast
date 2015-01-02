@@ -2,9 +2,10 @@
 
 var vercast = require('vercast');
 
-function store(monitor, emit) {
+function store(monitor, emit, kvs) {
     var id = monitor.hash()
     emit({id: id, val: monitor.json()});
+    kvs[id] = monitor.json();
     return id; 
 }
 function cacheKey(v, p) {
@@ -22,6 +23,7 @@ function createBucket() {
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    emit({id: monitor.hash(),
 		  val: monitor.json()});
+	    kvs[monitor.hash()] = monitor.json();
 	    return monitor.hash();
 	},
 	retrieve: function(id) {
@@ -35,11 +37,11 @@ function createBucket() {
 	},
 	storeIncoming: function(v, p, monitor, r, eff, emit) {
 	    //cacheResult(v, p, monitor, this.name, r, eff);
-	    return store(monitor, emit);
+	    return store(monitor, emit, kvs);
 	},
 	storeInternal: function(v, p, monitor, r, eff, emit) {
 	    cacheResult(v, p, monitor, this.name, r, eff);
-	    return store(monitor, emit);
+	    return store(monitor, emit, kvs);
 	},
 	add: function(elem) {
 	    kvs[elem.id] = elem.val;

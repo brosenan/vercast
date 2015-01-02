@@ -39,6 +39,7 @@ exports.createValidatingBucket = function(createBucket) {
 	},
 	add: function(elem) {
 	    bucket1.add(elem);
+	    bucket2.add(elem);
 	},
     };
 };

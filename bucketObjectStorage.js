@@ -35,13 +35,10 @@ module.exports = function(bucketStore, createBucket, options) {
 	    bucketID = monitor.hash();
 	    emit = function(elem) {
 		emits.push(elem);
-		bucket.add(elem);
+		//bucket.add(elem);
 	    }
 	}
 	var internalID = bucket.store(obj, emit);
-//	emits.forEach(function(elem) {
-//	    bucket.add(elem);
-//	});
 	yield* bucketStore.append(bucketID, emits);
 	return [bucketID, internalID].join('-');
     };
@@ -72,7 +69,7 @@ module.exports = function(bucketStore, createBucket, options) {
 		emits[key] = emitsForBucket;
 	    }
 	    emitsForBucket.push(elem);
-	    bucket.add(elem);
+//	    bucket.add(elem);
 	};
     }
 
@@ -123,9 +120,6 @@ module.exports = function(bucketStore, createBucket, options) {
 	    var key = emitionKey(childCtx);
 	    if(emits[key]) {
 		if(internalID !== oldInternalID) {
-//		    emits[key].forEach(function(elem) {
-//			targetBucket.add(elem);
-//		    });
 		    yield* bucketStore.append(targetBucketID, emits[key]);
 		    bucketSizes[targetBucketID] += emits[key].length;
 		}
@@ -135,14 +129,11 @@ module.exports = function(bucketStore, createBucket, options) {
 		var copyEmits = [];
 		function copyEmit(elem) {
 		    copyEmits.push(elem);
-		    newTargetBucket.add(elem);
+		    //newTargetBucket.add(elem);
 		}
 		var newTargetBucketID = monitor.hash();
 		var newTargetBucket = yield* getBucket(newTargetBucketID);
 		internalID = copyObject(internalID, targetBucket, newTargetBucket, copyEmit);
-//		copyEmits.forEach(function(elem) {
-//		    newTargetBucket.add(elem);
-//		});
 		yield* bucketStore.append(newTargetBucket, copyEmits);
 		targetBucketID = newTargetBucketID;
 	    }

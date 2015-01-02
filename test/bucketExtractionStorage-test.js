@@ -7,6 +7,16 @@ var vercast = require('vercast');
 function createOStore(dispMap) {
     var bucketStore = new vercast.DummyBucketStore();
     var disp = new vercast.ObjectDispatcher(dispMap);
+    var storage = vercast.createBucketExtractionStorage(bucketStore, disp, true);
+
+    var kvs = new vercast.DummyKeyValueStore();
+    var seq = new vercast.SequenceStoreFactory(kvs);
+    return new vercast.ObjectStore(disp, seq, storage);
+}
+
+function createOStoreNoValidate(dispMap) {
+    var bucketStore = new vercast.DummyBucketStore();
+    var disp = new vercast.ObjectDispatcher(dispMap);
     var storage = vercast.createBucketExtractionStorage(bucketStore, disp);
 
     var kvs = new vercast.DummyKeyValueStore();
@@ -16,5 +26,5 @@ function createOStore(dispMap) {
 
 describe('BucketExtractionStorage', function(){
     require('./describeObjectStore.js')(createOStore);
-    //require('./describeObjectStore.js').describeCachedObjectStore(createOStore);
+    require('./describeObjectStore.js').describeCachedObjectStore(createOStoreNoValidate);
 });
