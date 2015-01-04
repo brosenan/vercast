@@ -3,10 +3,9 @@
 var vercast = require('vercast');
 var asyncgen = require('asyncgen');
 
-module.exports = function(bucketStore, disp, testing) {
+module.exports = function(disp) {
     var ctx = {};
-
-    var createBucket = function(name) {
+    return function(name) {
 	var kvs = new vercast.DummyKeyValueStore();
 	var seq = new vercast.SequenceStoreFactory(kvs);
 	var internalStorage = new vercast.SimpleObjectStorage(kvs);
@@ -24,7 +23,7 @@ module.exports = function(bucketStore, disp, testing) {
 	    },
 	    checkCache: function(v, p) {
 		var split = v.split('-');
-		var res = asyncgen.runSync(function*() {
+		return asyncgen.runSync(function*() {
 		    return yield* internalStorage.checkCache(ctx, split[1], p);
 		});
 	    },
@@ -75,20 +74,20 @@ module.exports = function(bucketStore, disp, testing) {
 		return monitor.hash();
 	    },
 	    storeInternal: function(v, p, monitor, r, eff, emit) {
+		var split = v.split('-');
+		var v2 = [split[0], monitor.hash()].join('-');
+		asyncgen.runSync(function*() {
+		    var pHash = vercast.ObjectMonitor.seal(p);
+		    var cachedKey = split[1] + '>' + pHash;
+		    var retVal = {v: {$:v2}, r: r, eff: eff};
+		    yield* kvs.store(cachedKey, JSON.stringify(retVal));
+		});
+		
 		return monitor.hash();
 	    },
 	};
     }
-
-    if(testing) {
-	var oldCreateBucket = createBucket;
-	createBucket = function() {
-	    return vercast.createValidatingBucket(oldCreateBucket);
-	}
-    }
-    return new vercast.BucketObjectStorage(bucketStore, createBucket);
-};
-
+}
 function removeBucketID(obj, id) {
     var prefix = id + '-';
     if(!obj || typeof obj !== 'object') {

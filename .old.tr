@@ -39,6 +39,10 @@
   ․ BranchStore .pull(v, b) should return a merge between the head of b and v
     BranchStore .pull(v, b) should resolve conflicts by preferring the branch
   ․ BranchStore .pull(v, b) should resolve conflicts by preferring the branch
+    BucketExtractionStorage should avoid running the patch method again if the patch has already been applied on an identical object
+  ․ BucketExtractionStorage should avoid running the patch method again if the patch has already been applied on an identical object
+    BucketExtractionStorage should store child objects in the same bucket as the parent
+  ․ BucketExtractionStorage should store child objects in the same bucket as the parent
     BucketExtractionStorage .init(type, args) should return a version ID of a newly created object
   ․ BucketExtractionStorage .init(type, args) should return a version ID of a newly created object
     BucketExtractionStorage .init(type, args) should support queries to other objects during the initialization
@@ -395,8 +399,8 @@
   ․ createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method
     createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
   ․ createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
-    createValidatingBucket(createBucket) .add(elem) should consult the underlying .add() method
-  ․ createValidatingBucket(createBucket) .add(elem) should consult the underlying .add() method
+    createValidatingBucket(createBucket) .add(elem) should forward elem to two instances of this bucket
+  ․ createValidatingBucket(createBucket) .add(elem) should forward elem to two instances of this bucket
     array should apply patches to different objects, by the patch's _key attribute
   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value
@@ -410,5 +414,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  205 passing (6s)
+  207 passing (6s)
 

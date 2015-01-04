@@ -21,7 +21,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		emitted.push(elem);
 	    }
 
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var res = validatingBucket.store({x:2}, emit);
 	    assert.equal(res.obj.x, 2);
 	    assert.deepEqual(emitted, [{a:1}]);
@@ -43,7 +43,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		emitted.push(elem);
 	    }
 
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var res = validatingBucket.storeIncoming('1234', 
 						     {_type: 'somePatch'}, 
 						     new vercast.ObjectMonitor({_type: 'someObj'}), 
@@ -72,7 +72,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		emitted.push(elem);
 	    }
 
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var res = validatingBucket.storeOutgoing('1234', 
 						     {_type: 'somePatch'}, 
 						     new vercast.ObjectMonitor({_type: 'someObj'}), 
@@ -101,7 +101,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		emitted.push(elem);
 	    }
 
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var res = validatingBucket.storeInternal('1234', 
 						     {_type: 'somePatch'}, 
 						     new vercast.ObjectMonitor({_type: 'someObj'}), 
@@ -123,7 +123,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		    },
 		};
 	    }
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var res = validatingBucket.checkCache('1234-5678', {_type: 'somePatch'});
 
 	    assert.equal(res.v, '1234-5678');
@@ -162,7 +162,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		};
 	    }
 	    function emit(elem) {};
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    validatingBucket.storeIncoming('1234', 
 					   {_type: 'somePatch'}, 
 					   new vercast.ObjectMonitor({_type: 'someObj'}),
@@ -195,7 +195,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		    },
 		};
 	    }
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var res = validatingBucket.retrieve('1234');
 
 	    assert.equal(res.proxy().id, '1234');
@@ -234,7 +234,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		};
 	    }
 	    function emit(elem) {};
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    var id = validatingBucket.store({_type: 'someObj'}, emit);
 	    assert.throws(function() {
 		var monitor = validatingBucket.retrieve(id);
@@ -273,7 +273,7 @@ describe('createValidatingBucket(createBucket)', function(){
 		    },
 		};
 	    }
-	    var validatingBucket = vercast.createValidatingBucket(createBucket);
+	    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 	    validatingBucket.add({a:1});
 	    validatingBucket.add({a:2});
 

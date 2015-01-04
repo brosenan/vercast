@@ -33,9 +33,9 @@ module.exports = function(bucketStore, createBucket, options) {
 	if(bucketSizes[bucketID] >= maxBucketSize || bucketID === '') {
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    bucketID = monitor.hash();
+	    bucket = yield* getBucket(bucketID);
 	    emit = function(elem) {
 		emits.push(elem);
-		//bucket.add(elem);
 	    }
 	}
 	var internalID = bucket.store(obj, emit);
@@ -69,7 +69,6 @@ module.exports = function(bucketStore, createBucket, options) {
 		emits[key] = emitsForBucket;
 	    }
 	    emitsForBucket.push(elem);
-//	    bucket.add(elem);
 	};
     }
 
@@ -129,7 +128,6 @@ module.exports = function(bucketStore, createBucket, options) {
 		var copyEmits = [];
 		function copyEmit(elem) {
 		    copyEmits.push(elem);
-		    //newTargetBucket.add(elem);
 		}
 		var newTargetBucketID = monitor.hash();
 		var newTargetBucket = yield* getBucket(newTargetBucketID);

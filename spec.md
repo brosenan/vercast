@@ -352,6 +352,51 @@ function* (){
 
 <a name="bucketextractionstorage"></a>
 # BucketExtractionStorage
+should avoid running the patch method again if the patch has already been applied on an identical object.
+
+```js
+function* (){
+	var count = 0;
+	var dispMap = Object.create(vercast.examples);
+	dispMap.foo = {
+	    init: function*() { this.x = 0; },
+	    bar: function*(ctx, p, u) {
+		count += 1;
+		this.x += 1;
+	    },
+	};
+	var ostore = createOStore(dispMap);
+	var v0 = yield* ostore.init('array', {elementType: 'foo', args: {}});
+	var v1 = (yield* ostore.trans(v0, {_type: 'bar', _key: 'foo'})).v;
+	assert.equal(count, 1);
+	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar', _key: 'foo'})).v;
+	assert.equal(v1.$, v1Prime.$);
+	// This should not have required a call to the patch handler
+	assert.equal(count, 1);
+```
+
+should store child objects in the same bucket as the parent.
+
+```js
+function* (){
+	var dispMap = {
+	    foo: {
+		init: function*(ctx, args) { this.bar = null; },
+		createBar: function*(ctx, p, u) {
+		    this.bar = yield* ctx.init('bar', {});
+		    return this.bar;
+		},
+	    },
+	    bar: {
+		init: function*(ctx, args) {},
+	    },
+	};
+	var ostore = createOStoreNoValidate(dispMap);
+	var foo = yield* ostore.init('foo', {});
+	var res = yield* ostore.trans(foo, {_type: 'createBar'});
+	assert.equal(res.r.$.split('-')[0], foo.$.split('-')[0]);
+```
+
 <a name="bucketextractionstorage-inittype-args"></a>
 ## .init(type, args)
 should return a version ID of a newly created object.
@@ -756,8 +801,7 @@ function* (){
 				    {_type: 'somePatch'},
 				    new vercast.ObjectMonitor({_type: 'someObject'}),
 				    123, 'someEff');
-	assert.deepEqual([{a:1}, {a:2}], added);
-	assert.deepEqual(yield* bucketStore.retrieve('1234'), added);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), [{a:1}, {a:2}]);
 
 	// And again...
 	yield* storage.storeVersion({bucket: 'xyz'}, 
@@ -765,8 +809,7 @@ function* (){
 				    {_type: 'somePatch'},
 				    new vercast.ObjectMonitor({_type: 'someObject'}),
 				    123, 'someEff');
-	assert.deepEqual([{a:1}, {a:2}, {a:1}, {a:2}], added);
-	assert.deepEqual(yield* bucketStore.retrieve('1234'), added);
+	assert.deepEqual(yield* bucketStore.retrieve('1234'), [{a:1}, {a:2}, {a:1}, {a:2}]);
 ```
 
 should store emitions from underlying operations.
@@ -953,7 +996,6 @@ function* (){
 	    assert.notEqual(res.split('-')[0], ctx.bucket);
 	    // Emitions by store() should go to the new bucket
 	    assert.deepEqual(yield* bucketStore.retrieve(res.split('-')[0]), [{a:1}]);
-	    assert.deepEqual(added, [{a:1}]);
 ```
 
 <a name="bucketobjectstorage-storeversionctx-v1-p-monitor-r-eff"></a>
@@ -1051,6 +1093,7 @@ function* (){
 		    store: function(obj, emit) {
 			index += 1;
 			emit({i: index, obj: obj});
+			kvs[index] = obj;
 			return index;
 		    },
 		    retrieve: function(v) {
@@ -1092,6 +1135,7 @@ function* (){
 		    storeIncoming: function(v, p, monitor, r, eff, emit) {
 			index += 1;
 			emit({i: index, obj: monitor.object()});
+			kvs[index] = monitor.object();
 			return index;
 		    },
 		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
@@ -1103,6 +1147,7 @@ function* (){
 		    store: function(obj, emit) {
 			index += 1;
 			emit({i: index, obj: obj});
+			kvs[index] = obj;
 			return index;
 		    },
 		    retrieve: function(v) {
@@ -3013,20 +3058,19 @@ should avoid running the patch method again if the patch has already been applie
 ```js
 function* (){
 	var count = 0;
-	var dispMap = {
-	    foo: {
-		init: function*() { this.x = 0; },
-		bar: function*(ctx, p, u) {
-		    count += 1;
-		    this.x += 1;
-		},
+	var dispMap = Object.create(vercast.examples);
+	dispMap.foo = {
+	    init: function*() { this.x = 0; },
+	    bar: function*(ctx, p, u) {
+		count += 1;
+		this.x += 1;
 	    },
 	};
 	var ostore = createOStore(dispMap);
-	var v0 = yield* ostore.init('foo', {});
-	var v1 = (yield* ostore.trans(v0, {_type: 'bar'})).v;
+	var v0 = yield* ostore.init('array', {elementType: 'foo', args: {}});
+	var v1 = (yield* ostore.trans(v0, {_type: 'bar', _key: 'foo'})).v;
 	assert.equal(count, 1);
-	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar'})).v;
+	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar', _key: 'foo'})).v;
 	assert.equal(v1.$, v1Prime.$);
 	// This should not have required a call to the patch handler
 	assert.equal(count, 1);
@@ -3378,20 +3422,19 @@ should avoid running the patch method again if the patch has already been applie
 ```js
 function* (){
 	var count = 0;
-	var dispMap = {
-	    foo: {
-		init: function*() { this.x = 0; },
-		bar: function*(ctx, p, u) {
-		    count += 1;
-		    this.x += 1;
-		},
+	var dispMap = Object.create(vercast.examples);
+	dispMap.foo = {
+	    init: function*() { this.x = 0; },
+	    bar: function*(ctx, p, u) {
+		count += 1;
+		this.x += 1;
 	    },
 	};
 	var ostore = createOStore(dispMap);
-	var v0 = yield* ostore.init('foo', {});
-	var v1 = (yield* ostore.trans(v0, {_type: 'bar'})).v;
+	var v0 = yield* ostore.init('array', {elementType: 'foo', args: {}});
+	var v1 = (yield* ostore.trans(v0, {_type: 'bar', _key: 'foo'})).v;
 	assert.equal(count, 1);
-	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar'})).v;
+	var v1Prime = (yield* ostore.trans(v0, {_type: 'bar', _key: 'foo'})).v;
 	assert.equal(v1.$, v1Prime.$);
 	// This should not have required a call to the patch handler
 	assert.equal(count, 1);
@@ -3912,7 +3955,7 @@ function emit(elem) {
 		emitted.push(elem);
 }
 
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var res = validatingBucket.store({x:2}, emit);
 assert.equal(res.obj.x, 2);
 assert.deepEqual(emitted, [{a:1}]);
@@ -3937,7 +3980,7 @@ function emit(elem) {
 		emitted.push(elem);
 }
 
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var res = validatingBucket.storeIncoming('1234', 
 						     {_type: 'somePatch'}, 
 						     new vercast.ObjectMonitor({_type: 'someObj'}), 
@@ -3969,7 +4012,7 @@ function emit(elem) {
 		emitted.push(elem);
 }
 
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var res = validatingBucket.storeOutgoing('1234', 
 						     {_type: 'somePatch'}, 
 						     new vercast.ObjectMonitor({_type: 'someObj'}), 
@@ -4001,7 +4044,7 @@ function emit(elem) {
 		emitted.push(elem);
 }
 
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var res = validatingBucket.storeInternal('1234', 
 						     {_type: 'somePatch'}, 
 						     new vercast.ObjectMonitor({_type: 'someObj'}), 
@@ -4026,7 +4069,7 @@ function createBucket() {
 		    },
 		};
 }
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var res = validatingBucket.checkCache('1234-5678', {_type: 'somePatch'});
 
 assert.equal(res.v, '1234-5678');
@@ -4068,7 +4111,7 @@ function createBucket() {
 		};
 }
 function emit(elem) {};
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 validatingBucket.storeIncoming('1234', 
 					   {_type: 'somePatch'}, 
 					   new vercast.ObjectMonitor({_type: 'someObj'}),
@@ -4104,7 +4147,7 @@ function createBucket() {
 		    },
 		};
 }
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var res = validatingBucket.retrieve('1234');
 
 assert.equal(res.proxy().id, '1234');
@@ -4146,7 +4189,7 @@ function createBucket() {
 		};
 }
 function emit(elem) {};
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 var id = validatingBucket.store({_type: 'someObj'}, emit);
 assert.throws(function() {
 		var monitor = validatingBucket.retrieve(id);
@@ -4175,7 +4218,7 @@ assert.throws(function() {
 
 <a name="createvalidatingbucketcreatebucket-addelem"></a>
 ## .add(elem)
-should consult the underlying .add() method.
+should forward elem to two instances of this bucket.
 
 ```js
 var added = [];
@@ -4186,10 +4229,10 @@ function createBucket() {
 		    },
 		};
 }
-var validatingBucket = vercast.createValidatingBucket(createBucket);
+var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
 validatingBucket.add({a:1});
 validatingBucket.add({a:2});
 
-assert.deepEqual(added, [{a:1}, {a:2}]);
+assert.deepEqual(added, [{a:1}, {a:1}, {a:2}, {a:2}]);
 ```
 

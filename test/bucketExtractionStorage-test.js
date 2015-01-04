@@ -7,7 +7,8 @@ var vercast = require('vercast');
 function createOStore(dispMap) {
     var bucketStore = new vercast.DummyBucketStore();
     var disp = new vercast.ObjectDispatcher(dispMap);
-    var storage = vercast.createBucketExtractionStorage(bucketStore, disp, true);
+    var createBucket = vercast.createValidatingBucket(vercast.createExtractingBucket(disp));
+    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 
     var kvs = new vercast.DummyKeyValueStore();
     var seq = new vercast.SequenceStoreFactory(kvs);
@@ -17,7 +18,8 @@ function createOStore(dispMap) {
 function createOStoreNoValidate(dispMap) {
     var bucketStore = new vercast.DummyBucketStore();
     var disp = new vercast.ObjectDispatcher(dispMap);
-    var storage = vercast.createBucketExtractionStorage(bucketStore, disp);
+    var createBucket = vercast.createExtractingBucket(disp);
+    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 
     var kvs = new vercast.DummyKeyValueStore();
     var seq = new vercast.SequenceStoreFactory(kvs);
@@ -27,4 +29,23 @@ function createOStoreNoValidate(dispMap) {
 describe('BucketExtractionStorage', function(){
     require('./describeObjectStore.js')(createOStore);
     require('./describeObjectStore.js').describeCachedObjectStore(createOStoreNoValidate);
+    it('should store child objects in the same bucket as the parent', asyncgen.async(function*(){
+	var dispMap = {
+	    foo: {
+		init: function*(ctx, args) { this.bar = null; },
+		createBar: function*(ctx, p, u) {
+		    this.bar = yield* ctx.init('bar', {});
+		    return this.bar;
+		},
+	    },
+	    bar: {
+		init: function*(ctx, args) {},
+	    },
+	};
+	var ostore = createOStoreNoValidate(dispMap);
+	var foo = yield* ostore.init('foo', {});
+	var res = yield* ostore.trans(foo, {_type: 'createBar'});
+	assert.equal(res.r.$.split('-')[0], foo.$.split('-')[0]);
+    }));
 });
+

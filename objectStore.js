@@ -10,7 +10,8 @@ module.exports = function(disp, effSeqFactory, storage) {
     this.init = function*(type, args, ctx) {
 	ctx = ctx || Object.create(null);
 	var obj = yield* disp.init(createContext(this), type, args);
-	return {$: yield* storage.storeNewObject(ctx, obj)};
+	var res = {$: yield* storage.storeNewObject(ctx, obj)};
+	return res;
     };
     this.trans = function*(v, p, u, ctx) {
 	ctx = ctx || {};
@@ -25,6 +26,7 @@ module.exports = function(disp, effSeqFactory, storage) {
 	var effSeq = effSeqFactory.createSequenceStore();
 	var monitor = yield* storage.retrieve(ctx, v.$);
 	var newCtx = createContext(this, effSeq, v, storage.deriveContext(ctx, v.$, p));
+	//console.log('trans', ctx, storage.deriveContext(ctx, v.$, p));
 	var r = yield* disp.apply(newCtx, monitor.proxy(), p, u);
 	var v2 = v;
 	var eff = yield* effSeq.hash();
@@ -54,7 +56,7 @@ module.exports = function(disp, effSeqFactory, storage) {
 function createContext(self, effSeq, v, ctx) {
     return {
 	init: function*(type, args) {
-	    return yield* self.init(type, args);
+	    return yield* self.init(type, args, ctx);
 	},
 	trans: function*(v, p, u) {
 	    var res = yield* self.trans(v, p, u, ctx);
