@@ -89,23 +89,3 @@ module.exports = function(disp) {
 	};
     }
 }
-function removeBucketID(obj, id) {
-    var prefix = id + '-';
-    if(!obj || typeof obj !== 'object') {
-	return obj;
-    }
-
-    if(obj.$) {
-	if(obj.$.substr(0, prefix.length) === prefix) {
-	    return {$: obj.$.substr(prefix.length)};
-	} else {
-	    return obj;
-	}
-    } else {
-	var newObj = Object.create(null);
-	Object.keys(obj).forEach(function(key) {
-	    newObj[key] = removeBucketID(obj[key], id);
-	});
-	return newObj;
-    }
-}

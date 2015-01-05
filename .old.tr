@@ -115,8 +115,12 @@
   ․ DummyAtomicKVS as AtomicKeyValue .modify(key, oldVal, newVal) should not change the value under key if the current value does not equal oldVal
     DummyBucketStore should retrieve, all at once, the elements that were individually appended to a given bucket
   ․ DummyBucketStore should retrieve, all at once, the elements that were individually appended to a given bucket
-    DummyBucketStore should retrieve an empty array for a bucket that has never been appended to
-  ․ DummyBucketStore should retrieve an empty array for a bucket that has never been appended to
+    DummyBucketStore .append(bucketName, elements) should return a time-uuid corresponding with this transaction
+  ․ DummyBucketStore .append(bucketName, elements) should return a time-uuid corresponding with this transaction
+    DummyBucketStore .retrieve(bucketName[, tuid]) should retrieve an empty array for a bucket that has never been appended to
+  ․ DummyBucketStore .retrieve(bucketName[, tuid]) should retrieve an empty array for a bucket that has never been appended to
+    DummyBucketStore .retrieve(bucketName[, tuid]) should only return elements that correspond to tuid greater than the given one, if given
+  ․ DummyBucketStore .retrieve(bucketName[, tuid]) should only return elements that correspond to tuid greater than the given one, if given
     DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
   ․ DummyGraphDB as GraphDB addEdge should accept an edge and add it to the graph
     DummyGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
@@ -414,5 +418,5 @@
     counter put{value} should reset the counter to the given value
   ․ counter put{value} should reset the counter to the given value
 
-  207 passing (6s)
+  209 passing (6s)
 

@@ -28,6 +28,8 @@
        - [.retrieve(key))](#dummyatomickvs-as-atomickeyvalue-retrievekey)
        - [.modify(key, oldVal, newVal)](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval)
    - [DummyBucketStore](#dummybucketstore)
+     - [.append(bucketName, elements)](#dummybucketstore-appendbucketname-elements)
+     - [.retrieve(bucketName[, tuid])](#dummybucketstore-retrievebucketname-tuid)
    - [DummyGraphDB](#dummygraphdb)
      - [as GraphDB](#dummygraphdb-as-graphdb)
        - [addEdge](#dummygraphdb-as-graphdb-addedge)
@@ -386,15 +388,26 @@ function* (){
 		    this.bar = yield* ctx.init('bar', {});
 		    return this.bar;
 		},
+		changeBar: function*(ctx, p, u) {
+		    this.bar = (yield* ctx.trans(this.bar, {_type: 'inc'}, u)).v;
+		},
+		getBar: function*(ctx, p, u) {
+		    return (yield* ctx.trans(this.bar, {_type: 'get'}, u)).r;
+		},
 	    },
 	    bar: {
-		init: function*(ctx, args) {},
+		init: function*(ctx, args) {this.value = 0},
+		inc: function*(ctx, p, u) {this.value += 1;},
+		get: function*() { return this.value; },
 	    },
 	};
 	var ostore = createOStoreNoValidate(dispMap);
 	var foo = yield* ostore.init('foo', {});
 	var res = yield* ostore.trans(foo, {_type: 'createBar'});
 	assert.equal(res.r.$.split('-')[0], foo.$.split('-')[0]);
+	res = yield* ostore.trans(res.v, {_type: 'changeBar'});
+	res = yield* ostore.trans(res.v, {_type: 'getBar'});
+	assert.equal(res.r, 1);
 ```
 
 <a name="bucketextractionstorage-inittype-args"></a>
@@ -1297,11 +1310,35 @@ function* (){
 			 [{a:1}, {a:2}, {a:3}, {a:4}]);
 ```
 
+<a name="dummybucketstore-appendbucketname-elements"></a>
+## .append(bucketName, elements)
+should return a time-uuid corresponding with this transaction.
+
+```js
+function* (){
+	    var tuid1 = yield* bucketStore.append('foo', [{a:1}, {a:2}]);
+	    var tuid2 = yield* bucketStore.append('foo', [{a:3}, {a:4}]);
+	    assert(tuid1 < tuid2, tuid1 + " < " + tuid2);
+```
+
+<a name="dummybucketstore-retrievebucketname-tuid"></a>
+## .retrieve(bucketName[, tuid])
 should retrieve an empty array for a bucket that has never been appended to.
 
 ```js
 function* (){
-	assert.deepEqual(yield* bucketStore.retrieve('bar'), []);
+	    assert.deepEqual(yield* bucketStore.retrieve('bar'), []);
+```
+
+should only return elements that correspond to tuid greater than the given one, if given.
+
+```js
+function* (){
+	    yield* bucketStore.append('foo', [{a:1}, {a:2}]);
+	    var tuid = yield* bucketStore.append('foo', [{a:3}]);
+	    yield* bucketStore.append('foo', [{a:4}]);
+	    assert.deepEqual(yield* bucketStore.retrieve('foo', tuid), 
+			     [{a:4}]);
 ```
 
 <a name="dummygraphdb"></a>
