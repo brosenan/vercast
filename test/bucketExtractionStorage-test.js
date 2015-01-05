@@ -37,15 +37,26 @@ describe('BucketExtractionStorage', function(){
 		    this.bar = yield* ctx.init('bar', {});
 		    return this.bar;
 		},
+		changeBar: function*(ctx, p, u) {
+		    this.bar = (yield* ctx.trans(this.bar, {_type: 'inc'}, u)).v;
+		},
+		getBar: function*(ctx, p, u) {
+		    return (yield* ctx.trans(this.bar, {_type: 'get'}, u)).r;
+		},
 	    },
 	    bar: {
-		init: function*(ctx, args) {},
+		init: function*(ctx, args) {this.value = 0},
+		inc: function*(ctx, p, u) {this.value += 1;},
+		get: function*() { return this.value; },
 	    },
 	};
 	var ostore = createOStoreNoValidate(dispMap);
 	var foo = yield* ostore.init('foo', {});
 	var res = yield* ostore.trans(foo, {_type: 'createBar'});
 	assert.equal(res.r.$.split('-')[0], foo.$.split('-')[0]);
+	res = yield* ostore.trans(res.v, {_type: 'changeBar'});
+	res = yield* ostore.trans(res.v, {_type: 'getBar'});
+	assert.equal(res.r, 1);
     }));
 });
 

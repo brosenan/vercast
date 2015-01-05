@@ -6,6 +6,9 @@ module.exports = function() {
     };
 
     this.append = function*(bucketName, elems) {
+	if(!bucketName || bucketName === '') {
+	    throw Error("Invalid empty bucket name");
+	}
 	var bucket = buckets[bucketName];
 	if(typeof bucket === 'undefined') {
 	    bucket = [];

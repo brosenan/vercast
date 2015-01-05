@@ -81,6 +81,7 @@ module.exports = function(disp) {
 		    var cachedKey = split[1] + '>' + pHash;
 		    var retVal = {v: {$:v2}, r: r, eff: eff};
 		    yield* kvs.store(cachedKey, JSON.stringify(retVal));
+		    yield* internalStorage.storeVersion(ctx, v, p, monitor, r, eff);
 		});
 		
 		return monitor.hash();

@@ -33,7 +33,7 @@ module.exports = function(bucketStore, createBucket, options) {
 	if(bucketSizes[bucketID] >= maxBucketSize || bucketID === '') {
 	    var monitor = new vercast.ObjectMonitor(obj);
 	    bucketID = monitor.hash();
-	    bucket = yield* getBucket(bucketID);
+	    //bucket = yield* getBucket(bucketID);
 	    emit = function(elem) {
 		emits.push(elem);
 	    }
