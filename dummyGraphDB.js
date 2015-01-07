@@ -1,5 +1,3 @@
-var util = require('/home/boaz/vercast-1/util.js');
-
 module.exports = function() {
     var G = {};
     this.clear = function*() {

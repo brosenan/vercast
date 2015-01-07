@@ -16,5 +16,21 @@ module.exports = function(table, region) {
 	    db.putItem({Item: item, TableName: table}, _);
 	};
     };
-    this.retrieve = function*() { return []; };
+    this.retrieve = function*(bucket) {
+	var query = {
+	    TableName: table,
+	    KeyConditions: {
+		bucket: {
+		    AttributeValueList: [
+			{S: bucket},
+		    ],
+		    ComparisonOperator: 'EQ',
+		},
+	    },
+	};
+	var res = yield function(_) {
+	    db.query(query, _);
+	};
+	return res.Items.map(function(x) { return x.elems; });
+    };
 };
