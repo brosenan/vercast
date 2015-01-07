@@ -23,11 +23,19 @@ module.exports = function() {
 	});
 	return tuid;
     };
-    this.retrieve = function*(bucketName, tuid) {
+    this.retrieve = function*(bucketName, tuid, giveTUID) {
 	tuid = tuid || '';
 	var bucket = buckets[bucketName] || [];
-	return bucket
+	var elems = bucket
 	    .filter(function(x) {return x.tuid > tuid})
 	    .map(function(x) { return x.elem; });
+	if(giveTUID) {
+	    var newTuid = bucket.length > 0 ? 
+		bucket[bucket.length - 1].tuid :
+		'';
+	    return {elems: elems, tuid: newTuid};
+	} else {
+	    return elems;
+	}
     };
 };

@@ -29,7 +29,7 @@
        - [.modify(key, oldVal, newVal)](#dummyatomickvs-as-atomickeyvalue-modifykey-oldval-newval)
    - [DummyBucketStore](#dummybucketstore)
      - [.append(bucketName, elements)](#dummybucketstore-appendbucketname-elements)
-     - [.retrieve(bucketName[, tuid])](#dummybucketstore-retrievebucketname-tuid)
+     - [.retrieve(bucketName[, tuid[, giveTUID]])](#dummybucketstore-retrievebucketname-tuid-givetuid)
    - [DummyGraphDB](#dummygraphdb)
      - [as GraphDB](#dummygraphdb-as-graphdb)
        - [addEdge](#dummygraphdb-as-graphdb-addedge)
@@ -1211,6 +1211,39 @@ function* (){
 	    assert.equal(monitor.proxy().my_id_is, '5678');
 ```
 
+should re-consult the bucketStore for updates in case of a missing element.
+
+```js
+function* (){
+	    function createBucket() {
+		var kvs = {};
+		return {
+		    add: function(elem) {
+			if(elem.id in kvs) {
+			    throw Error('Double update of id ' + elem.id);
+			}
+			kvs[elem.id] = elem.obj;
+		    },
+		    retrieve: function(id) {
+			var val = kvs[id];
+			if(!val) {
+			    throw Error('Invalid ID ' + id);
+			}
+			return new vercast.ObjectMonitor(val);
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	    var ctx = {bucket: '4444'};
+	    yield* bucketStore.append('1234', [{id: '5678', obj: {my_id_is: '5678'}}]);
+	    var monitor = yield* storage.retrieve(ctx, "1234-5678");
+	    assert.equal(monitor.proxy().my_id_is, '5678');
+
+	    yield* bucketStore.append('1234', [{id: '6789', obj: {my_id_is: '6789'}}]);
+	    var monitor = yield* storage.retrieve(ctx, "1234-6789");
+	    assert.equal(monitor.proxy().my_id_is, '6789');
+```
+
 <a name="bucketobjectstorage-checkcachectx-v-p"></a>
 ## .checkCache(ctx, v, p)
 should invoke the bucket object's checkCache() method.
@@ -1321,8 +1354,8 @@ function* (){
 	    assert(tuid1 < tuid2, tuid1 + " < " + tuid2);
 ```
 
-<a name="dummybucketstore-retrievebucketname-tuid"></a>
-## .retrieve(bucketName[, tuid])
+<a name="dummybucketstore-retrievebucketname-tuid-givetuid"></a>
+## .retrieve(bucketName[, tuid[, giveTUID]])
 should retrieve an empty array for a bucket that has never been appended to.
 
 ```js
@@ -1339,6 +1372,18 @@ function* (){
 	    yield* bucketStore.append('foo', [{a:4}]);
 	    assert.deepEqual(yield* bucketStore.retrieve('foo', tuid), 
 			     [{a:4}]);
+```
+
+should return an object: {elems, tuid} if giveTUID is true.
+
+```js
+function* (){
+	    yield* bucketStore.append('foo', [{a:1}, {a:2}]);
+	    var res = yield* bucketStore.retrieve('foo', '', true);
+	    yield* bucketStore.append('foo', [{a:3}]);
+	    yield* bucketStore.append('foo', [{a:4}]);
+	    assert.deepEqual(yield* bucketStore.retrieve('foo', res.tuid), 
+			     [{a:3}, {a:4}]);
 ```
 
 <a name="dummygraphdb"></a>

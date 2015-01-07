@@ -414,6 +414,36 @@ describe('BucketObjectStorage', function(){
 	    var monitor = yield* storage.retrieve(ctx, "1234-5678");
 	    assert.equal(monitor.proxy().my_id_is, '5678');
 	}));
+	it('should re-consult the bucketStore for updates in case of a missing element', asyncgen.async(function*(){
+	    function createBucket() {
+		var kvs = {};
+		return {
+		    add: function(elem) {
+			if(elem.id in kvs) {
+			    throw Error('Double update of id ' + elem.id);
+			}
+			kvs[elem.id] = elem.obj;
+		    },
+		    retrieve: function(id) {
+			var val = kvs[id];
+			if(!val) {
+			    throw Error('Invalid ID ' + id);
+			}
+			return new vercast.ObjectMonitor(val);
+		    },
+		};
+	    }
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
+	    var ctx = {bucket: '4444'};
+	    yield* bucketStore.append('1234', [{id: '5678', obj: {my_id_is: '5678'}}]);
+	    var monitor = yield* storage.retrieve(ctx, "1234-5678");
+	    assert.equal(monitor.proxy().my_id_is, '5678');
+
+	    yield* bucketStore.append('1234', [{id: '6789', obj: {my_id_is: '6789'}}]);
+	    var monitor = yield* storage.retrieve(ctx, "1234-6789");
+	    assert.equal(monitor.proxy().my_id_is, '6789');
+	}));
+
     });
     describe('.checkCache(ctx, v, p)', function(){
 	it('should invoke the bucket object\'s checkCache() method', asyncgen.async(function*(){

@@ -25,7 +25,7 @@ describe('DummyBucketStore', function(){
 	}));
 
     });
-    describe('.retrieve(bucketName[, tuid])', function(){
+    describe('.retrieve(bucketName[, tuid[, giveTUID]])', function(){
 	it('should retrieve an empty array for a bucket that has never been appended to', asyncgen.async(function*(){
 	    assert.deepEqual(yield* bucketStore.retrieve('bar'), []);
 	}));
@@ -37,7 +37,14 @@ describe('DummyBucketStore', function(){
 			     [{a:4}]);
 	    
 	}));
+	it('should return an object: {elems, tuid} if giveTUID is true', asyncgen.async(function*(){
+	    yield* bucketStore.append('foo', [{a:1}, {a:2}]);
+	    var res = yield* bucketStore.retrieve('foo', '', true);
+	    yield* bucketStore.append('foo', [{a:3}]);
+	    yield* bucketStore.append('foo', [{a:4}]);
+	    assert.deepEqual(yield* bucketStore.retrieve('foo', res.tuid), 
+			     [{a:3}, {a:4}]);
+	}));
 
     });
-
 });

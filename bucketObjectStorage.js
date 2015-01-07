@@ -42,16 +42,20 @@ module.exports = function(bucketStore, createBucket, options) {
 	yield* bucketStore.append(bucketID, emits);
 	return [bucketID, internalID].join('-');
     };
+    function* fillBucket(id, bucket) {
+	var res = yield* bucketStore.retrieve(id, bucket._lastTuid, true);
+	res.elems.forEach(function(elem) {
+	    bucket.add(elem);
+	});
+	bucket._lastTuid = res.tuid;
+    }
     function* getBucket(id) {
 	var bucket = buckets.get(id);
 	if(!bucket) {
 	    bucket = createBucket(id);
 	    buckets.set(id, bucket);
 	    bucketSizes[id] = 0;
-	    var elements = yield* bucketStore.retrieve(id);
-	    elements.forEach(function(elem) {
-		bucket.add(elem);
-	    });
+	    yield* fillBucket(id, bucket);
 	}
 	bucket.name = id;
 	return bucket;
@@ -141,7 +145,12 @@ module.exports = function(bucketStore, createBucket, options) {
     this.retrieve = function*(ctx, id) {
 	var split = id.split('-');
 	var bucket = yield* getBucket(split[0]);
-	return bucket.retrieve(split[1]);
+	try {
+	    return bucket.retrieve(split[1]);
+	} catch(e) {
+	    yield* fillBucket(split[0], bucket);
+	    return bucket.retrieve(split[1]);
+	}
     };
     this.checkCache = function*(ctx, v, p) {
 	var bucketID = ctx.bucket || '';
