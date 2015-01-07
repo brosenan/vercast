@@ -25,6 +25,7 @@
   },
   "dependencies": {
     "asyncgen": "^1.0.8",
+    "aws-sdk": "^2.1.4",
     "lru-cache": "^2.5.0",
     "neo4j": "^1.1.1",
     "node-uuid": "^1.4.2"
