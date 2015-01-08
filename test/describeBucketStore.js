@@ -45,7 +45,7 @@ module.exports = function(bucketStore) {
 	    var res = yield* bucketStore.retrieve(id, '', true);
 	    yield* bucketStore.append(id, [{a:3}]);
 	    yield* bucketStore.append(id, [{a:4}]);
-	    assert.deepEqual(yield* bucketStore.retrieve(id, res.tuid), 
+	    assert.deepEqual((yield* bucketStore.retrieve(id, res.tuid, true)).elems, 
 			     [{a:3}, {a:4}]);
 	}));
     });

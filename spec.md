@@ -293,7 +293,6 @@ function* (){
 						from: '',
 						to: 'BAR'})).v;
 	    yield* branchStore.push('br2', v2, true); // Atomic commit
-
 	    yield function(_) { setTimeout(_, 4); };
 	    
 	    // Now we merge br1 and br2, giving priority to br1
@@ -724,7 +723,6 @@ function* (){
 		var foo = yield* ostore.init('foo', {value: 42});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.equal(val, 42);
-
 		foo = yield* ostore.init('foo', {value: [42]});
 		res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.deepEqual(val, [42]);
@@ -765,7 +763,6 @@ function* (){
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket);
 	yield* storage.storeNewObject({bucket: 'xyz'}, {_type: 'someObject'});
 	assert(called, 'should be called');
-
 	called = false;
 	yield* storage.storeNewObject({bucket: 'xyz'}, {_type: 'someOtherObject'});
 	assert(!called, 'should not have been called again');
@@ -815,7 +812,6 @@ function* (){
 				    new vercast.ObjectMonitor({_type: 'someObject'}),
 				    123, 'someEff');
 	assert.deepEqual(yield* bucketStore.retrieve('1234'), [{a:1}, {a:2}]);
-
 	// And again...
 	yield* storage.storeVersion({bucket: 'xyz'}, 
 				    '1234-5678', 
@@ -907,7 +903,6 @@ function* (){
 		checkCache: function() {},
 	    };
 	}
-
 	var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxOpenBuckets: 2});
 	yield* storage.checkCache({bucket: 'x'}, 'x-aaa', {_type: 'somePatch'});
 	yield* storage.checkCache({bucket: 'y'}, 'y-aaa', {_type: 'somePatch'});
@@ -1238,7 +1233,6 @@ function* (){
 	    yield* bucketStore.append('1234', [{id: '5678', obj: {my_id_is: '5678'}}]);
 	    var monitor = yield* storage.retrieve(ctx, "1234-5678");
 	    assert.equal(monitor.proxy().my_id_is, '5678');
-
 	    yield* bucketStore.append('1234', [{id: '6789', obj: {my_id_is: '6789'}}]);
 	    var monitor = yield* storage.retrieve(ctx, "1234-6789");
 	    assert.equal(monitor.proxy().my_id_is, '6789');
@@ -1336,10 +1330,11 @@ should retrieve, all at once, the elements that were individually appended to a 
 
 ```js
 function* (){
-	yield* bucketStore.append('foo', [{a:1}, {a:2}]);
-	yield* bucketStore.append('foo', [{a:3}]);
-	yield* bucketStore.append('foo', [{a:4}]);
-	assert.deepEqual(yield* bucketStore.retrieve('foo'), 
+	var id = newBucketID();
+	yield* bucketStore.append(id, [{a:1}, {a:2}]);
+	yield* bucketStore.append(id, [{a:3}]);
+	yield* bucketStore.append(id, [{a:4}]);
+	assert.deepEqual(yield* bucketStore.retrieve(id), 
 			 [{a:1}, {a:2}, {a:3}, {a:4}]);
 ```
 
@@ -1349,8 +1344,9 @@ should return a time-uuid corresponding with this transaction.
 
 ```js
 function* (){
-	    var tuid1 = yield* bucketStore.append('foo', [{a:1}, {a:2}]);
-	    var tuid2 = yield* bucketStore.append('foo', [{a:3}, {a:4}]);
+	    var id = newBucketID();
+	    var tuid1 = yield* bucketStore.append(id, [{a:1}, {a:2}]);
+	    var tuid2 = yield* bucketStore.append(id, [{a:3}, {a:4}]);
 	    assert(tuid1 < tuid2, tuid1 + " < " + tuid2);
 ```
 
@@ -1360,17 +1356,18 @@ should retrieve an empty array for a bucket that has never been appended to.
 
 ```js
 function* (){
-	    assert.deepEqual(yield* bucketStore.retrieve('bar'), []);
+	    assert.deepEqual(yield* bucketStore.retrieve('aBucketThatDoesNotExist'), []);
 ```
 
 should only return elements that correspond to tuid greater than the given one, if given.
 
 ```js
 function* (){
-	    yield* bucketStore.append('foo', [{a:1}, {a:2}]);
-	    var tuid = yield* bucketStore.append('foo', [{a:3}]);
-	    yield* bucketStore.append('foo', [{a:4}]);
-	    assert.deepEqual(yield* bucketStore.retrieve('foo', tuid), 
+	    var id = newBucketID();
+	    yield* bucketStore.append(id, [{a:1}, {a:2}]);
+	    var tuid = yield* bucketStore.append(id, [{a:3}]);
+	    yield* bucketStore.append(id, [{a:4}]);
+	    assert.deepEqual(yield* bucketStore.retrieve(id, tuid), 
 			     [{a:4}]);
 ```
 
@@ -1378,11 +1375,12 @@ should return an object: {elems, tuid} if giveTUID is true.
 
 ```js
 function* (){
-	    yield* bucketStore.append('foo', [{a:1}, {a:2}]);
-	    var res = yield* bucketStore.retrieve('foo', '', true);
-	    yield* bucketStore.append('foo', [{a:3}]);
-	    yield* bucketStore.append('foo', [{a:4}]);
-	    assert.deepEqual(yield* bucketStore.retrieve('foo', res.tuid), 
+	    var id = newBucketID();
+	    yield* bucketStore.append(id, [{a:1}, {a:2}]);
+	    var res = yield* bucketStore.retrieve(id, '', true);
+	    yield* bucketStore.append(id, [{a:3}]);
+	    yield* bucketStore.append(id, [{a:4}]);
+	    assert.deepEqual((yield* bucketStore.retrieve(id, res.tuid, true)).elems, 
 			     [{a:3}, {a:4}]);
 ```
 
@@ -1812,7 +1810,6 @@ function* (){
 		var foo = yield* ostore.init('foo', {value: 42});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.equal(val, 42);
-
 		foo = yield* ostore.init('foo', {value: [42]});
 		res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.deepEqual(val, [42]);
@@ -1868,7 +1865,6 @@ function* (){
 	    var res = yield* ostore.trans(foo, {_type: 'bar', x: 2}, false);
 	    assert(called, 'handler should have been called');
 	    assert.equal(v2_out.$, res.v.$);
-
 	    var seq = ostore.getSequenceStore();
 	    yield* seq.append(eff_out);
 	    assert.deepEqual(yield* seq.shift(), {a:1});
@@ -1997,10 +1993,8 @@ function* (){
 	    
 	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'baz', from: '', to: 'BAZ'})).v;
 	    var vm2 = yield* ostore.merge(v1, vm1);
-
 	    v1 = (yield* ostore.trans(v1, {_type: 'set', _key: 'bat', from: '', to: 'BAT'})).v;
 	    var vm3 = yield* ostore.merge(vm2, v1);
-
 	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'foo'})).r, 'FOO');
 	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'bar'})).r, 'BAR');
 	    assert.equal((yield* ostore.trans(vm3, {_type: 'get', _key: 'baz'})).r, 'BAZ');
@@ -2083,7 +2077,6 @@ function* (){
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'foo'})).r, 'FOO1');
 	    // The  transaction was rolled-back due to a conflict on key foo.
 	    assert.equal((yield* ostore.trans(vm, {_type: 'get', _key: 'bar'})).r, '');
-
 	    // The transaction's failure should be recorded, so that merging v2 with vm should keep foo => FOO1
 	    v2 = yield* ostore.merge(v2, vm);
 ```
@@ -2243,102 +2236,102 @@ should allow modifying an object through a proxy.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-assert.equal(proxy.a, 1);
-proxy.a = 3;
-assert.equal(obj.a, 3);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    assert.equal(proxy.a, 1);
+    proxy.a = 3;
+    assert.equal(obj.a, 3);
 ```
 
 should wrap objects (including arrays) with map proxies.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = [1, 2, 3];
-assert.throws(function() {
-		proxy.a[0] = 4;
-}, /Can't add property 0, object is not extensible/);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = [1, 2, 3];
+    assert.throws(function() {
+	proxy.a[0] = 4;
+    }, /Can't add property 0, object is not extensible/);
 ```
 
 should provide access to child object fields via get/put methods, that update the dirty flag.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-assert(!monitor.isDirty(), 'should not be dirty');
-proxy.a = [1, 2, 3];
-assert(monitor.isDirty(), 'should be dirty after adding updating a to an array');
-assert(!monitor.isDirty(), 'dirty flag should have been reset');
-assert.equal(proxy.a.get(1), 2);
-proxy.a.put(2, 5);
-assert(monitor.isDirty(), 'should be dirty after updating the value');
-assert.equal(proxy.a.get(2), 5);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    assert(!monitor.isDirty(), 'should not be dirty');
+    proxy.a = [1, 2, 3];
+    assert(monitor.isDirty(), 'should be dirty after adding updating a to an array');
+    assert(!monitor.isDirty(), 'dirty flag should have been reset');
+    assert.equal(proxy.a.get(1), 2);
+    proxy.a.put(2, 5);
+    assert(monitor.isDirty(), 'should be dirty after updating the value');
+    assert.equal(proxy.a.get(2), 5);
 ```
 
 should retain the original object as a simple, JSON-style object.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = [1, 2, 3];
-assert.deepEqual(obj, {a:[1, 2, 3], b:2});
-proxy.a.put(2, 4);
-assert.deepEqual(obj, {a:[1, 2, 4], b:2});
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = [1, 2, 3];
+    assert.deepEqual(obj, {a:[1, 2, 3], b:2});
+    proxy.a.put(2, 4);
+    assert.deepEqual(obj, {a:[1, 2, 4], b:2});
 ```
 
 should use map proxies recursively.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = [1, 2, 3];
-proxy.a.put(2, {x:1, y: 2});
-assert.throws(function() {
-		proxy.a.get(2).x = 3;
-}, /Can't add property x, object is not extensible/);
-assert.equal(proxy.a.get(2).get('x'), 1);
-monitor.isDirty(); // reset the dirty flag
-proxy.a.get(2).put('x', 4);
-assert(monitor.isDirty(), 'should be dirty now');
-assert.equal(proxy.a.get(2).get('x'), 4);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = [1, 2, 3];
+    proxy.a.put(2, {x:1, y: 2});
+    assert.throws(function() {
+	proxy.a.get(2).x = 3;
+    }, /Can't add property x, object is not extensible/);
+    assert.equal(proxy.a.get(2).get('x'), 1);
+    monitor.isDirty(); // reset the dirty flag
+    proxy.a.get(2).put('x', 4);
+    assert(monitor.isDirty(), 'should be dirty now');
+    assert.equal(proxy.a.get(2).get('x'), 4);
 ```
 
 should return an unextensible proxy object.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-assert.throws(function() {
-		proxy.c = 4;
-}, /Can't add property c, object is not extensible/);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    assert.throws(function() {
+	proxy.c = 4;
+    }, /Can't add property c, object is not extensible/);
 ```
 
 should not provide a map proxy for id-like objects.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = {$:'abc'};
-assert.equal(proxy.a.$, 'abc');
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = {$:'abc'};
+    assert.equal(proxy.a.$, 'abc');
 ```
 
 should not provide a map proxy for id-like nested objects.
 
 ```js
 var obj = {a:1, b:2, c: {$:'abc'}};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.b = [1, 2, 3];
-proxy.b.put(1, {$:'efg'});
-assert.equal(proxy.b.get(1).$, 'efg');
-assert.equal(proxy.c.$, 'abc');
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.b = [1, 2, 3];
+    proxy.b.put(1, {$:'efg'});
+    assert.equal(proxy.b.get(1).$, 'efg');
+    assert.equal(proxy.c.$, 'abc');
 ```
 
 <a name="objectmonitor-proxy-_replacewithobj"></a>
@@ -2390,12 +2383,12 @@ should indicate if a change to the object has been made since the last time it h
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-assert(!monitor.isDirty(), 'monitor should not be dirty yet');
-proxy.a = 3;
-assert(monitor.isDirty(), 'monitor should now be dirty');
-assert(!monitor.isDirty(), 'monitor should not be dirty anymore');
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    assert(!monitor.isDirty(), 'monitor should not be dirty yet');
+    proxy.a = 3;
+    assert(monitor.isDirty(), 'monitor should now be dirty');
+    assert(!monitor.isDirty(), 'monitor should not be dirty anymore');
 ```
 
 <a name="objectmonitor-hash"></a>
@@ -2404,32 +2397,32 @@ should return a unique string representing the content of the object.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = [1, 2, 3];
-var hash1 = monitor.hash();
-assert.equal(typeof hash1, 'string');
-proxy.a.put(0, 4);
-var hash2 = monitor.hash();
-assert.notEqual(hash1, hash2);
-proxy.a.put(0, 1);
-var hash3 = monitor.hash();
-assert.equal(hash3, hash1);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = [1, 2, 3];
+    var hash1 = monitor.hash();
+    assert.equal(typeof hash1, 'string');
+    proxy.a.put(0, 4);
+    var hash2 = monitor.hash();
+    assert.notEqual(hash1, hash2);
+    proxy.a.put(0, 1);
+    var hash3 = monitor.hash();
+    assert.equal(hash3, hash1);
 ```
 
 should work regardless of dirty testing.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = [1, 2, 3];
-var hash1 = monitor.hash();
-assert.equal(typeof hash1, 'string');
-proxy.a.put(0, 4);
-monitor.isDirty();
-var hash2 = monitor.hash();
-assert.notEqual(hash1, hash2);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = [1, 2, 3];
+    var hash1 = monitor.hash();
+    assert.equal(typeof hash1, 'string');
+    proxy.a.put(0, 4);
+    monitor.isDirty();
+    var hash2 = monitor.hash();
+    assert.notEqual(hash1, hash2);
 ```
 
 <a name="objectmonitor-sealobj-static"></a>
@@ -2438,36 +2431,36 @@ should make the given object unmodifiable.
 
 ```js
 var obj = {a:1, b:2};
-vercast.ObjectMonitor.seal(obj);
-assert.throws(function() {
-		obj.a = 3;
-}, /Cannot assign to read only property/);
+    vercast.ObjectMonitor.seal(obj);
+    assert.throws(function() {
+	obj.a = 3;
+    }, /Cannot assign to read only property/);
 ```
 
 should place the object's hash as the $ property of the object.
 
 ```js
 var hash1 = new vercast.ObjectMonitor({a:1, b:2}).hash();
-var obj = {a:1, b:2};
-vercast.ObjectMonitor.seal(obj);
-assert.equal(obj.$, hash1);
+    var obj = {a:1, b:2};
+    vercast.ObjectMonitor.seal(obj);
+    assert.equal(obj.$, hash1);
 ```
 
 should return the hash.
 
 ```js
 var obj = {a:1, b:2};
-var hash1 = vercast.ObjectMonitor.seal(obj);
-assert.equal(obj.$, hash1);
+    var hash1 = vercast.ObjectMonitor.seal(obj);
+    assert.equal(obj.$, hash1);
 ```
 
 should allow an object to be sealed multiple times.
 
 ```js
 var obj = {a:1, b:2};
-var hash1 = vercast.ObjectMonitor.seal(obj);
-var hash2 = vercast.ObjectMonitor.seal(obj);
-assert.equal(hash1, hash2);
+    var hash1 = vercast.ObjectMonitor.seal(obj);
+    var hash2 = vercast.ObjectMonitor.seal(obj);
+    assert.equal(hash1, hash2);
 ```
 
 <a name="objectmonitor-revision"></a>
@@ -2476,13 +2469,13 @@ should return the object's revision number, one that icrements with each change.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-assert.equal(monitor.revision(), 0);
-proxy.a = [1, 2, 3];
-assert.equal(monitor.revision(), 1);
-proxy.a.put(0, 3);
-assert.equal(monitor.revision(), 2);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    assert.equal(monitor.revision(), 0);
+    proxy.a = [1, 2, 3];
+    assert.equal(monitor.revision(), 1);
+    proxy.a.put(0, 3);
+    assert.equal(monitor.revision(), 2);
 ```
 
 <a name="objectmonitor-json"></a>
@@ -2491,10 +2484,10 @@ should return a JSON representation of the object.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var proxy = monitor.proxy();
-proxy.a = [1, 2, 3];
-assert.equal(monitor.json(), '{"a":[1,2,3],"b":2}');
+    var monitor = new vercast.ObjectMonitor(obj);
+    var proxy = monitor.proxy();
+    proxy.a = [1, 2, 3];
+    assert.equal(monitor.json(), '{"a":[1,2,3],"b":2}');
 ```
 
 <a name="objectmonitor-object"></a>
@@ -2503,9 +2496,9 @@ should provide an unprovisioned access to the object.
 
 ```js
 var obj = {a:1, b:2};
-var monitor = new vercast.ObjectMonitor(obj);
-var obj2 = monitor.object();
-assert.equal(obj2.a, 1);
+    var monitor = new vercast.ObjectMonitor(obj);
+    var obj2 = monitor.object();
+    assert.equal(obj2.a, 1);
 ```
 
 <a name="objectstore"></a>
@@ -2992,7 +2985,7 @@ should return a new sequence store.
 
 ```js
 var seqStore = factory.createSequenceStore();
-assert.equal(typeof seqStore, 'object');
+    assert.equal(typeof seqStore, 'object');
 ```
 
 <a name="sequencestorefactory-createsequencestore-appendobj"></a>
@@ -3013,7 +3006,6 @@ function* (){
 		var seqStore1 = factory.createSequenceStore();
 		yield* seqStore1.append({a:1});
 		yield* seqStore1.append({a:2});
-
 		var seqStore2 = factory.createSequenceStore();
 		yield* seqStore2.append(yield* seqStore1.hash());
 		yield* seqStore2.append({a:3});
@@ -3029,7 +3021,6 @@ should append a sequence consisting of a single object when given its hash.
 function* (){
 		var seqStore1 = factory.createSequenceStore();
 		yield* seqStore1.append({a:2});
-
 		var seqStore2 = factory.createSequenceStore();
 		yield* seqStore2.append({a:1});
 		yield* seqStore2.append(yield* seqStore1.hash());
@@ -3472,7 +3463,6 @@ function* (){
 		var foo = yield* ostore.init('foo', {value: 42});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.equal(val, 42);
-
 		foo = yield* ostore.init('foo', {value: [42]});
 		res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.deepEqual(val, [42]);
@@ -3836,7 +3826,6 @@ function* (){
 		var foo = yield* ostore.init('foo', {value: 42});
 		var res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.equal(val, 42);
-
 		foo = yield* ostore.init('foo', {value: [42]});
 		res = yield* ostore.trans(foo, {_type: 'bar'});
 		assert.deepEqual(val, [42]);
@@ -4009,7 +3998,6 @@ function* (){
 	var res = yield* ostore.trans(v, transPatch);
 	res = yield* ostore.trans(res.v, {_type: 'get'});
 	assert.equal(res.r, 'd');
-
 	// Apply a transaction in reverse
 	res = yield* ostore.trans(res.v, transPatch, true);
 	res = yield* ostore.trans(res.v, {_type: 'get'});
@@ -4024,23 +4012,22 @@ should consult the underlying .store() method.
 
 ```js
 function createBucket() {
-		return {
-		    store: function(obj, emit) {
-			emit({a:1});
-			return {obj: obj};
-		    },
-		    add: function() {},
-		};
-}
-var emitted = [];
-function emit(elem) {
-		emitted.push(elem);
-}
-
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var res = validatingBucket.store({x:2}, emit);
-assert.equal(res.obj.x, 2);
-assert.deepEqual(emitted, [{a:1}]);
+	return {
+	    store: function(obj, emit) {
+		emit({a:1});
+		return {obj: obj};
+	    },
+	    add: function() {},
+	};
+    }
+    var emitted = [];
+    function emit(elem) {
+	emitted.push(elem);
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var res = validatingBucket.store({x:2}, emit);
+    assert.equal(res.obj.x, 2);
+    assert.deepEqual(emitted, [{a:1}]);
 ```
 
 <a name="createvalidatingbucketcreatebucket-storeincomingv-p-monitor-r-eff-emit"></a>
@@ -4049,30 +4036,29 @@ should consult the underlying .storeIncoming() method.
 
 ```js
 function createBucket() {
-		return {
-		    storeIncoming: function(v, p, monitor, r, eff, emit) {
-			emit({a:2});
-			return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
-		    },
-		    add: function() {},
-		};
-}
-var emitted = [];
-function emit(elem) {
-		emitted.push(elem);
-}
-
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var res = validatingBucket.storeIncoming('1234', 
-						     {_type: 'somePatch'}, 
-						     new vercast.ObjectMonitor({_type: 'someObj'}), 
-						     123, 'someEff', emit);
-assert.equal(res.v, '1234');
-assert.deepEqual(res.p, {_type: 'somePatch'});
-assert.deepEqual(res.obj, {_type: 'someObj'});
-assert.equal(res.r, 123);
-assert.equal(res.eff, 'someEff');
-assert.deepEqual(emitted, [{a:2}]);
+	return {
+	    storeIncoming: function(v, p, monitor, r, eff, emit) {
+		emit({a:2});
+		return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
+	    },
+	    add: function() {},
+	};
+    }
+    var emitted = [];
+    function emit(elem) {
+	emitted.push(elem);
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var res = validatingBucket.storeIncoming('1234', 
+					     {_type: 'somePatch'}, 
+					     new vercast.ObjectMonitor({_type: 'someObj'}), 
+					     123, 'someEff', emit);
+    assert.equal(res.v, '1234');
+    assert.deepEqual(res.p, {_type: 'somePatch'});
+    assert.deepEqual(res.obj, {_type: 'someObj'});
+    assert.equal(res.r, 123);
+    assert.equal(res.eff, 'someEff');
+    assert.deepEqual(emitted, [{a:2}]);
 ```
 
 <a name="createvalidatingbucketcreatebucket-storeoutgoingv-p-monitor-r-eff-emit"></a>
@@ -4081,30 +4067,29 @@ should consult the underlying .storeIncoming() method.
 
 ```js
 function createBucket() {
-		return {
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {
-			emit({a:3});
-			return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
-		    },
-		    add: function() {},
-		};
-}
-var emitted = [];
-function emit(elem) {
-		emitted.push(elem);
-}
-
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var res = validatingBucket.storeOutgoing('1234', 
-						     {_type: 'somePatch'}, 
-						     new vercast.ObjectMonitor({_type: 'someObj'}), 
-						     123, 'someEff', emit);
-assert.equal(res.v, '1234');
-assert.deepEqual(res.p, {_type: 'somePatch'});
-assert.deepEqual(res.obj, {_type: 'someObj'});
-assert.equal(res.r, 123);
-assert.equal(res.eff, 'someEff');
-assert.deepEqual(emitted, [{a:3}]);
+	return {
+	    storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		emit({a:3});
+		return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
+	    },
+	    add: function() {},
+	};
+    }
+    var emitted = [];
+    function emit(elem) {
+	emitted.push(elem);
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var res = validatingBucket.storeOutgoing('1234', 
+					     {_type: 'somePatch'}, 
+					     new vercast.ObjectMonitor({_type: 'someObj'}), 
+					     123, 'someEff', emit);
+    assert.equal(res.v, '1234');
+    assert.deepEqual(res.p, {_type: 'somePatch'});
+    assert.deepEqual(res.obj, {_type: 'someObj'});
+    assert.equal(res.r, 123);
+    assert.equal(res.eff, 'someEff');
+    assert.deepEqual(emitted, [{a:3}]);
 ```
 
 <a name="createvalidatingbucketcreatebucket-storeinternalv-p-monitor-r-eff-emit"></a>
@@ -4113,30 +4098,29 @@ should consult the underlying .storeIncoming() method.
 
 ```js
 function createBucket() {
-		return {
-		    storeInternal: function(v, p, monitor, r, eff, emit) {
-			emit({a:4});
-			return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
-		    },
-		    add: function() {},
-		};
-}
-var emitted = [];
-function emit(elem) {
-		emitted.push(elem);
-}
-
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var res = validatingBucket.storeInternal('1234', 
-						     {_type: 'somePatch'}, 
-						     new vercast.ObjectMonitor({_type: 'someObj'}), 
-						     123, 'someEff', emit);
-assert.equal(res.v, '1234');
-assert.deepEqual(res.p, {_type: 'somePatch'});
-assert.deepEqual(res.obj, {_type: 'someObj'});
-assert.equal(res.r, 123);
-assert.equal(res.eff, 'someEff');
-assert.deepEqual(emitted, [{a:4}]);
+	return {
+	    storeInternal: function(v, p, monitor, r, eff, emit) {
+		emit({a:4});
+		return {v:v, p:p, obj: monitor.object(), r: r, eff:eff};
+	    },
+	    add: function() {},
+	};
+    }
+    var emitted = [];
+    function emit(elem) {
+	emitted.push(elem);
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var res = validatingBucket.storeInternal('1234', 
+					     {_type: 'somePatch'}, 
+					     new vercast.ObjectMonitor({_type: 'someObj'}), 
+					     123, 'someEff', emit);
+    assert.equal(res.v, '1234');
+    assert.deepEqual(res.p, {_type: 'somePatch'});
+    assert.deepEqual(res.obj, {_type: 'someObj'});
+    assert.equal(res.r, 123);
+    assert.equal(res.eff, 'someEff');
+    assert.deepEqual(emitted, [{a:4}]);
 ```
 
 <a name="createvalidatingbucketcreatebucket-checkcachev-p"></a>
@@ -4145,76 +4129,74 @@ should consult the underlying .checkCache() method.
 
 ```js
 function createBucket() {
-		return {
-		    checkCache: function(v, p) {
-			return {v: v, p: p};
-		    },
-		};
-}
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var res = validatingBucket.checkCache('1234-5678', {_type: 'somePatch'});
-
-assert.equal(res.v, '1234-5678');
-assert.deepEqual(res.p, {_type: 'somePatch'});
+	return {
+	    checkCache: function(v, p) {
+		return {v: v, p: p};
+	    },
+	};
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var res = validatingBucket.checkCache('1234-5678', {_type: 'somePatch'});
+    assert.equal(res.v, '1234-5678');
+    assert.deepEqual(res.p, {_type: 'somePatch'});
 ```
 
 should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle.
 
 ```js
 function calcKey(v, p) {
-		return v + ">" + vercast.ObjectMonitor.seal(p);
-}
-function createBucket() {
-		var kvs = {};
-		return {
-		    storeIncoming: function(v, p, monitor, r, eff, emit) {
-			var key = calcKey(v, p);
-			emit({key: key, obj: monitor.object()}); // good
-			kvs[key] = monitor.object();
-			return '1234';
-		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {
-			// Bad: does not change own state
-			var key = calcKey(v, p);
-			emit({key: key, obj: monitor.object()});
-		    },
-		    storeInternal: function(v, p, monitor, r, eff, emit) {
-			// Bad: Does not emit
-			var key = calcKey(v, p);
-			kvs[key] = monitor.object();
-			return '1234';
-		    },
-		    add: function(elem) {
-			kvs[elem.key] = elem.obj;
-		    },
-		    checkCache: function(v, p) {
-			return kvs[calcKey(v, p)];
-		    },
-		};
-}
-function emit(elem) {};
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-validatingBucket.storeIncoming('1234', 
-					   {_type: 'somePatch'}, 
-					   new vercast.ObjectMonitor({_type: 'someObj'}),
-					   undefined, '', emit);
-var obj = validatingBucket.checkCache('1234', {_type: 'somePatch'});
-assert.equal(obj._type, 'someObj');
-validatingBucket.storeOutgoing('1234', 
-					   {_type: 'somePatch'}, 
-					   new vercast.ObjectMonitor({_type: 'someObj1', foo: 2}),
-					   undefined, '', emit);
-assert.throws(function() {
-		validatingBucket.checkCache('1234', {_type: 'somePatch'});
-}, /Mismatch in return value between stored and added state/);
-
-validatingBucket.storeInternal('1234', 
-					   {_type: 'somePatch'}, 
-					   new vercast.ObjectMonitor({_type: 'someObj2'}),
-					   undefined, '', emit);
-assert.throws(function() {
-		validatingBucket.checkCache('1234', {_type: 'somePatch'});
-}, /Mismatch in return value between stored and added state/);
+	return v + ">" + vercast.ObjectMonitor.seal(p);
+    }
+    function createBucket() {
+	var kvs = {};
+	return {
+	    storeIncoming: function(v, p, monitor, r, eff, emit) {
+		var key = calcKey(v, p);
+		emit({key: key, obj: monitor.object()}); // good
+		kvs[key] = monitor.object();
+		return '1234';
+	    },
+	    storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		// Bad: does not change own state
+		var key = calcKey(v, p);
+		emit({key: key, obj: monitor.object()});
+	    },
+	    storeInternal: function(v, p, monitor, r, eff, emit) {
+		// Bad: Does not emit
+		var key = calcKey(v, p);
+		kvs[key] = monitor.object();
+		return '1234';
+	    },
+	    add: function(elem) {
+		kvs[elem.key] = elem.obj;
+	    },
+	    checkCache: function(v, p) {
+		return kvs[calcKey(v, p)];
+	    },
+	};
+    }
+    function emit(elem) {};
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    validatingBucket.storeIncoming('1234', 
+				   {_type: 'somePatch'}, 
+				   new vercast.ObjectMonitor({_type: 'someObj'}),
+				   undefined, '', emit);
+    var obj = validatingBucket.checkCache('1234', {_type: 'somePatch'});
+    assert.equal(obj._type, 'someObj');
+    validatingBucket.storeOutgoing('1234', 
+				   {_type: 'somePatch'}, 
+				   new vercast.ObjectMonitor({_type: 'someObj1', foo: 2}),
+				   undefined, '', emit);
+    assert.throws(function() {
+	validatingBucket.checkCache('1234', {_type: 'somePatch'});
+    }, /Mismatch in return value between stored and added state/);
+    validatingBucket.storeInternal('1234', 
+				   {_type: 'somePatch'}, 
+				   new vercast.ObjectMonitor({_type: 'someObj2'}),
+				   undefined, '', emit);
+    assert.throws(function() {
+	validatingBucket.checkCache('1234', {_type: 'somePatch'});
+    }, /Mismatch in return value between stored and added state/);
 ```
 
 <a name="createvalidatingbucketcreatebucket-retrieveid"></a>
@@ -4223,79 +4205,77 @@ should consult the underlying .retrieve() method.
 
 ```js
 function createBucket() {
-		return {
-		    retrieve: function(id) {
-			return new vercast.ObjectMonitor({id: id});
-		    },
-		};
-}
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var res = validatingBucket.retrieve('1234');
-
-assert.equal(res.proxy().id, '1234');
+	return {
+	    retrieve: function(id) {
+		return new vercast.ObjectMonitor({id: id});
+	    },
+	};
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var res = validatingBucket.retrieve('1234');
+    assert.equal(res.proxy().id, '1234');
 ```
 
 should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle.
 
 ```js
 function createBucket() {
-		var kvs = {};
-		return {
-		    store: function(obj, emit) {
-			// Bad: changes own state but does not emit
-			var key = obj._type;
-			kvs[key] = obj;
-			return key;
-		    },
-		    storeIncoming: function(v, p, monitor, r, eff, emit) {
-			emit(monitor.object()); // good
-			var id = this.store(monitor.object());
-			return id;
-		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {
-			// Bad: does not change own state
-			emit(monitor.object()); 
-		    },
-		    storeInternal: function(v, p, monitor, r, eff, emit) {
-			// Bad: Emits one thing, changes state to another
-			emit({_type: 'someObj2', bar: 4});
-			var id = this.store(monitor.object());
-			return id;
-		    },
-		    retrieve: function(id) {
-			return new vercast.ObjectMonitor(kvs[id]);
-		    },
-		    add: function(elem) {
-			this.store(elem);
-		    },
-		};
-}
-function emit(elem) {};
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-var id = validatingBucket.store({_type: 'someObj'}, emit);
-assert.throws(function() {
-		var monitor = validatingBucket.retrieve(id);
-}, /Mismatch in return value between stored and added state/);
-id = validatingBucket.storeIncoming('1234', 
-						{_type: 'somePatch'}, 
-						new vercast.ObjectMonitor({_type: 'someOtherObj'}),
-						undefined, '', emit);
-validatingBucket.retrieve(id); // should be OK
-validatingBucket.storeOutgoing('1234', 
-					   {_type: 'somePatch'}, 
-					   new vercast.ObjectMonitor({_type: 'someObj1', foo: 2}),
-					   undefined, '', emit);
-assert.throws(function() {
-		validatingBucket.retrieve('someObj1');
-}, /Mismatch in return value between stored and added state/);
-
-validatingBucket.storeInternal('1234', 
-					   {_type: 'somePatch'}, 
-					   new vercast.ObjectMonitor({_type: 'someObj2'}),
-					   undefined, '', emit);
-assert.throws(function() {
-		validatingBucket.retrieve('someObj2');
-}, /Mismatch in return value between stored and added state/);
+	var kvs = {};
+	return {
+	    store: function(obj, emit) {
+		// Bad: changes own state but does not emit
+		var key = obj._type;
+		kvs[key] = obj;
+		return key;
+	    },
+	    storeIncoming: function(v, p, monitor, r, eff, emit) {
+		emit(monitor.object()); // good
+		var id = this.store(monitor.object());
+		return id;
+	    },
+	    storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		// Bad: does not change own state
+		emit(monitor.object()); 
+	    },
+	    storeInternal: function(v, p, monitor, r, eff, emit) {
+		// Bad: Emits one thing, changes state to another
+		emit({_type: 'someObj2', bar: 4});
+		var id = this.store(monitor.object());
+		return id;
+	    },
+	    retrieve: function(id) {
+		return new vercast.ObjectMonitor(kvs[id]);
+	    },
+	    add: function(elem) {
+		this.store(elem);
+	    },
+	};
+    }
+    function emit(elem) {};
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    var id = validatingBucket.store({_type: 'someObj'}, emit);
+    assert.throws(function() {
+	var monitor = validatingBucket.retrieve(id);
+    }, /Mismatch in return value between stored and added state/);
+    id = validatingBucket.storeIncoming('1234', 
+					{_type: 'somePatch'}, 
+					new vercast.ObjectMonitor({_type: 'someOtherObj'}),
+					undefined, '', emit);
+    validatingBucket.retrieve(id); // should be OK
+    validatingBucket.storeOutgoing('1234', 
+				   {_type: 'somePatch'}, 
+				   new vercast.ObjectMonitor({_type: 'someObj1', foo: 2}),
+				   undefined, '', emit);
+    assert.throws(function() {
+	validatingBucket.retrieve('someObj1');
+    }, /Mismatch in return value between stored and added state/);
+    validatingBucket.storeInternal('1234', 
+				   {_type: 'somePatch'}, 
+				   new vercast.ObjectMonitor({_type: 'someObj2'}),
+				   undefined, '', emit);
+    assert.throws(function() {
+	validatingBucket.retrieve('someObj2');
+    }, /Mismatch in return value between stored and added state/);
 ```
 
 <a name="createvalidatingbucketcreatebucket-addelem"></a>
@@ -4304,17 +4284,16 @@ should forward elem to two instances of this bucket.
 
 ```js
 var added = [];
-function createBucket() {
-		return {
-		    add: function(elem) {
-			added.push(elem);
-		    },
-		};
-}
-var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
-validatingBucket.add({a:1});
-validatingBucket.add({a:2});
-
-assert.deepEqual(added, [{a:1}, {a:1}, {a:2}, {a:2}]);
+    function createBucket() {
+	return {
+	    add: function(elem) {
+		added.push(elem);
+	    },
+	};
+    }
+    var validatingBucket = vercast.createValidatingBucket(createBucket)('foo');
+    validatingBucket.add({a:1});
+    validatingBucket.add({a:2});
+    assert.deepEqual(added, [{a:1}, {a:1}, {a:2}, {a:2}]);
 ```
 
