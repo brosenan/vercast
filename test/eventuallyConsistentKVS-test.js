@@ -4,24 +4,24 @@ var assert = require('assert');
 var asyncgen = require('asyncgen');
 var vercast = require('vercast');
 
-var kvs = new vercast.DummyECKVS();
+var newKey = function() {
+    return 'k' + Math.floor(Math.random() * 1000000000);
+}
 
-describe('EventuallyConsistentKVS', function(){
-    beforeEach(asyncgen.async(function*() {
-	yield* kvs.abolish();
-    }));
-    
+module.exports = function(kvs) {
     describe('.newKey(key, value)', function(){
 	it('should store a new key/value pair given that the method is called only once for that key', asyncgen.async(function*(){
-	    yield* kvs.newKey('foo', 'bar');
+	    var key = newKey();
+	    yield* kvs.newKey(key, 'foo');
 	}));
     });
     describe('.retrieve(key)', function(){
 	it('should return a previously-assigned value of the key, or undefined the value has not yet been regiested', asyncgen.async(function*(){
-	    yield* kvs.newKey('foo', 'bar');
+	    var key = newKey();
+	    yield* kvs.newKey(key, 'bar');
 	    var value;
 	    while(!value) {
-		value = yield* kvs.retrieve('foo');
+		value = yield* kvs.retrieve(key);
 		yield function(_) { setTimeout(_, 1); };
 	    }
 	    assert.equal(value, 'bar');
@@ -29,18 +29,19 @@ describe('EventuallyConsistentKVS', function(){
     });
     describe('.modify(key, value)', function(){
 	it('should change the value so that it eventually becomes the given one', asyncgen.async(function*(){
-	    yield* kvs.newKey('foo', 'bar');
+	    var key = newKey();
+	    yield* kvs.newKey(key, 'bar');
 	    var value;
 	    while(!value) {
-		value = yield* kvs.retrieve('foo');
+		value = yield* kvs.retrieve(key);
 		yield function(_) { setTimeout(_, 1); };
 	    }
-	    yield* kvs.modify('foo', 'baz');
+	    yield* kvs.modify(key, 'baz');
 	    while(value === 'bar') {
-		value = yield* kvs.retrieve('foo');
+		value = yield* kvs.retrieve(key);
 		yield function(_) { setTimeout(_, 1); };
 	    }
 	    assert.equal(value, 'baz');
 	}));
     });
-});
+};

@@ -1,5 +1,5 @@
 test
 #neo4j/test
 examples/test
-#dynamodb/test
+dynamodb/test
 
