@@ -201,7 +201,14 @@
     createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method:   ․ createValidatingBucket(createBucket) .retrieve(id) should consult the underlying .retrieve() method
     createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle:   ․ createValidatingBucket(createBucket) .retrieve(id) should validate that the same value is provided for the same ID when using ths store*() methods or the emit/add cycle
     createValidatingBucket(createBucket) .add(elem) should forward elem to two instances of this bucket:   ․ createValidatingBucket(createBucket) .add(elem) should forward elem to two instances of this bucket
-    Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+    Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph:   ․ Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
+    Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source:   ․ Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+    Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them:   ․ Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
+    Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+    Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+    Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
+    Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
     array should apply patches to different objects, by the patch's _key attribute:   ․ array should apply patches to different objects, by the patch's _key attribute
     atom should allow setting and getting a value:   ․ atom should allow setting and getting a value
     atom put{value} should cause the atom to change to the given value:   ․ atom put{value} should cause the atom to change to the given value
@@ -209,31 +216,5 @@
     counter get should return the counter's value:   ․ counter get should return the counter's value
     counter put{value} should reset the counter to the given value:   ․ counter put{value} should reset the counter to the given value
 
-  208 passing (1s)
-  1 failing
-
-  1) Neo4jGraphDB "before each" hook
-     Error
-      at Error (native)
-      at query (/home/ubuntu/node_modules/vercast/neo4j/neo4jGraphDB.js:38
-      at GeneratorFunctionPrototype.throw (native)
-      at clear (/home/ubuntu/node_modules/vercast/neo4j/neo4jGraphDB.js:46
-      at GeneratorFunctionPrototype.throw (native)
-      at /home/ubuntu/node_modules/vercast/test/graphDB-test.js:11
-      at GeneratorFunctionPrototype.throw (native)
-      at next (/home/ubuntu/node_modules/vercast/node_modules/asyncgen/async.js:21
-      at __$GraphDatabase_prototype_query__20 (/home/ubuntu/node_modules/vercast/node_modules/neo4j/lib/GraphDatabase.js:942
-      at /home/ubuntu/node_modules/vercast/node_modules/neo4j/lib/GraphDatabase.js:2
-      at Object.__g.trampoline.flush (/home/ubuntu/node_modules/vercast/node_modules/neo4j/lib/Node.js:2
-      at Request.___ [as _callback] (/home/ubuntu/node_modules/vercast/node_modules/neo4j/lib/GraphDatabase.js:2
-      at self.callback (/home/ubuntu/node_modules/vercast/node_modules/neo4j/node_modules/request/request.js:373
-      at Request.emit (events.js:107
-      at Request.onRequestError (/home/ubuntu/node_modules/vercast/node_modules/neo4j/node_modules/request/request.js:971
-      at ClientRequest.emit (events.js:107
-      at Socket.socketErrorListener (_http_client.js:271
-      at Socket.emit (events.js:107
-      at net.js:436
-      at process._tickDomainCallback (node.js:403
-
-
+  216 passing (2s)
 
