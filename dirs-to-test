@@ -1,5 +1,7 @@
-test
-#neo4j/test
+# Core Modules
+./test
 examples/test
+# Database Drivers
+#neo4j/test
 dynamodb/test
 
