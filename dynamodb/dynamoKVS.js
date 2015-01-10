@@ -78,4 +78,6 @@ module.exports = function(table, region) {
 	    }
 	}
     };
+    this.store = function*(key, value) { yield* this.newKey(key, value); };
+    this.fetch = function*(key) { return yield* this.retrieve(key); };
 };
