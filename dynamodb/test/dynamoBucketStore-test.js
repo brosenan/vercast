@@ -4,8 +4,8 @@ var assert = require('assert');
 var asyncgen = require('asyncgen'); 
 var vercast = require('vercast');
 
-var bucketStore = new vercast.DynamoDBBucketStore('TestBucketStore', 'us-east-1');
+var bucketStore = new vercast.DynamoBucketStore('TestBucketStore', 'us-east-1');
 
-describe('DynamoDBBucketStore', function(){
+describe('DynamoBucketStore', function(){
     require('../../test/describeBucketStore.js')(bucketStore);
 });

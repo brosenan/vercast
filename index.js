@@ -24,5 +24,5 @@ exports.BucketObjectStorage = require('./bucketObjectStorage.js');
 exports.createSimpleBucketStorage = require('./simpleBucketStorage.js');
 exports.createExtractingBucket = require('./bucketExtractionStorage.js');
 exports.createValidatingBucket = require('./validatingBucket.js').createValidatingBucket;
-exports.DynamoDBBucketStore = require('./dynamodb/dynamoDBBucketStore.js');
-exports.DynamoDbEcKvs = require('./dynamodb/dynamoDbEcKvs.js');
+exports.DynamoBucketStore = require('./dynamodb/dynamoBucketStore.js');
+exports.DynamoKVS = require('./dynamodb/dynamoKVS.js');

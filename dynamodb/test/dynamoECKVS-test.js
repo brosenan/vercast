@@ -2,9 +2,9 @@
 
 var vercast = require('vercast');
 
-var kvs = new vercast.DynamoDbEcKvs('TestKVS', 'us-east-1');
+var kvs = new vercast.DynamoKVS('TestKVS', 'us-east-1');
 
-describe('DynamoDbEcKvs', function() {
+describe('DynamoKVS', function() {
     require('../../test/eventuallyConsistentKVS-test.js')(kvs);
     require('../../test/atomicKeyValue-test.js')(kvs);
 });
