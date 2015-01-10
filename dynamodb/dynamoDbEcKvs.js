@@ -3,6 +3,7 @@ var AWS = require('aws-sdk');
 
 module.exports = function(table, region) {
     var db = new AWS.DynamoDB({region: region});
+    var db2 = new AWS.DynamoDB({region: region});
     this.newKey = function*(key, value) {
 	var item = {
 	    key: {S: key},
@@ -33,7 +34,7 @@ module.exports = function(table, region) {
 	    },
 	};
 	var res = yield function(_) {
-	    db.query(query, _);
+	    db2.query(query, _);
 	};
 	if(res.Count > 0) {
 	    return res.Items[0].value.S;
@@ -69,6 +70,11 @@ module.exports = function(table, region) {
 	} catch(e) {
 	    if(e.code !== 'ConditionalCheckFailedException') {
 		throw e;
+	    } else {
+		yield function(_) {
+		    setTimeout(_, 0);
+		};
+		return yield* this.retrieve(key);
 	    }
 	}
     };

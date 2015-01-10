@@ -52,7 +52,7 @@ module.exports = function(atomicKV) {
 		var key = newKey();
 		yield* atomicKV.newKey(key, 'bar');
 		var valAfterMod = yield* atomicKV.modify(key, 'baz', 'bat');
-		//assert.equal(valAfterMod, 'bar'); // The value before the change
+		assert.equal(valAfterMod, 'bar'); // The value before the change
 		var val = yield* atomicKV.retrieve(key);
 		assert.equal(val, 'bar');
 	    }));
