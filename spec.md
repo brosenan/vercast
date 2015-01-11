@@ -30,12 +30,18 @@
    - [DummyBucketStore](#dummybucketstore)
      - [.append(bucketName, elements)](#dummybucketstore-appendbucketname-elements)
      - [.retrieve(bucketName[, tuid[, giveTUID]])](#dummybucketstore-retrievebucketname-tuid-givetuid)
+   - [DummyECKVS](#dummyeckvs)
+     - [.newKey(key, value)](#dummyeckvs-newkeykey-value)
+     - [.retrieve(key)](#dummyeckvs-retrievekey)
+     - [.modify(key, value)](#dummyeckvs-modifykey-value)
    - [DummyGraphDB](#dummygraphdb)
      - [as GraphDB](#dummygraphdb-as-graphdb)
        - [addEdge](#dummygraphdb-as-graphdb-addedge)
        - [findCommonAncestor](#dummygraphdb-as-graphdb-findcommonancestor)
      - [.findPath(x, y, cb(err, path))](#dummygraphdb-findpathx-y-cberr-path)
+     - [.remove(vertex)](#dummygraphdb-removevertex)
    - [DummyKeyValueStore](#dummykeyvaluestore)
+     - [as KeyValueStore](#dummykeyvaluestore-as-keyvaluestore)
    - [DummyObjectStore](#dummyobjectstore)
      - [.init(type, args)](#dummyobjectstore-inittype-args)
      - [.trans(v, p, u) -> {v, r, eff}](#dummyobjectstore-transv-p-u---v-r-eff)
@@ -47,10 +53,6 @@
        - [.self()](#dummyobjectstore-context-self)
        - [.clone(obj)](#dummyobjectstore-context-cloneobj)
      - [.addTransListener(handler(v1, p, u, v2, r, eff))](#dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff)
-   - [EventuallyConsistentKVS](#eventuallyconsistentkvs)
-     - [.newKey(key, value)](#eventuallyconsistentkvs-newkeykey-value)
-     - [.retrieve(key)](#eventuallyconsistentkvs-retrievekey)
-     - [.modify(key, value)](#eventuallyconsistentkvs-modifykey-value)
    - [$inv](#inv)
    - [MergingObjectStore](#mergingobjectstore)
      - [.init(type, args)](#mergingobjectstore-inittype-args)
@@ -1268,8 +1270,9 @@ should store a new key/value pair, given that key does not already exist.
 
 ```js
 function* (){
-		yield* atomicKV.newKey('foo', 'bar');
-		var value = yield* atomicKV.retrieve('foo');
+		var key = newKey();
+		yield* atomicKV.newKey(key, 'bar');
+		var value = yield* atomicKV.retrieve(key);
 		assert.equal(value, 'bar');
 ```
 
@@ -1277,12 +1280,13 @@ should emit an error when the key already exists.
 
 ```js
 function* (){
+		var key = newKey();
 		try {
-		    yield* atomicKV.newKey('foo', 'bar');
-		    yield* atomicKV.newKey('foo', 'bar');
+		    yield* atomicKV.newKey(key, 'bar');
+		    yield* atomicKV.newKey(key, 'bar');
 		    assert(false, 'An error should be emitted');
 		} catch(err) {
-		    assert.equal(err.message, 'Key foo already exists');
+		    assert.equal(err.message, 'Key ' + key + ' already exists');
 		}
 ```
 
@@ -1292,11 +1296,12 @@ should emit an error if the value does not exist.
 
 ```js
 function* (){
+		var key = newKey();
 		try {
-		    var value = yield* atomicKV.retrieve('foo');
+		    var value = yield* atomicKV.retrieve(key);
 		    assert(false, 'the value is not supposed to be found');
 		} catch(err) {
-		    assert.equal(err.message, 'Key foo was not found');
+		    assert.equal(err.message, 'Key ' + key + ' was not found');
 		}
 ```
 
@@ -1306,10 +1311,11 @@ should change the value under key to newVal, given that the previous value was o
 
 ```js
 function* (){
-		yield* atomicKV.newKey('foo', 'bar');
-		var valAfterMod = yield* atomicKV.modify('foo', 'bar', 'baz');
+		var key = newKey();
+		yield* atomicKV.newKey(key, 'bar');
+		var valAfterMod = yield* atomicKV.modify(key, 'bar', 'baz');
 		assert.equal(valAfterMod, 'baz');
-		var val = yield* atomicKV.retrieve('foo');
+		var val = yield* atomicKV.retrieve(key);
 		assert.equal(val, 'baz');
 ```
 
@@ -1317,10 +1323,11 @@ should not change the value under key if the current value does not equal oldVal
 
 ```js
 function* (){
-		yield* atomicKV.newKey('foo', 'bar');
-		var valAfterMod = yield* atomicKV.modify('foo', 'baz', 'bat');
+		var key = newKey();
+		yield* atomicKV.newKey(key, 'bar');
+		var valAfterMod = yield* atomicKV.modify(key, 'baz', 'bat');
 		assert.equal(valAfterMod, 'bar'); // The value before the change
-		var val = yield* atomicKV.retrieve('foo');
+		var val = yield* atomicKV.retrieve(key);
 		assert.equal(val, 'bar');
 ```
 
@@ -1382,6 +1389,55 @@ function* (){
 	    yield* bucketStore.append(id, [{a:4}]);
 	    assert.deepEqual((yield* bucketStore.retrieve(id, res.tuid, true)).elems, 
 			     [{a:3}, {a:4}]);
+```
+
+<a name="dummyeckvs"></a>
+# DummyECKVS
+<a name="dummyeckvs-newkeykey-value"></a>
+## .newKey(key, value)
+should store a new key/value pair given that the method is called only once for that key.
+
+```js
+function* (){
+	    var key = newKey();
+	    yield* kvs.newKey(key, 'foo');
+```
+
+<a name="dummyeckvs-retrievekey"></a>
+## .retrieve(key)
+should return a previously-assigned value of the key, or undefined the value has not yet been regiested.
+
+```js
+function* (){
+	    var key = newKey();
+	    yield* kvs.newKey(key, 'bar');
+	    var value;
+	    while(!value) {
+		value = yield* kvs.retrieve(key);
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    assert.equal(value, 'bar');
+```
+
+<a name="dummyeckvs-modifykey-value"></a>
+## .modify(key, value)
+should change the value so that it eventually becomes the given one.
+
+```js
+function* (){
+	    var key = newKey();
+	    yield* kvs.newKey(key, 'bar');
+	    var value;
+	    while(!value) {
+		value = yield* kvs.retrieve(key);
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    yield* kvs.modify(key, 'baz');
+	    while(value === 'bar') {
+		value = yield* kvs.retrieve(key);
+		yield function(_) { setTimeout(_, 1); };
+	    }
+	    assert.equal(value, 'baz');
 ```
 
 <a name="dummygraphdb"></a>
@@ -1483,15 +1539,38 @@ function* (){
 	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
 ```
 
+<a name="dummygraphdb-removevertex"></a>
+## .remove(vertex)
+should remove all edges pointing to and from the given vertex.
+
+```js
+function* (){
+	    var key = newKey();
+	    yield* graphDB.addEdge(key + 'X', "a", key + 'Y');
+	    yield* graphDB.addEdge(key + 'X', "b", key + 'Z');
+	    yield* graphDB.addEdge(key + 'W', "c", key + 'X');
+	    yield* graphDB.remove(key + 'X');
+	    try {
+		yield* graphDB.queryEdge(key + "X", "likes");
+		assert(false, 'Should not find and edge');
+	    } catch(e) {
+		assert.equal(e.message, 'Vertex ' + key + 'X not found');
+	    }
+	    assert.equal(typeof (yield* graphDB.queryBackEdge(key + "Y", "a")), 'undefined');
+	    assert.equal(typeof (yield* graphDB.queryEdge(key + "W", "c")), 'undefined');
+```
+
 <a name="dummykeyvaluestore"></a>
 # DummyKeyValueStore
+<a name="dummykeyvaluestore-as-keyvaluestore"></a>
+## as KeyValueStore
 should retrieve stored values.
 
 ```js
 function* (){
-	var kvs = new vercast.DummyKeyValueStore();
-	yield* kvs.store('foo', 'bar');
-	assert.equal(yield* kvs.fetch('foo'), 'bar');
+	    var key = newKey();
+	    yield* kvs.store(key, 'bar');
+	    assert.equal(yield* kvs.fetch(key), 'bar');
 ```
 
 <a name="dummyobjectstore"></a>
@@ -1868,52 +1947,6 @@ function* (){
 	    var seq = ostore.getSequenceStore();
 	    yield* seq.append(eff_out);
 	    assert.deepEqual(yield* seq.shift(), {a:1});
-```
-
-<a name="eventuallyconsistentkvs"></a>
-# EventuallyConsistentKVS
-<a name="eventuallyconsistentkvs-newkeykey-value"></a>
-## .newKey(key, value)
-should store a new key/value pair given that the method is called only once for that key.
-
-```js
-function* (){
-	    yield* kvs.newKey('foo', 'bar');
-```
-
-<a name="eventuallyconsistentkvs-retrievekey"></a>
-## .retrieve(key)
-should return a previously-assigned value of the key, or undefined the value has not yet been regiested.
-
-```js
-function* (){
-	    yield* kvs.newKey('foo', 'bar');
-	    var value;
-	    while(!value) {
-		value = yield* kvs.retrieve('foo');
-		yield function(_) { setTimeout(_, 1); };
-	    }
-	    assert.equal(value, 'bar');
-```
-
-<a name="eventuallyconsistentkvs-modifykey-value"></a>
-## .modify(key, value)
-should change the value so that it eventually becomes the given one.
-
-```js
-function* (){
-	    yield* kvs.newKey('foo', 'bar');
-	    var value;
-	    while(!value) {
-		value = yield* kvs.retrieve('foo');
-		yield function(_) { setTimeout(_, 1); };
-	    }
-	    yield* kvs.modify('foo', 'baz');
-	    while(value === 'bar') {
-		value = yield* kvs.retrieve('foo');
-		yield function(_) { setTimeout(_, 1); };
-	    }
-	    assert.equal(value, 'baz');
 ```
 
 <a name="inv"></a>

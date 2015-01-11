@@ -23,7 +23,11 @@ module.exports = function() {
 	mapEdge(dest, label, src, false);
     };
     this.queryEdge = function*(src, label) {
-	return G[src].o[label];
+	var v = G[src];
+	if(!v) {
+	    throw Error('Vertex ' + src + ' not found');
+	}
+	return v.o[label];
     };
     this.queryBackEdge = function*(dest, label) {
 	return G[dest].i[label];
@@ -100,10 +104,22 @@ module.exports = function() {
     };
     this.abolish = function() {
 	G = {};
-    }
+    };
     this.dump = function() {
 	console.log(G);
-    }
+    };
+    this.remove = function*(vertex) {
+	var node = G[vertex];
+	Object.keys(node.i).forEach(function(e) {
+	    var v = node.i[e];
+	    delete G[v].o[e];
+	});
+	Object.keys(node.o).forEach(function(e) {
+	    var v = node.o[e];
+	    delete G[v].i[e];
+	});
+	delete G[vertex];
+    };
 };
 
 function pathLabels(path) {
