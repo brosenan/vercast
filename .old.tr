@@ -163,6 +163,13 @@
     ObjectTestBed .trans(p) commutativityChecker should consult a digest() method (if exists) to determine version equivalence:   ․ ObjectTestBed .trans(p) commutativityChecker should consult a digest() method (if exists) to determine version equivalence
     ObjectTestBed .trans(p) .objectStore() should return the underlying obejct store:   ․ ObjectTestBed .trans(p) .objectStore() should return the underlying obejct store
     ObjectTestBed .trans(p) .current() should return the current version:   ․ ObjectTestBed .trans(p) .current() should return the current version
+    ReliableQueue .push(elem) should return a time-uuid:   ․ ReliableQueue .push(elem) should return a time-uuid
+    ReliableQueue .getAll() should return all the elements that have been pushed to the queue:   ․ ReliableQueue .getAll() should return all the elements that have been pushed to the queue
+    ReliableQueue .getAll() should clear the elements so that further calls do not retrieve the same items:   ․ ReliableQueue .getAll() should clear the elements so that further calls do not retrieve the same items
+    ReliableQueue .getAll() should also return elements pushed by a previous (crashed) instance looking at the same directory:   ․ ReliableQueue .getAll() should also return elements pushed by a previous (crashed) instance looking at the same directory
+    ReliableQueue .acknowledge(tuid) should not repeat acknowledged elements:   ․ ReliableQueue .acknowledge(tuid) should not repeat acknowledged elements
+    ReliableQueue .acknowledge(tuid) should not repeat more than a given number of acknowledged elements when recovering from failure:   ․ ReliableQueue .acknowledge(tuid) should not repeat more than a given number of acknowledged elements when recovering from failure
+    ReliableQueue .acknowledge(tuid) should recover all elements since the acknowledgement:   ․ ReliableQueue .acknowledge(tuid) should recover all elements since the acknowledgement
     RootStore .init(type, args) should return an initial version ID of a new object:   ․ RootStore .init(type, args) should return an initial version ID of a new object
     RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value:   ․ RootStore .trans(v, p, u) -> {v,r} should call a patch method and return its returned value
     RootStore .trans(v, p, u) -> {v,r} should apply the effect set internally:   ․ RootStore .trans(v, p, u) -> {v,r} should apply the effect set internally
@@ -233,5 +240,5 @@
     counter get should return the counter's value:   ․ counter get should return the counter's value
     counter put{value} should reset the counter to the given value:   ․ counter put{value} should reset the counter to the given value
 
-  233 passing (504ms)
+  240 passing (520ms)
 

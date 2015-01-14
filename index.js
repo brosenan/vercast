@@ -28,3 +28,4 @@ exports.DynamoBucketStore = require('./dynamodb/dynamoBucketStore.js');
 exports.DynamoKVS = require('./dynamodb/dynamoKVS.js');
 exports.ClusteredGraphDB = require('./clusteredGraphDB.js');
 exports.GraphCache = require('./graphCache.js');
+exports.ReliableQueue = require('./reliableQueue.js')
