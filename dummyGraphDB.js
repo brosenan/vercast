@@ -86,6 +86,8 @@ module.exports = function() {
     };
     this.findPath = function*(x, y) {
 	var self = this;
+	if(!G[x]) throw Error(x + ' is not a node in the graph');
+	if(!G[y]) throw Error(y + ' is not a node in the graph');
 	//yield function(_) { setTimeout(_, 0); };
 	var res = self.bfs(x, function(node, path) {
 	    var res = {};
@@ -110,6 +112,7 @@ module.exports = function() {
     };
     this.remove = function*(vertex) {
 	var node = G[vertex];
+	if(!node) throw Error(vertex + ' is not a node in the graph');
 	Object.keys(node.i).forEach(function(e) {
 	    var v = node.i[e];
 	    delete G[v].o[e];

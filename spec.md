@@ -22,6 +22,11 @@
      - [.storeVersion(ctx, v1, p, monitor, r, eff)](#bucketobjectstorage-storeversionctx-v1-p-monitor-r-eff)
      - [.retrieve(ctx, id)](#bucketobjectstorage-retrievectx-id)
      - [.checkCache(ctx, v, p)](#bucketobjectstorage-checkcachectx-v-p)
+   - [ClusteredGraphDB](#clusteredgraphdb)
+     - [as GraphDB](#clusteredgraphdb-as-graphdb)
+       - [addEdge](#clusteredgraphdb-as-graphdb-addedge)
+       - [findCommonAncestor](#clusteredgraphdb-as-graphdb-findcommonancestor)
+     - [.findPath(x, y, cb(err, path))](#clusteredgraphdb-findpathx-y-cberr-path)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
@@ -53,6 +58,11 @@
        - [.self()](#dummyobjectstore-context-self)
        - [.clone(obj)](#dummyobjectstore-context-cloneobj)
      - [.addTransListener(handler(v1, p, u, v2, r, eff))](#dummyobjectstore-addtranslistenerhandlerv1-p-u-v2-r-eff)
+   - [GraphCache](#graphcache)
+     - [as GraphDB](#graphcache-as-graphdb)
+       - [addEdge](#graphcache-as-graphdb-addedge)
+       - [findCommonAncestor](#graphcache-as-graphdb-findcommonancestor)
+     - [.findPath(x, y, cb(err, path))](#graphcache-findpathx-y-cberr-path)
    - [$inv](#inv)
    - [MergingObjectStore](#mergingobjectstore)
      - [.init(type, args)](#mergingobjectstore-inittype-args)
@@ -1260,6 +1270,202 @@ function* (){
 	    assert.equal(result.r._type, 'somePatch');
 ```
 
+<a name="clusteredgraphdb"></a>
+# ClusteredGraphDB
+<a name="clusteredgraphdb-as-graphdb"></a>
+## as GraphDB
+<a name="clusteredgraphdb-as-graphdb-addedge"></a>
+### addEdge
+should accept an edge and add it to the graph.
+
+```js
+function* (){
+		yield* graphDB.addEdge("foo", "likes", "bar");
+		var shouldBeBar = yield* graphDB.queryEdge("foo", "likes");
+		assert.equal(shouldBeBar, 'bar');
+```
+
+should create a dual mapping, mapping also the destination to the source.
+
+```js
+function* (){
+		    yield* graphDB.addEdge("foo", "likes", "bar");
+		    var shouldBeFoo = yield* graphDB.queryBackEdge("bar", "likes"); 
+		    assert.equal(shouldBeFoo, 'foo');
+```
+
+<a name="clusteredgraphdb-as-graphdb-findcommonancestor"></a>
+### findCommonAncestor
+should find the common ancestor of two nodes, and the path to each of them.
+
+```js
+function* (){
+		yield* graphDB.addEdge('terah', 'p1', 'abraham');
+		yield* graphDB.addEdge('abraham', 'p2', 'isaac');
+		yield* graphDB.addEdge('isaac', 'p3', 'jacob');
+		yield* graphDB.addEdge('jacob', 'p4', 'joseph');
+		yield* graphDB.addEdge('abraham', 'p5', 'ismael');
+		yield* graphDB.addEdge('isaac', 'p6', 'esaw');
+		yield* graphDB.addEdge('jacob', 'p7', 'simon');
+		var res = yield* graphDB.findCommonAncestor('simon', 'ismael');
+		assert.equal(res.node, 'abraham');
+```
+
+should handle the case where there are also common descendants.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(4, 6);
+		assert.equal(res.node, 2);
+```
+
+should return the path from the common ancestor to both nodes.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(8, 10);
+		assert.equal(res.node, 2);
+		assert.deepEqual(res.p1, [{l:'2', n:'4'}, {l:'2', n:'8'}]);
+		assert.deepEqual(res.p2, [{l:'5', n:'10'}]);
+```
+
+<a name="clusteredgraphdb-findpathx-y-cberr-path"></a>
+## .findPath(x, y, cb(err, path))
+should return the labels along the edges from x to y.
+
+```js
+function* (){
+	    yield* createGraph(30);
+	    var path = yield* graphDB.findPath(3, 24);
+	    var m = 1;
+	    for(var i = 0; i < path.length; i++) {
+		m *= path[i];
+	    }
+	    assert.equal(m, 8); // 24 / 3
+```
+
+should always take the shortest path.
+
+```js
+function* (){
+		yield* graphDB.addEdge('a', 'wrong1', 'b');
+		yield* graphDB.addEdge('b', 'wrong2', 'c');
+		yield* graphDB.addEdge('a', 'right', 'c');
+		var path = yield* graphDB.findPath('a', 'c');
+		assert.deepEqual(path, ['right']);
+```
+
+should handle directed cycles correctly.
+
+```js
+function* (){
+	    yield* graphDB.addEdge('a', 'right1', 'b');
+	    yield* graphDB.addEdge('b', 'right2', 'c');
+	    yield* graphDB.addEdge('c', 'wrong', 'b');
+	    yield* graphDB.addEdge('c', 'right3', 'd');
+	    var path = yield* graphDB.findPath('a', 'd');
+	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
+```
+
+<a name="clusteredgraphdb-as-graphdb"></a>
+## as GraphDB
+<a name="clusteredgraphdb-as-graphdb-addedge"></a>
+### addEdge
+should accept an edge and add it to the graph.
+
+```js
+function* (){
+		yield* graphDB.addEdge("foo", "likes", "bar");
+		var shouldBeBar = yield* graphDB.queryEdge("foo", "likes");
+		assert.equal(shouldBeBar, 'bar');
+```
+
+should create a dual mapping, mapping also the destination to the source.
+
+```js
+function* (){
+		    yield* graphDB.addEdge("foo", "likes", "bar");
+		    var shouldBeFoo = yield* graphDB.queryBackEdge("bar", "likes"); 
+		    assert.equal(shouldBeFoo, 'foo');
+```
+
+<a name="clusteredgraphdb-as-graphdb-findcommonancestor"></a>
+### findCommonAncestor
+should find the common ancestor of two nodes, and the path to each of them.
+
+```js
+function* (){
+		yield* graphDB.addEdge('terah', 'p1', 'abraham');
+		yield* graphDB.addEdge('abraham', 'p2', 'isaac');
+		yield* graphDB.addEdge('isaac', 'p3', 'jacob');
+		yield* graphDB.addEdge('jacob', 'p4', 'joseph');
+		yield* graphDB.addEdge('abraham', 'p5', 'ismael');
+		yield* graphDB.addEdge('isaac', 'p6', 'esaw');
+		yield* graphDB.addEdge('jacob', 'p7', 'simon');
+		var res = yield* graphDB.findCommonAncestor('simon', 'ismael');
+		assert.equal(res.node, 'abraham');
+```
+
+should handle the case where there are also common descendants.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(4, 6);
+		assert.equal(res.node, 2);
+```
+
+should return the path from the common ancestor to both nodes.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(8, 10);
+		assert.equal(res.node, 2);
+		assert.deepEqual(res.p1, [{l:'2', n:'4'}, {l:'2', n:'8'}]);
+		assert.deepEqual(res.p2, [{l:'5', n:'10'}]);
+```
+
+<a name="clusteredgraphdb-findpathx-y-cberr-path"></a>
+## .findPath(x, y, cb(err, path))
+should return the labels along the edges from x to y.
+
+```js
+function* (){
+	    yield* createGraph(30);
+	    var path = yield* graphDB.findPath(3, 24);
+	    var m = 1;
+	    for(var i = 0; i < path.length; i++) {
+		m *= path[i];
+	    }
+	    assert.equal(m, 8); // 24 / 3
+```
+
+should always take the shortest path.
+
+```js
+function* (){
+		yield* graphDB.addEdge('a', 'wrong1', 'b');
+		yield* graphDB.addEdge('b', 'wrong2', 'c');
+		yield* graphDB.addEdge('a', 'right', 'c');
+		var path = yield* graphDB.findPath('a', 'c');
+		assert.deepEqual(path, ['right']);
+```
+
+should handle directed cycles correctly.
+
+```js
+function* (){
+	    yield* graphDB.addEdge('a', 'right1', 'b');
+	    yield* graphDB.addEdge('b', 'right2', 'c');
+	    yield* graphDB.addEdge('c', 'wrong', 'b');
+	    yield* graphDB.addEdge('c', 'right3', 'd');
+	    var path = yield* graphDB.findPath('a', 'd');
+	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
+```
+
 <a name="dummyatomickvs"></a>
 # DummyAtomicKVS
 <a name="dummyatomickvs-as-atomickeyvalue"></a>
@@ -1947,6 +2153,152 @@ function* (){
 	    var seq = ostore.getSequenceStore();
 	    yield* seq.append(eff_out);
 	    assert.deepEqual(yield* seq.shift(), {a:1});
+```
+
+<a name="graphcache"></a>
+# GraphCache
+should remove vertexes that exceed the specified capacity.
+
+```js
+function* (){
+	for(let i = 0; i < 99; i++) {
+	    yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	}
+	yield* graphCache.findPath('v0', 'v99'); // Should not fail
+	// Adding the one that exceeds...
+	yield* graphCache.addEdge('v99', 'e', 'v100');
+	try {
+	    yield* graphCache.findPath('v0', 'v1'); // Should be removed per LRU
+	    assert(false, 'Should fail');
+	} catch(e) {
+	    assert.equal(e.message, 'v0 is not a node in the graph');
+	}
+```
+
+should recall vertexes that were used in a found path.
+
+```js
+function* (){
+	yield* graphCache.addEdge('v0', 'xa', 'x1');
+	yield* graphCache.addEdge('x1', 'xb', 'x2');
+	yield* graphCache.addEdge('v0', 'ya', 'y1');
+	yield* graphCache.addEdge('y1', 'yb', 'y2');
+	for(let i = 0; i < 95; i++) {
+	    yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	}
+	yield* graphCache.findPath('v0', 'v95'); // Should not fail
+	yield* graphCache.findPath('v0', 'x2'); // Should not fail
+	yield* graphCache.findPath('v0', 'y2'); // Should not fail
+	// The following should recall the edges between v0 and x2 and y2
+	yield* graphCache.findCommonAncestor('x2', 'y2');
+	for(let i = 95; i < 99; i++) {
+	    yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	}
+	yield* graphCache.findPath('v0', 'x2'); // Should not fail
+	yield* graphCache.findPath('v0', 'y2'); // Should not fail
+	try {
+	    yield* graphCache.findPath('v0', 'v95');
+	    assert(false, 'Should fail');
+	} catch(e) {
+	    assert.equal(e.message, 'Could not find path from v0 to v95');
+	}
+```
+
+<a name="graphcache-as-graphdb"></a>
+## as GraphDB
+<a name="graphcache-as-graphdb-addedge"></a>
+### addEdge
+should accept an edge and add it to the graph.
+
+```js
+function* (){
+		yield* graphDB.addEdge("foo", "likes", "bar");
+		var shouldBeBar = yield* graphDB.queryEdge("foo", "likes");
+		assert.equal(shouldBeBar, 'bar');
+```
+
+should create a dual mapping, mapping also the destination to the source.
+
+```js
+function* (){
+		    yield* graphDB.addEdge("foo", "likes", "bar");
+		    var shouldBeFoo = yield* graphDB.queryBackEdge("bar", "likes"); 
+		    assert.equal(shouldBeFoo, 'foo');
+```
+
+<a name="graphcache-as-graphdb-findcommonancestor"></a>
+### findCommonAncestor
+should find the common ancestor of two nodes, and the path to each of them.
+
+```js
+function* (){
+		yield* graphDB.addEdge('terah', 'p1', 'abraham');
+		yield* graphDB.addEdge('abraham', 'p2', 'isaac');
+		yield* graphDB.addEdge('isaac', 'p3', 'jacob');
+		yield* graphDB.addEdge('jacob', 'p4', 'joseph');
+		yield* graphDB.addEdge('abraham', 'p5', 'ismael');
+		yield* graphDB.addEdge('isaac', 'p6', 'esaw');
+		yield* graphDB.addEdge('jacob', 'p7', 'simon');
+		var res = yield* graphDB.findCommonAncestor('simon', 'ismael');
+		assert.equal(res.node, 'abraham');
+```
+
+should handle the case where there are also common descendants.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(4, 6);
+		assert.equal(res.node, 2);
+```
+
+should return the path from the common ancestor to both nodes.
+
+```js
+function* (){
+		yield* createGraph(30);
+		var res = yield* graphDB.findCommonAncestor(8, 10);
+		assert.equal(res.node, 2);
+		assert.deepEqual(res.p1, [{l:'2', n:'4'}, {l:'2', n:'8'}]);
+		assert.deepEqual(res.p2, [{l:'5', n:'10'}]);
+```
+
+<a name="graphcache-findpathx-y-cberr-path"></a>
+## .findPath(x, y, cb(err, path))
+should return the labels along the edges from x to y.
+
+```js
+function* (){
+	    yield* createGraph(30);
+	    var path = yield* graphDB.findPath(3, 24);
+	    var m = 1;
+	    for(var i = 0; i < path.length; i++) {
+		m *= path[i];
+	    }
+	    assert.equal(m, 8); // 24 / 3
+```
+
+should always take the shortest path.
+
+```js
+function* (){
+		yield* graphDB.addEdge('a', 'wrong1', 'b');
+		yield* graphDB.addEdge('b', 'wrong2', 'c');
+		yield* graphDB.addEdge('a', 'right', 'c');
+		var path = yield* graphDB.findPath('a', 'c');
+		assert.deepEqual(path, ['right']);
+```
+
+should handle directed cycles correctly.
+
+```js
+function* (){
+	    yield* graphDB.addEdge('a', 'right1', 'b');
+	    yield* graphDB.addEdge('b', 'right2', 'c');
+	    yield* graphDB.addEdge('c', 'wrong', 'b');
+	    yield* graphDB.addEdge('c', 'right3', 'd');
+	    var path = yield* graphDB.findPath('a', 'd');
+	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
 ```
 
 <a name="inv"></a>

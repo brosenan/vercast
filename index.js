@@ -26,3 +26,5 @@ exports.createExtractingBucket = require('./bucketExtractionStorage.js');
 exports.createValidatingBucket = require('./validatingBucket.js').createValidatingBucket;
 exports.DynamoBucketStore = require('./dynamodb/dynamoBucketStore.js');
 exports.DynamoKVS = require('./dynamodb/dynamoKVS.js');
+exports.ClusteredGraphDB = require('./clusteredGraphDB.js');
+exports.GraphCache = require('./graphCache.js');
