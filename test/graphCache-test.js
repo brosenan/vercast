@@ -52,4 +52,37 @@ describe('GraphCache', function(){
 	    assert.equal(e.message, 'Could not find path from v0 to v95');
 	}
     }));
+    describe('.has(v)', function(){
+	it('should return true iff vertex v is currently in the cache', asyncgen.async(function*(){
+	    for(let i = 0; i < 99; i++) {
+		yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	    }
+	    assert(graphCache.has('v0'), "graphCache.has('v0')");
+	    // Adding the one that exceeds...
+	    yield* graphCache.addEdge('v99', 'e', 'v100');
+	    assert(!graphCache.has('v0'), "!graphCache.has('v0')");
+	}));
+    });
+    describe('explicit-cleanup', function(){
+	it('should not clean-up vertexes automatically if this flag has been set', asyncgen.async(function*(){
+	    var graphCache = new vercast.GraphCache(100, true);
+	    for(let i = 0; i < 200; i++) {
+		yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	    }
+	    assert(graphCache.has('v0'), "graphCache.has('v0')");
+	}));
+    });
+    describe('.cleanup()', function(){
+	it('should clean-up old vertexes leaving only the allowed capacity', asyncgen.async(function*(){
+	    var graphCache = new vercast.GraphCache(100, true);
+	    for(let i = 0; i < 100; i++) {
+		yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	    }
+	    assert(graphCache.has('v0'), "graphCache.has('v0')");
+	    yield* graphCache.cleanup();
+	    assert(!graphCache.has('v0'), "!graphCache.has('v0')");
+	    assert(graphCache.has('v1'), "graphCache.has('v1')");
+	}));
+    });
+
 });

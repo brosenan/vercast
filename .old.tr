@@ -44,22 +44,22 @@
     BucketObjectStorage .retrieve(ctx, id) should invoke the bucket's retrieve() method and return the monitor provided by it:   ․ BucketObjectStorage .retrieve(ctx, id) should invoke the bucket's retrieve() method and return the monitor provided by it
     BucketObjectStorage .retrieve(ctx, id) should re-consult the bucketStore for updates in case of a missing element:   ․ BucketObjectStorage .retrieve(ctx, id) should re-consult the bucketStore for updates in case of a missing element
     BucketObjectStorage .checkCache(ctx, v, p) should invoke the bucket object's checkCache() method:   ․ BucketObjectStorage .checkCache(ctx, v, p) should invoke the bucket object's checkCache() method
-    ClusteredGraphDB as GraphDB addEdge should accept an edge and add it to the graph:   ․ ClusteredGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-    ClusteredGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source:   ․ ClusteredGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-    ClusteredGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them:   ․ ClusteredGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    ClusteredGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ ClusteredGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-    ClusteredGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ ClusteredGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-    ClusteredGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ ClusteredGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-    ClusteredGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ ClusteredGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-    ClusteredGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ ClusteredGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
-    ClusteredGraphDB as GraphDB addEdge should accept an edge and add it to the graph:   ․ ClusteredGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-    ClusteredGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source:   ․ ClusteredGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-    ClusteredGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them:   ․ ClusteredGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    ClusteredGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ ClusteredGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-    ClusteredGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ ClusteredGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-    ClusteredGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ ClusteredGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-    ClusteredGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ ClusteredGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-    ClusteredGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ ClusteredGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+    ClusteredGraphDB with identity clustering as GraphDB addEdge should accept an edge and add it to the graph:   ․ ClusteredGraphDB with identity clustering as GraphDB addEdge should accept an edge and add it to the graph
+    ClusteredGraphDB with identity clustering as GraphDB addEdge should create a dual mapping, mapping also the destination to the source:   ․ ClusteredGraphDB with identity clustering as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+    ClusteredGraphDB with identity clustering as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them:   ․ ClusteredGraphDB with identity clustering as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    ClusteredGraphDB with identity clustering as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ ClusteredGraphDB with identity clustering as GraphDB findCommonAncestor should handle the case where there are also common descendants
+    ClusteredGraphDB with identity clustering as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ ClusteredGraphDB with identity clustering as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+    ClusteredGraphDB with identity clustering .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ ClusteredGraphDB with identity clustering .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+    ClusteredGraphDB with identity clustering .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ ClusteredGraphDB with identity clustering .findPath(x, y, cb(err, path)) should always take the shortest path
+    ClusteredGraphDB with identity clustering .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ ClusteredGraphDB with identity clustering .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+    ClusteredGraphDB with universal clustering as GraphDB addEdge should accept an edge and add it to the graph:   ․ ClusteredGraphDB with universal clustering as GraphDB addEdge should accept an edge and add it to the graph
+    ClusteredGraphDB with universal clustering as GraphDB addEdge should create a dual mapping, mapping also the destination to the source:   ․ ClusteredGraphDB with universal clustering as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
+    ClusteredGraphDB with universal clustering as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them:   ․ ClusteredGraphDB with universal clustering as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
+    ClusteredGraphDB with universal clustering as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ ClusteredGraphDB with universal clustering as GraphDB findCommonAncestor should handle the case where there are also common descendants
+    ClusteredGraphDB with universal clustering as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ ClusteredGraphDB with universal clustering as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
+    ClusteredGraphDB with universal clustering .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ ClusteredGraphDB with universal clustering .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
+    ClusteredGraphDB with universal clustering .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ ClusteredGraphDB with universal clustering .findPath(x, y, cb(err, path)) should always take the shortest path
+    ClusteredGraphDB with universal clustering .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ ClusteredGraphDB with universal clustering .findPath(x, y, cb(err, path)) should handle directed cycles correctly
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist:   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should store a new key/value pair, given that key does not already exist
     DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists:   ․ DummyAtomicKVS as AtomicKeyValue .newKey(key, val) should emit an error when the key already exists
     DummyAtomicKVS as AtomicKeyValue .retrieve(key)) should emit an error if the value does not exist:   ․ DummyAtomicKVS as AtomicKeyValue .retrieve(key)) should emit an error if the value does not exist
@@ -108,6 +108,9 @@
     GraphCache .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ GraphCache .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
     GraphCache .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ GraphCache .findPath(x, y, cb(err, path)) should always take the shortest path
     GraphCache .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ GraphCache .findPath(x, y, cb(err, path)) should handle directed cycles correctly
+    GraphCache .has(v) should return true iff vertex v is currently in the cache:   ․ GraphCache .has(v) should return true iff vertex v is currently in the cache
+    GraphCache explicit-cleanup should not clean-up vertexes automatically if this flag has been set:   ․ GraphCache explicit-cleanup should not clean-up vertexes automatically if this flag has been set
+    GraphCache .cleanup() should clean-up old vertexes leaving only the allowed capacity:   ․ GraphCache .cleanup() should clean-up old vertexes leaving only the allowed capacity
     $inv should unapply the underlying patch:   ․ $inv should unapply the underlying patch
     MergingObjectStore .init(type, args) should return a new version ID:   ․ MergingObjectStore .init(type, args) should return a new version ID
     MergingObjectStore .trans(v, p) -> {v,r} should apply a patch to the state:   ․ MergingObjectStore .trans(v, p) -> {v,r} should apply a patch to the state
@@ -230,5 +233,5 @@
     counter get should return the counter's value:   ․ counter get should return the counter's value
     counter put{value} should reset the counter to the given value:   ․ counter put{value} should reset the counter to the given value
 
-  230 passing (463ms)
+  233 passing (466ms)
 

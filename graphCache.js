@@ -2,7 +2,7 @@
 var vercast = require('vercast');
 var LRU = require('lru').LRU;
 
-module.exports = function(capacity) {
+module.exports = function(capacity, explicitCleanup) {
     var graphDB = new vercast.DummyGraphDB();
     var toDispose = [];
     
@@ -23,7 +23,9 @@ module.exports = function(capacity) {
 	lru.set(v1, v1);
 	lru.set(v2, v2);
 	yield* graphDB.addEdge(v1, e, v2);
-	yield* cleanup();
+	if(!explicitCleanup) {
+	    yield* this.cleanup();
+	}
     };
     this.queryEdge = function*(v1, e) {
 	return yield* graphDB.queryEdge(v1, e);
@@ -45,10 +47,14 @@ module.exports = function(capacity) {
     this.findPath = function*(v1, v2) {
 	return yield* graphDB.findPath(v1, v2);
     };
-
-    function* cleanup() {
+    this.has = function(v) {
+	return graphDB.has(v);
+    };
+    this.cleanup = function*() {
 	for(let i = 0; i < toDispose.length; i++) {
-	    yield* graphDB.remove(toDispose[i]);
+	    if(graphDB.has(toDispose[i])) {
+		yield* graphDB.remove(toDispose[i]);
+	    }
 	}
 	toDispose = [];
     }

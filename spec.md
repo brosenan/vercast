@@ -23,10 +23,16 @@
      - [.retrieve(ctx, id)](#bucketobjectstorage-retrievectx-id)
      - [.checkCache(ctx, v, p)](#bucketobjectstorage-checkcachectx-v-p)
    - [ClusteredGraphDB](#clusteredgraphdb)
-     - [as GraphDB](#clusteredgraphdb-as-graphdb)
-       - [addEdge](#clusteredgraphdb-as-graphdb-addedge)
-       - [findCommonAncestor](#clusteredgraphdb-as-graphdb-findcommonancestor)
-     - [.findPath(x, y, cb(err, path))](#clusteredgraphdb-findpathx-y-cberr-path)
+     - [with identity clustering](#clusteredgraphdb-with-identity-clustering)
+       - [as GraphDB](#clusteredgraphdb-with-identity-clustering-as-graphdb)
+         - [addEdge](#clusteredgraphdb-with-identity-clustering-as-graphdb-addedge)
+         - [findCommonAncestor](#clusteredgraphdb-with-identity-clustering-as-graphdb-findcommonancestor)
+       - [.findPath(x, y, cb(err, path))](#clusteredgraphdb-with-identity-clustering-findpathx-y-cberr-path)
+     - [with universal clustering](#clusteredgraphdb-with-universal-clustering)
+       - [as GraphDB](#clusteredgraphdb-with-universal-clustering-as-graphdb)
+         - [addEdge](#clusteredgraphdb-with-universal-clustering-as-graphdb-addedge)
+         - [findCommonAncestor](#clusteredgraphdb-with-universal-clustering-as-graphdb-findcommonancestor)
+       - [.findPath(x, y, cb(err, path))](#clusteredgraphdb-with-universal-clustering-findpathx-y-cberr-path)
    - [DummyAtomicKVS](#dummyatomickvs)
      - [as AtomicKeyValue](#dummyatomickvs-as-atomickeyvalue)
        - [.newKey(key, val)](#dummyatomickvs-as-atomickeyvalue-newkeykey-val)
@@ -63,6 +69,9 @@
        - [addEdge](#graphcache-as-graphdb-addedge)
        - [findCommonAncestor](#graphcache-as-graphdb-findcommonancestor)
      - [.findPath(x, y, cb(err, path))](#graphcache-findpathx-y-cberr-path)
+     - [.has(v)](#graphcache-hasv)
+     - [explicit-cleanup](#graphcache-explicit-cleanup)
+     - [.cleanup()](#graphcache-cleanup)
    - [$inv](#inv)
    - [MergingObjectStore](#mergingobjectstore)
      - [.init(type, args)](#mergingobjectstore-inittype-args)
@@ -1272,10 +1281,12 @@ function* (){
 
 <a name="clusteredgraphdb"></a>
 # ClusteredGraphDB
-<a name="clusteredgraphdb-as-graphdb"></a>
-## as GraphDB
-<a name="clusteredgraphdb-as-graphdb-addedge"></a>
-### addEdge
+<a name="clusteredgraphdb-with-identity-clustering"></a>
+## with identity clustering
+<a name="clusteredgraphdb-with-identity-clustering-as-graphdb"></a>
+### as GraphDB
+<a name="clusteredgraphdb-with-identity-clustering-as-graphdb-addedge"></a>
+#### addEdge
 should accept an edge and add it to the graph.
 
 ```js
@@ -1294,8 +1305,8 @@ function* (){
 		    assert.equal(shouldBeFoo, 'foo');
 ```
 
-<a name="clusteredgraphdb-as-graphdb-findcommonancestor"></a>
-### findCommonAncestor
+<a name="clusteredgraphdb-with-identity-clustering-as-graphdb-findcommonancestor"></a>
+#### findCommonAncestor
 should find the common ancestor of two nodes, and the path to each of them.
 
 ```js
@@ -1331,8 +1342,8 @@ function* (){
 		assert.deepEqual(res.p2, [{l:'5', n:'10'}]);
 ```
 
-<a name="clusteredgraphdb-findpathx-y-cberr-path"></a>
-## .findPath(x, y, cb(err, path))
+<a name="clusteredgraphdb-with-identity-clustering-findpathx-y-cberr-path"></a>
+### .findPath(x, y, cb(err, path))
 should return the labels along the edges from x to y.
 
 ```js
@@ -1369,10 +1380,12 @@ function* (){
 	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
 ```
 
-<a name="clusteredgraphdb-as-graphdb"></a>
-## as GraphDB
-<a name="clusteredgraphdb-as-graphdb-addedge"></a>
-### addEdge
+<a name="clusteredgraphdb-with-universal-clustering"></a>
+## with universal clustering
+<a name="clusteredgraphdb-with-universal-clustering-as-graphdb"></a>
+### as GraphDB
+<a name="clusteredgraphdb-with-universal-clustering-as-graphdb-addedge"></a>
+#### addEdge
 should accept an edge and add it to the graph.
 
 ```js
@@ -1391,8 +1404,8 @@ function* (){
 		    assert.equal(shouldBeFoo, 'foo');
 ```
 
-<a name="clusteredgraphdb-as-graphdb-findcommonancestor"></a>
-### findCommonAncestor
+<a name="clusteredgraphdb-with-universal-clustering-as-graphdb-findcommonancestor"></a>
+#### findCommonAncestor
 should find the common ancestor of two nodes, and the path to each of them.
 
 ```js
@@ -1428,8 +1441,8 @@ function* (){
 		assert.deepEqual(res.p2, [{l:'5', n:'10'}]);
 ```
 
-<a name="clusteredgraphdb-findpathx-y-cberr-path"></a>
-## .findPath(x, y, cb(err, path))
+<a name="clusteredgraphdb-with-universal-clustering-findpathx-y-cberr-path"></a>
+### .findPath(x, y, cb(err, path))
 should return the labels along the edges from x to y.
 
 ```js
@@ -2299,6 +2312,50 @@ function* (){
 	    yield* graphDB.addEdge('c', 'right3', 'd');
 	    var path = yield* graphDB.findPath('a', 'd');
 	    assert.deepEqual(path, ['right1', 'right2', 'right3']);
+```
+
+<a name="graphcache-hasv"></a>
+## .has(v)
+should return true iff vertex v is currently in the cache.
+
+```js
+function* (){
+	    for(let i = 0; i < 99; i++) {
+		yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	    }
+	    assert(graphCache.has('v0'), "graphCache.has('v0')");
+	    // Adding the one that exceeds...
+	    yield* graphCache.addEdge('v99', 'e', 'v100');
+	    assert(!graphCache.has('v0'), "!graphCache.has('v0')");
+```
+
+<a name="graphcache-explicit-cleanup"></a>
+## explicit-cleanup
+should not clean-up vertexes automatically if this flag has been set.
+
+```js
+function* (){
+	    var graphCache = new vercast.GraphCache(100, true);
+	    for(let i = 0; i < 200; i++) {
+		yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	    }
+	    assert(graphCache.has('v0'), "graphCache.has('v0')");
+```
+
+<a name="graphcache-cleanup"></a>
+## .cleanup()
+should clean-up old vertexes leaving only the allowed capacity.
+
+```js
+function* (){
+	    var graphCache = new vercast.GraphCache(100, true);
+	    for(let i = 0; i < 100; i++) {
+		yield* graphCache.addEdge('v' + i, 'e', 'v' + (i+1));
+	    }
+	    assert(graphCache.has('v0'), "graphCache.has('v0')");
+	    yield* graphCache.cleanup();
+	    assert(!graphCache.has('v0'), "!graphCache.has('v0')");
+	    assert(graphCache.has('v1'), "graphCache.has('v1')");
 ```
 
 <a name="inv"></a>

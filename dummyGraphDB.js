@@ -33,6 +33,8 @@ module.exports = function() {
 	return G[dest].i[label];
     };
     this.findCommonAncestor = function*(node1, node2) {
+	if(!G[node1]) throw Error(node1 + ' not in graph');
+	if(!G[node2]) throw Error(node2 + ' not in graph');
 	var res = this.bfs(node1, function(node, path) {
 	    var res = {};
 	    var i = 0;
@@ -122,6 +124,9 @@ module.exports = function() {
 	    delete G[v].i[e];
 	});
 	delete G[vertex];
+    };
+    this.has = function(v) {
+	return !!G[v];
     };
 };
 
