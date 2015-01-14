@@ -233,5 +233,5 @@
     counter get should return the counter's value:   ․ counter get should return the counter's value
     counter put{value} should reset the counter to the given value:   ․ counter put{value} should reset the counter to the given value
 
-  233 passing (466ms)
+  233 passing (504ms)
 
