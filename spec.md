@@ -100,7 +100,7 @@
        - [.current()](#objecttestbed-transp-current)
    - [ReliableQueue](#reliablequeue)
      - [.push(elem)](#reliablequeue-pushelem)
-     - [.getAll()](#reliablequeue-getall)
+     - [.getAll([getTuid])](#reliablequeue-getallgettuid)
      - [.acknowledge(tuid)](#reliablequeue-acknowledgetuid)
    - [RootStore](#rootstore)
      - [.init(type, args)](#rootstore-inittype-args)
@@ -3332,8 +3332,8 @@ function* (){
 	    assert(tuid2 > tuid1, tuid2 + " > " + tuid1);
 ```
 
-<a name="reliablequeue-getall"></a>
-## .getAll()
+<a name="reliablequeue-getallgettuid"></a>
+## .getAll([getTuid])
 should return all the elements that have been pushed to the queue.
 
 ```js
@@ -3366,6 +3366,28 @@ function* (){
 	    yield* queue1.push({a:2});
 	    var queue2 = new vercast.ReliableQueue(queueDir + '4');
 	    assert.deepEqual(yield* queue2.getAll(), [{a:1}, {a:2}]);
+```
+
+should also return the latest tuid if getTuid is true.
+
+```js
+function* (){
+	    var queue = new vercast.ReliableQueue(queueDir + '8');
+	    yield* queue.push({a:1});
+	    var tuid = yield* queue.push({a:2});
+	    var ret = yield* queue.getAll(true);
+	    assert.deepEqual(ret.elems, [{a:1}, {a:2}]);
+	    assert.equal(ret.tuid, tuid);
+```
+
+should return "" as tuid when there are no pending elements.
+
+```js
+function* (){
+	    var queue = new vercast.ReliableQueue(queueDir + '9');
+	    var ret = yield* queue.getAll(true);
+	    assert.deepEqual(ret.elems, []);
+	    assert.equal(ret.tuid, '');
 ```
 
 <a name="reliablequeue-acknowledgetuid"></a>
@@ -3403,7 +3425,7 @@ should recover all elements since the acknowledgement.
 
 ```js
 function* (){
-	    var queue1 = new vercast.ReliableQueue(queueDir + '6', 3);
+	    var queue1 = new vercast.ReliableQueue(queueDir + '7', 3);
 	    yield* queue1.push({a:1});
 	    var tuid = yield* queue1.push({a:2});
 	    yield* queue1.push({a:3});
@@ -3412,7 +3434,7 @@ function* (){
 	    yield* queue1.push({a:5});
 	    yield* queue1.push({a:6});
 	    yield* queue1.push({a:7});
-	    var queue2 = new vercast.ReliableQueue(queueDir + '6', 3);
+	    var queue2 = new vercast.ReliableQueue(queueDir + '7', 3);
 	    var recovered = yield* queue2.getAll();
 	    assert(recovered[0].a <= 3, recovered[0].a + ' <= 3');
 	    assert.deepEqual(recovered[recovered.length - 1], {a:7});

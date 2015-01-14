@@ -1,58 +1,63 @@
 "use strict";
 var neo4j = require('neo4j');
 var asyncgen = require('asyncgen');
+var vercast = require('vercast');
 
-var db = new neo4j.GraphDatabase('http://localhost:7474');
+module.exports = function(url, queuePath) {
+    url = url || 'http://localhost:7474';
+    queuePath = queuePath || '/tmp/vercast-neo4j-queue';
+    var db = new neo4j.GraphDatabase(url);
+    var queue = new vercast.ReliableQueue(queuePath);
 
-var pendingNodes = {};
-var pendingEdges = [];
-var pendingIndex = 0;
-
-function* storePending() {
-    var cypher = "";
-    var params = {};
-    Object.keys(pendingNodes).forEach(function(id) {
-	cypher += "MERGE (v" + pendingNodes[id] + ":ver {id:{v" + pendingNodes[id] + "}})\n";
-	params["v" + pendingNodes[id]] = id;
-    });
-    for(let i = 0; i < pendingEdges.length; i++) {
-	var src = pendingNodes[pendingEdges[i][0]];
-	var dest = pendingNodes[pendingEdges[i][2]];
-	cypher += "CREATE UNIQUE (v" + src + ")-[:TRANS {patch:{p" + i + "}}]->(v" + dest + ")\n"
-	params["p" + i] = pendingEdges[i][1];
+    function* storePending() {
+	var cypher = "";
+	var params = {};
+	var pending = yield* queue.getAll();
+	var pendingNodes = Object.create(null);
+	var index = 0;
+	pending.forEach(function(edge) {
+	    index += 1;
+	    pendingNodes[edge.v1] = index;
+	    index += 1;
+	    pendingNodes[edge.v2] = index;
+	});
+	Object.keys(pendingNodes).forEach(function(id) {
+	    cypher += "MERGE (v" + pendingNodes[id] + ":ver {id:{v" + pendingNodes[id] + "}})\n";
+	    params["v" + pendingNodes[id]] = id;
+	});
+	for(let i = 0; i < pending.length; i++) {
+	    var src = pendingNodes[pending[i].v1];
+	    var dest = pendingNodes[pending[i].v2];
+	    cypher += "CREATE UNIQUE (v" + src + ")-[:TRANS {patch:{p" + i + "}}]->(v" + dest + ")\n"
+	    params["p" + i] = pending[i].p;
+	}
+	if(cypher !== '') {
+	    console.log(cypher);
+	    yield* query(cypher, params);
+	}
     }
-    yield* query(cypher, params);
-    pendingNodes = {};
-    pendingEdges = [];
-    pendingIndex = 0;
-}
 
-function* query(cypher, params) {
-    params = params || {};
-    var timeBefore = Date.now();
-    try {
-	var res = yield function(_) {
-	    db.query(cypher, params, _);
-	};
-    } catch(e) {
-	throw Error(e.message + " in " + cypher);
+    function* query(cypher, params) {
+	params = params || {};
+	var timeBefore = Date.now();
+	try {
+	    var res = yield function(_) {
+		db.query(cypher, params, _);
+	    };
+	} catch(e) {
+	    throw Error(e.message + " in " + cypher);
+	}
+	//console.log(cypher, params, Date.now() - timeBefore);
+	return res;
     }
-    //console.log(cypher, params, Date.now() - timeBefore);
-    return res;
-}
 
-module.exports = function() {
     this.clear = function*() {
 	yield* query("MATCH (x)-[r]->(y) DELETE r;");
 	yield* query("MATCH (x) DELETE x;");
     };
 
     this.addEdge = function*(v1, p, v2) {
-	pendingNodes[v1] = pendingIndex;
-	pendingIndex += 1;
-	pendingNodes[v2] = pendingIndex;
-	pendingIndex += 1;
-	pendingEdges.push([v1, p, v2]);
+	yield* queue.push({v1: v1, p: p, v2: v2});
     }
     this.queryEdge = function*(v1, p) {
 	yield* storePending();

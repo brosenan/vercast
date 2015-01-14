@@ -29,11 +29,20 @@ module.exports = function(dir, pkqSize) {
 	yield* writeToFile(q, tuid);
 	return tuid;
     };
-    this.getAll = function*() {
+    this.getAll = function*(getTuid) {
 	yield* init();
-	var ret = queue.map(function(q) { return q.e; });
+	var oldQueue = queue;
 	queue = [];
-	return ret;
+	var ret = oldQueue.map(function(q) { return q.e; });
+	if(getTuid) {
+	    if(oldQueue.length > 0) {
+		return {elems: ret, tuid: oldQueue[oldQueue.length-1].t};
+	    } else {
+		return {elems: ret, tuid: ''};
+	    }
+	} else {
+	    return ret;
+	}
     };
     this.acknowledge = function*(tuid) {
 	queue = queue.filter(function(q) {
