@@ -59,10 +59,7 @@ describe('ReliableQueue', function(){
 	    var ret = yield* queue.getAll(true);
 	    assert.deepEqual(ret.elems, []);
 	    assert.equal(ret.tuid, '');
-	    
 	}));
-
-
     });
     describe('.acknowledge(tuid)', function(){
 	it('should not repeat acknowledged elements', asyncgen.async(function*(){

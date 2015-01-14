@@ -7,12 +7,13 @@ module.exports = function(url, queuePath) {
     url = url || 'http://localhost:7474';
     queuePath = queuePath || '/tmp/vercast-neo4j-queue';
     var db = new neo4j.GraphDatabase(url);
-    var queue = new vercast.ReliableQueue(queuePath);
+    var queue = new vercast.ReliableQueue(queuePath, 10);
 
     function* storePending() {
 	var cypher = "";
 	var params = {};
-	var pending = yield* queue.getAll();
+	var pendingRes = yield* queue.getAll(true);
+	var pending = pendingRes.elems;
 	var pendingNodes = Object.create(null);
 	var index = 0;
 	pending.forEach(function(edge) {
@@ -32,9 +33,9 @@ module.exports = function(url, queuePath) {
 	    params["p" + i] = pending[i].p;
 	}
 	if(cypher !== '') {
-	    console.log(cypher);
 	    yield* query(cypher, params);
 	}
+	yield* queue.acknowledge(pendingRes.tuid);
     }
 
     function* query(cypher, params) {
