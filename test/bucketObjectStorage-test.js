@@ -384,7 +384,9 @@ describe('BucketObjectStorage', function(){
 	    var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	    var last = yield* storage.storeNewObject(ctx, {_type: 'someObj'});
 	    for(let i = 0; i < 2; i++) {
-		last = yield* storage.storeNewObject(ctx, {_type: 'someObj', next: {$:last}});
+		last = yield* storage.storeNewObject(ctx, {_type: 'someObj', 
+							   next: {$:last}, 
+							   someNull: null});
 	    }
 	    var v = yield* storage.storeVersion({}, '1234-5678', {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj', next: {$:last}}), undefined, '');
 	    assert.equal(last.split('-')[0], '1234');

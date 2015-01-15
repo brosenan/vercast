@@ -89,7 +89,7 @@ module.exports = function(bucketStore, createBucket, options) {
     function copyMembers(objIn, bucketFrom, bucketTo, emit) {
 	var objOut = Object.create(null);
 	Object.keys(objIn).forEach(function(key) {
-	    if(typeof objIn[key] === 'object') {
+	    if(objIn[key] && typeof objIn[key] === 'object') {
 		if('$' in objIn[key]) {
 		    var split = objIn[key].$.split('-');
 		    if(split[0] === bucketFrom.name) {

@@ -241,15 +241,6 @@
     counter should add the given amount to the counter and return the value:   ․ counter should add the given amount to the counter and return the value
     counter get should return the counter's value:   ․ counter get should return the counter's value
     counter put{value} should reset the counter to the given value:   ․ counter put{value} should reset the counter to the given value
-    Neo4jGraphDB should store edges reliably:   ․ Neo4jGraphDB should store edges reliably
-    Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph:   ․ Neo4jGraphDB as GraphDB addEdge should accept an edge and add it to the graph
-    Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source:   ․ Neo4jGraphDB as GraphDB addEdge should create a dual mapping, mapping also the destination to the source
-    Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them:   ․ Neo4jGraphDB as GraphDB findCommonAncestor should find the common ancestor of two nodes, and the path to each of them
-    Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants:   ․ Neo4jGraphDB as GraphDB findCommonAncestor should handle the case where there are also common descendants
-    Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes:   ․ Neo4jGraphDB as GraphDB findCommonAncestor should return the path from the common ancestor to both nodes
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y:   ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should return the labels along the edges from x to y
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path:   ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should always take the shortest path
-    Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly:   ․ Neo4jGraphDB .findPath(x, y, cb(err, path)) should handle directed cycles correctly
 
-  251 passing (6s)
+  242 passing (653ms)
 
