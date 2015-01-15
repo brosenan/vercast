@@ -1,6 +1,6 @@
 {
   "name": "vercast",
-  "version": "0.1.15",
+  "version": "0.2.0",
   "description": "VERsion Controlled Application STate: A version control system for application state.",
   "main": "index.js",
   "scripts": {
