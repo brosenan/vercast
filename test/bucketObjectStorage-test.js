@@ -218,6 +218,7 @@ describe('BucketObjectStorage', function(){
 		    },
 		};
 	    }
+	    bucketStore.setMaxSize(5);
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
 	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	    var v1 = '1234-5678';
@@ -328,11 +329,13 @@ describe('BucketObjectStorage', function(){
 			if(obj) {
 			    return new vercast.ObjectMonitor(obj);
 			} else {
+			    console.log(kvs, this.name);
 			    throw Error('Could not find object for key ' + v);
 			}
 		    },
 		};
 	    }
+	    bucketStore.setMaxSize(5);
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
 	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	    var v1 = '1234-5678';
@@ -380,10 +383,11 @@ describe('BucketObjectStorage', function(){
 		    },
 		};
 	    }
+	    bucketStore.setMaxSize(5);
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
 	    var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	    var last = yield* storage.storeNewObject(ctx, {_type: 'someObj'});
-	    for(let i = 0; i < 2; i++) {
+	    for(let i = 0; i < 3; i++) {
 		last = yield* storage.storeNewObject(ctx, {_type: 'someObj', 
 							   next: {$:last}, 
 							   someNull: null});
@@ -393,11 +397,20 @@ describe('BucketObjectStorage', function(){
 	    // The next change should create a new bucket
 	    v = yield* storage.storeVersion({}, v, {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj', next: {$:last}, foo: 2}), undefined, '');
 	    var monitor = yield* storage.retrieve({}, v);
-	    for(let i = 0; i < 3; i++) {
+	    for(let i = 0; i < 4; i++) {
 		assert.notEqual(v.split('-')[0], '1234');
 		assert.equal(monitor.proxy()._type, 'someObj');
 		v = monitor.proxy().next.$;
 		monitor = yield* storage.retrieve({}, v);
+	    }
+	    // Additional elements should not violate the bucket size
+	    for(let i = 0; i < 5; i++) {
+		v = yield* storage.storeVersion({}, v, 
+						{_type: 'somePatch'}, 
+						new vercast.ObjectMonitor({_type: 'someObj', 
+									   next: {$:v}, 
+									   foo: 2}), 
+						undefined, '');
 	    }
 	}));
 

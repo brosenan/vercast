@@ -1,12 +1,18 @@
 "use strict";
 
 var uuid = require('node-uuid');
+var assert = require('assert');
 
 module.exports = function() {
+    var maxSize;
     var buckets = Object.create(null);
     this.clear = function*() {
+	maxSize = undefined;
 	buckets = Object.create(null);
     };
+    this.setMaxSize = function(size) {
+	maxSize = size;
+    }
 
     this.append = function*(bucketName, elems) {
 	if(!bucketName || bucketName === '') {
@@ -21,6 +27,9 @@ module.exports = function() {
 	elems.forEach(function(x) {
 	    bucket.push({elem: x, tuid: tuid});
 	});
+	if(maxSize) {
+	    assert(bucket.length <= maxSize, bucket.length + ' <= ' + maxSize);
+	}
 	return tuid;
     };
     this.retrieve = function*(bucketName, tuid, giveTUID) {
