@@ -32,8 +32,9 @@ function createBucket() {
 	    }
 	    return new vercast.ObjectMonitor(JSON.parse(kvs[id]));
 	},
-	storeOutgoing: function(v, p, monitor, r, eff, emit) {
-	    cacheResult(v, p, monitor, this.name, r, eff);
+	storeOutgoing: function(v, p, v2, r, eff, emit) {
+	    cache[cacheKey(v, p)] = {v: {$: v2}, 
+				     r: r, eff: eff};
 	},
 	storeIncoming: function(v, p, monitor, r, eff, emit) {
 	    //cacheResult(v, p, monitor, this.name, r, eff);

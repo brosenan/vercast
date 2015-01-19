@@ -84,7 +84,7 @@ describe('BucketObjectStorage', function(){
 		    emit({a:4});
 		},
 		storeIncoming: function() { return 'newver'; },
-		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		storeOutgoing: function(v, p, v2, r, eff, emit) {
 		    emit({a:5});
 		    emit({a:6});
 		},
@@ -118,7 +118,7 @@ describe('BucketObjectStorage', function(){
 		    emit({a:4});
 		},
 		storeIncoming: function(v, p, monitor, r, eff, emit) { return v.split('-')[1]; },
-		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		storeOutgoing: function(v, p, v2, r, eff, emit) {
 		    emit({a:5});
 		    emit({a:6});
 		},
@@ -209,7 +209,7 @@ describe('BucketObjectStorage', function(){
 		    storeIncoming: function(v, p, monitor, r, eff, emit) {
 			emit({foo:'bar'});
 		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    storeOutgoing: function(v, p, v2, r, eff, emit) {},
 		    add: function(elem) {
 			added.push(elem);
 		    },
@@ -272,15 +272,14 @@ describe('BucketObjectStorage', function(){
 			   assert.equal(this.this_is, '2345');
 			   return "foo";
 		       },
-		       storeOutgoing: function(v1, p, monitor, r, eff) {
+		       storeOutgoing: function(v1, p, v2, r, eff) {
 			   calledOutgoing = true;
 			   assert.equal(v1, '2345-6789');
 			   assert.equal(p._type, 'somePatch');
-			   assert.equal(monitor.proxy()._type, 'someObj');
+			   assert.equal(v2, '2345-foo');
 			   assert.equal(r, 123);
 			   assert.equal(eff, 'someEff');
 			   assert.equal(this.this_is, '1234');
-			   return "bar";
 		       },
 		       storeInternal: function() {
 			   assert(false, 'storeInternal() should not have been called');
@@ -301,6 +300,7 @@ describe('BucketObjectStorage', function(){
 	       assert.equal(v2, "2345-foo");
 	   }));
 	it('should store the object under a new bucket if the bucket size has been exceeded', asyncgen.async(function*(){
+	    var v2Out;
 	    function createBucket() {
 		var index = 0;
 		var kvs = Object.create(null);
@@ -309,7 +309,9 @@ describe('BucketObjectStorage', function(){
 			emit({a:1});
 			return 'foo';
 		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    storeOutgoing: function(v, p, v2, r, eff, emit) {
+			v2Out = v2;
+		    },
 		    add: function(elem) {
 			if(elem.obj) {
 			    kvs[elem.i] = elem.obj;
@@ -346,6 +348,7 @@ describe('BucketObjectStorage', function(){
 	    }
 	    var v2 = yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
 	    assert.notEqual(v2.split('-')[0], ctx.bucket);
+	    assert.equal(v2, v2Out); // storeOutgoing() should get the final version ID
 	    // The object must be reachable
 	    assert.equal(typeof (yield* storage.retrieve({}, v2)).proxy, 'function');
 	    assert.equal((yield* storage.retrieve({}, v2)).proxy()._type, 'someObj');
@@ -361,7 +364,7 @@ describe('BucketObjectStorage', function(){
 			kvs[index] = monitor.object();
 			return index;
 		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    storeOutgoing: function(v, p, v2, r, eff, emit) {},
 		    add: function(elem) {
 			if(elem.obj) {
 			    kvs[elem.i] = elem.obj;

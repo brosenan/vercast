@@ -50,9 +50,8 @@ module.exports = function(disp) {
 		    });
 		}
 	    },
-	    storeOutgoing: function(v, p, monitor, r, eff, emit) {
+	    storeOutgoing: function(v, p, v2, r, eff, emit) {
 		var split = v.split('-');
-		var v2 = [split[0], monitor.hash()].join('-');
 		emit({type: 'cache', 
 		      v: v, 
 		      v2 : v2, 

@@ -197,7 +197,6 @@ module.exports = function(bucketStore, createBucket, options) {
 	    internalID = ctxBucket.storeInternal(v1, p, monitor, r, eff, emitFunc(ctx, targetBucket));
 	} else {
 	    var childCtx = this.deriveContext(ctx, v1, p);
-	    ctxBucket.storeOutgoing(v1, p, monitor, r, eff, emitFunc(ctx, ctxBucket));
 	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx, targetBucket));
 	    var key = emitionKey(childCtx);
 	    if(emits[key]) {
@@ -220,6 +219,9 @@ module.exports = function(bucketStore, createBucket, options) {
 		yield* bucketStore.append(newTargetBucket, copyEmits);
 		targetBucketID = newTargetBucketID;
 	    }
+	}
+	if(targetBucketID !== ctxBucketID) {
+	    ctxBucket.storeOutgoing(v1, p, [targetBucketID, internalID].join('-'), r, eff, emitFunc(ctx, ctxBucket));
 	}
 	return [targetBucketID, internalID].join('-');
     };
