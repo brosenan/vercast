@@ -1,10 +1,11 @@
 "use strict";
+var assert = require('assert');
 
 var vercast = require('vercast');
 var LRU = require('lru-cache');
 
+
 module.exports = function(bucketStore, createBucket, options) {
-    var bucketSizes = Object.create(null);
     var emits = Object.create(null);
     options = options || {};
     var maxBucketSize = options.maxBucketSize || 100;
@@ -29,18 +30,20 @@ module.exports = function(bucketStore, createBucket, options) {
     this.storeNewObject = function*(ctx, obj) {
 	var bucketID = ctx.bucket || '';
 	var bucket = yield* getBucket(bucketID);
-	var emit = emitFunc(ctx, bucket);
-	var emits = [];
-	if(bucketSizes[bucketID] >= maxBucketSize || bucketID === '') {
-	    var monitor = new vercast.ObjectMonitor(obj);
-	    bucketID = monitor.hash();
-	    //bucket = yield* getBucket(bucketID);
-	    emit = function(elem) {
-		emits.push(elem);
-	    }
+	var ownEmits = [];
+	var emit = function(elem) {
+	    ownEmits.push(elem);
 	}
 	var internalID = bucket.store(obj, emit);
-	yield* bucketStore.append(bucketID, emits);
+	var prevEmits = emits[emitionKey(ctx)] || [];
+	if(!bucket.sizeGuard.canAppend(prevEmits.concat(ownEmits)) || bucketID === '') {
+	    var monitor = new vercast.ObjectMonitor(obj);
+	    bucketID = monitor.hash();
+	    bucket = yield* getBucket(bucketID);
+	    yield* bucket.sizeGuard.append(ownEmits, bucketID);
+	} else {
+	    emits[emitionKey(ctx)] = prevEmits.concat(ownEmits);
+	}
 	return [bucketID, internalID].join('-');
     };
     function* fillBucket(id, bucket) {
@@ -54,11 +57,13 @@ module.exports = function(bucketStore, createBucket, options) {
 	var bucket = buckets.get(id);
 	if(!bucket) {
 	    bucket = createBucket(id);
-	    buckets.set(id, bucket);
-	    bucketSizes[id] = 0;
+	    if(id !== '') {
+		buckets.set(id, bucket);
+	    }
 	    yield* fillBucket(id, bucket);
+	    bucket.name = id;
+	    bucket.sizeGuard = new SizedBucketStore(id);
 	}
-	bucket.name = id;
 	return bucket;
     }
 
@@ -108,7 +113,7 @@ module.exports = function(bucketStore, createBucket, options) {
 	    let emits = [];
 	    let newID = yield* copyObject(queue[i], bucketFrom, newBucket, function(elem) { emits.push(elem); });
 	    map[idFrom] = [newBucketID, newID].join('-');
-	    yield* bucketStore.append(newBucketID, emits);
+	    yield* newBucket.sizeGuard.append(emits, newBucketID);
 	}
 	while(stack.length > 0) {
 	    let internal = stack.pop();
@@ -159,32 +164,6 @@ module.exports = function(bucketStore, createBucket, options) {
 	    return obj;
 	}
     }
-//    function copyObject(internalID, bucketFrom, bucketTo, emit) {
-//	var monitor = bucketFrom.retrieve(internalID);
-//	var obj = copyMembers(monitor.object(), bucketFrom, bucketTo, emit);
-//	return bucketTo.store(obj, emit);
-//    }
-//
-//    function copyMembers(objIn, bucketFrom, bucketTo, emit) {
-//	var objOut = Object.create(null);
-//	Object.keys(objIn).forEach(function(key) {
-//	    if(objIn[key] && typeof objIn[key] === 'object') {
-//		if('$' in objIn[key]) {
-//		    var split = objIn[key].$.split('-');
-//		    if(split[0] === bucketFrom.name) {
-//			objOut[key] = {$: bucketTo.name + '-' + copyObject(split[1], bucketFrom, bucketTo, emit)};
-//		    } else {
-//			objOut[key] = objIn[key];
-//		    }
-//		} else {
-//		    objOut[key] = copyMembers(objIn[key], bucketFrom, bucketTo, emit);
-//		}
-//	    } else {
-//		objOut[key] = objIn[key];
-//	    }
-//	});
-//	return objOut;
-//    }
 
     this.storeVersion = function*(ctx, v1, p, monitor, r, eff) {
 	var ctxBucketID = ctx.bucket || '';
@@ -199,26 +178,23 @@ module.exports = function(bucketStore, createBucket, options) {
 	    var childCtx = this.deriveContext(ctx, v1, p);
 	    internalID = targetBucket.storeIncoming(v1, p, monitor, r, eff, emitFunc(childCtx, targetBucket));
 	    var key = emitionKey(childCtx);
-	    if(emits[key]) {
-		if(internalID !== oldInternalID) {
-		    bucketSizes[targetBucketID] += emits[key].length;
-		    if(bucketSizes[targetBucketID] <= maxBucketSize) {
-			yield* bucketStore.append(targetBucketID, emits[key]);
+	    if(internalID !== oldInternalID) {
+		let myEmits = emits[key] || [];
+		if(targetBucket.sizeGuard.canAppend(myEmits)) {
+		    yield* targetBucket.sizeGuard.append(myEmits, targetBucketID);
+		} else {
+		    var copyEmits = [];
+		    function copyEmit(elem) {
+			copyEmits.push(elem);
 		    }
+		    var newTargetBucketID = monitor.hash();
+		    var newTargetBucket = yield* getBucket(newTargetBucketID);
+		    internalID = yield* copyObject(internalID, targetBucket, newTargetBucket, copyEmit);
+		    //yield* bucketStore.append(newTargetBucket, copyEmits);
+		    targetBucketID = newTargetBucketID;
 		}
-		delete emits[key];
 	    }
-	    if(bucketSizes[targetBucketID] > maxBucketSize) {
-		var copyEmits = [];
-		function copyEmit(elem) {
-		    copyEmits.push(elem);
-		}
-		var newTargetBucketID = monitor.hash();
-		var newTargetBucket = yield* getBucket(newTargetBucketID);
-		internalID = yield* copyObject(internalID, targetBucket, newTargetBucket, copyEmit);
-		yield* bucketStore.append(newTargetBucket, copyEmits);
-		targetBucketID = newTargetBucketID;
-	    }
+	    delete emits[key];
 	}
 	if(targetBucketID !== ctxBucketID) {
 	    ctxBucket.storeOutgoing(v1, p, [targetBucketID, internalID].join('-'), r, eff, emitFunc(ctx, ctxBucket));
@@ -240,4 +216,18 @@ module.exports = function(bucketStore, createBucket, options) {
 	var bucket = yield* getBucket(bucketID);
 	return bucket.checkCache(v, p);
     };
+    function SizedBucketStore(bucketID) {
+	var size = 0;
+	this.append = function*(items, id) {
+	    size += items.length;
+	    assert.equal(id, bucketID);
+	    yield* bucketStore.append(bucketID, items);
+	}
+	this.canAppend = function(items) {
+//	    console.log(size + ' + ' + items.length + ' <= ' + maxBucketSize, 
+//			bucketID,
+//			size + items.length <= maxBucketSize);
+	    return size + items.length <= maxBucketSize;
+	}
+    }
 };

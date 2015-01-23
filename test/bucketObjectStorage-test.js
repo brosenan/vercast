@@ -387,7 +387,7 @@ describe('BucketObjectStorage', function(){
 		};
 	    }
 	    bucketStore.setMaxSize(5);
-	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5, maxOpenBuckets: 1});
 	    var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	    var last = yield* storage.storeNewObject(ctx, {_type: 'someObj'});
 	    for(let i = 0; i < 3; i++) {

@@ -28,7 +28,7 @@ module.exports = function() {
 	    bucket.push({elem: x, tuid: tuid});
 	});
 	if(maxSize) {
-	    assert(bucket.length <= maxSize, bucket.length + ' <= ' + maxSize);
+	    assert(bucket.length <= maxSize, bucket.length + ' <= ' + maxSize + ' in ' + bucketName);
 	}
 	return tuid;
     };
