@@ -8,7 +8,7 @@ module.exports = function(disp) {
     return function(name) {
 	var kvs = new vercast.DummyKeyValueStore();
 	var seq = new vercast.SequenceStoreFactory(kvs);
-	var internalStorage = new vercast.SimpleObjectStorage(kvs);
+	var internalStorage = new vercast.SimpleObjectStorage(kvs, name + '-');
 	internalStorage.foo = 23;
 	var internalOStore = new vercast.ObjectStore(disp, seq, internalStorage);
 
