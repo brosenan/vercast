@@ -42,6 +42,7 @@ module.exports = function(disp, effSeqFactory, storage) {
 	for(var iListener = 0; iListener < transListeners.length; iListener += 1) {
 	    yield* transListeners[iListener](v, p, u, v2, r, eff);
 	}
+	yield* storage.recordTrans(v.$, p, u, v2.$, r, eff);
 	return {r: r, 
 		v: v2,
 		eff: eff};

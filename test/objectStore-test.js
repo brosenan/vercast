@@ -39,6 +39,7 @@ describe('ObjectStore', function(){
 		assert.equal(eff, '');
 	    },
 	    deriveContext: function() {},
+	    recordTrans: function*() {},
 	};
 	var ostore = new vercast.ObjectStore(new vercast.ObjectDispatcher(dispMap), sequenceStoreFactory, storage);
 	var foo = yield* ostore.init('foo', {});
@@ -81,6 +82,7 @@ describe('ObjectStore', function(){
 	    storeVersion: function*(ctx, v, p, monitor, r, eff) {
 		checkContext(v, ctx);
 	    },
+	    recordTrans: function*() {},
 	};
 	var ostore = new vercast.ObjectStore(new vercast.ObjectDispatcher(dispMap), sequenceStoreFactory, storage);
 	var foo = yield* ostore.init('foo', {});

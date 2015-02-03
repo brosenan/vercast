@@ -50,6 +50,7 @@ exports.SimpleObjectStorage = function(kvs, prefix) {
 	    return id;
 	}
     }
+    this.recordTrans = function*() {};
 }
 
 exports.SimpleObjectStore = function(disp, kvs) {

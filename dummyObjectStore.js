@@ -16,6 +16,7 @@ var DummyObjectStorage = function() {
     };
     this.checkCache = function*() {};
     this.deriveContext = function() {};
+    this.recordTrans = function*() {};
 };
 
 module.exports = function(disp, effSeqFactory) {

@@ -230,4 +230,5 @@ module.exports = function(bucketStore, createBucket, options) {
 	    return size + items.length <= maxBucketSize;
 	}
     }
+    this.recordTrans = function*() {};
 };

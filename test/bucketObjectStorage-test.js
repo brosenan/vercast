@@ -158,7 +158,6 @@ describe('BucketObjectStorage', function(){
 	assert.equal(lastExtracted, 'x');
     }));
 
-
     describe('.deriveContext(ctx, v, p)', function(){
 	it('should store the version\'s bucket ID in  the context', asyncgen.async(function*(){
 	    var storage = new vercast.BucketObjectStorage();
