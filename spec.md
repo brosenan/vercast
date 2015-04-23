@@ -41,6 +41,7 @@
    - [DummyBucketStore](#dummybucketstore)
      - [.append(bucketName, elements)](#dummybucketstore-appendbucketname-elements)
      - [.retrieve(bucketName[, tuid[, giveTUID]])](#dummybucketstore-retrievebucketname-tuid-givetuid)
+     - [async mode](#dummybucketstore-async-mode)
    - [DummyECKVS](#dummyeckvs)
      - [.newKey(key, value)](#dummyeckvs-newkeykey-value)
      - [.retrieve(key)](#dummyeckvs-retrievekey)
@@ -861,7 +862,7 @@ function* (){
 		    emit({a:4});
 		},
 		storeIncoming: function() { return 'newver'; },
-		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		storeOutgoing: function(v, p, v2, r, eff, emit) {
 		    emit({a:5});
 		    emit({a:6});
 		},
@@ -898,7 +899,7 @@ function* (){
 		    emit({a:4});
 		},
 		storeIncoming: function(v, p, monitor, r, eff, emit) { return v.split('-')[1]; },
-		storeOutgoing: function(v, p, monitor, r, eff, emit) {
+		storeOutgoing: function(v, p, v2, r, eff, emit) {
 		    emit({a:5});
 		    emit({a:6});
 		},
@@ -1007,7 +1008,7 @@ function* (){
 		    storeIncoming: function(v, p, monitor, r, eff, emit) {
 			emit({foo:'bar'});
 		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    storeOutgoing: function(v, p, v2, r, eff, emit) {},
 		    add: function(elem) {
 			added.push(elem);
 		    },
@@ -1016,6 +1017,7 @@ function* (){
 		    },
 		};
 	    }
+	    bucketStore.setMaxSize(5);
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
 	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	    var v1 = '1234-5678';
@@ -1076,15 +1078,14 @@ function* (){
 			   assert.equal(this.this_is, '2345');
 			   return "foo";
 		       },
-		       storeOutgoing: function(v1, p, monitor, r, eff) {
+		       storeOutgoing: function(v1, p, v2, r, eff) {
 			   calledOutgoing = true;
 			   assert.equal(v1, '2345-6789');
 			   assert.equal(p._type, 'somePatch');
-			   assert.equal(monitor.proxy()._type, 'someObj');
+			   assert.equal(v2, '2345-foo');
 			   assert.equal(r, 123);
 			   assert.equal(eff, 'someEff');
 			   assert.equal(this.this_is, '1234');
-			   return "bar";
 		       },
 		       storeInternal: function() {
 			   assert(false, 'storeInternal() should not have been called');
@@ -1109,6 +1110,7 @@ should store the object under a new bucket if the bucket size has been exceeded.
 
 ```js
 function* (){
+	    var v2Out;
 	    function createBucket() {
 		var index = 0;
 		var kvs = Object.create(null);
@@ -1117,7 +1119,9 @@ function* (){
 			emit({a:1});
 			return 'foo';
 		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    storeOutgoing: function(v, p, v2, r, eff, emit) {
+			v2Out = v2;
+		    },
 		    add: function(elem) {
 			if(elem.obj) {
 			    kvs[elem.i] = elem.obj;
@@ -1137,11 +1141,13 @@ function* (){
 			if(obj) {
 			    return new vercast.ObjectMonitor(obj);
 			} else {
+			    console.log(kvs, this.name);
 			    throw Error('Could not find object for key ' + v);
 			}
 		    },
 		};
 	    }
+	    bucketStore.setMaxSize(5);
 	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
 	    var monitor = new vercast.ObjectMonitor({_type: 'someObj'});
 	    var v1 = '1234-5678';
@@ -1152,6 +1158,7 @@ function* (){
 	    }
 	    var v2 = yield* storage.storeVersion({}, v1, p, monitor, undefined, '');
 	    assert.notEqual(v2.split('-')[0], ctx.bucket);
+	    assert.equal(v2, v2Out); // storeOutgoing() should get the final version ID
 	    // The object must be reachable
 	    assert.equal(typeof (yield* storage.retrieve({}, v2)).proxy, 'function');
 	    assert.equal((yield* storage.retrieve({}, v2)).proxy()._type, 'someObj');
@@ -1171,7 +1178,7 @@ function* (){
 			kvs[index] = monitor.object();
 			return index;
 		    },
-		    storeOutgoing: function(v, p, monitor, r, eff, emit) {},
+		    storeOutgoing: function(v, p, v2, r, eff, emit) {},
 		    add: function(elem) {
 			if(elem.obj) {
 			    kvs[elem.i] = elem.obj;
@@ -1193,10 +1200,11 @@ function* (){
 		    },
 		};
 	    }
-	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5});
+	    bucketStore.setMaxSize(5);
+	    var storage = new vercast.BucketObjectStorage(bucketStore, createBucket, {maxBucketSize: 5, maxOpenBuckets: 1});
 	    var ctx = storage.deriveContext({}, '1234-5678', {_type: 'somePatch'});
 	    var last = yield* storage.storeNewObject(ctx, {_type: 'someObj'});
-	    for(let i = 0; i < 2; i++) {
+	    for(let i = 0; i < 3; i++) {
 		last = yield* storage.storeNewObject(ctx, {_type: 'someObj', 
 							   next: {$:last}, 
 							   someNull: null});
@@ -1206,11 +1214,20 @@ function* (){
 	    // The next change should create a new bucket
 	    v = yield* storage.storeVersion({}, v, {_type: 'somePatch'}, new vercast.ObjectMonitor({_type: 'someObj', next: {$:last}, foo: 2}), undefined, '');
 	    var monitor = yield* storage.retrieve({}, v);
-	    for(let i = 0; i < 3; i++) {
+	    for(let i = 0; i < 4; i++) {
 		assert.notEqual(v.split('-')[0], '1234');
 		assert.equal(monitor.proxy()._type, 'someObj');
 		v = monitor.proxy().next.$;
 		monitor = yield* storage.retrieve({}, v);
+	    }
+	    // Additional elements should not violate the bucket size
+	    for(let i = 0; i < 5; i++) {
+		v = yield* storage.storeVersion({}, v, 
+						{_type: 'somePatch'}, 
+						new vercast.ObjectMonitor({_type: 'someObj', 
+									   next: {$:v}, 
+									   foo: 2}), 
+						undefined, '');
 	    }
 ```
 
@@ -1614,6 +1631,26 @@ function* (){
 	    yield* bucketStore.append(id, [{a:4}]);
 	    assert.deepEqual((yield* bucketStore.retrieve(id, res.tuid, true)).elems, 
 			     [{a:3}, {a:4}]);
+```
+
+<a name="dummybucketstore-async-mode"></a>
+## async mode
+should work asynchronically if .async is set to true.
+
+```js
+function* (){
+	    var bucketStore = new vercast.DummyBucketStore();
+	    bucketStore.async = true;
+	    
+	    var id = 'ABCD';
+	    yield* bucketStore.append(id, [{a:1}, {a:2}]);
+	    yield* bucketStore.append(id, [{a:3}]);
+	    yield* bucketStore.append(id, [{a:4}]);
+	    assert.notDeepEqual(yield* bucketStore.retrieve(id), 
+			     [{a:1}, {a:2}, {a:3}, {a:4}]);
+	    yield function(_) { setTimeout(_, 3); };
+	    assert.deepEqual(yield* bucketStore.retrieve(id), 
+			     [{a:1}, {a:2}, {a:3}, {a:4}]);
 ```
 
 <a name="dummyeckvs"></a>
@@ -2985,6 +3022,7 @@ function* (){
 		assert.equal(eff, '');
 	    },
 	    deriveContext: function() {},
+	    recordTrans: function*() {},
 	};
 	var ostore = new vercast.ObjectStore(new vercast.ObjectDispatcher(dispMap), sequenceStoreFactory, storage);
 	var foo = yield* ostore.init('foo', {});
@@ -3030,6 +3068,7 @@ function* (){
 	    storeVersion: function*(ctx, v, p, monitor, r, eff) {
 		checkContext(v, ctx);
 	    },
+	    recordTrans: function*() {},
 	};
 	var ostore = new vercast.ObjectStore(new vercast.ObjectDispatcher(dispMap), sequenceStoreFactory, storage);
 	var foo = yield* ostore.init('foo', {});

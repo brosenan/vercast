@@ -15,22 +15,30 @@ module.exports = function() {
     }
 
     this.append = function*(bucketName, elems) {
-	if(!bucketName || bucketName === '') {
-	    throw Error("Invalid empty bucket name");
-	}
 	var tuid = uuid.v1();
-	var bucket = buckets[bucketName];
-	if(typeof bucket === 'undefined') {
-	    bucket = [];
-	    buckets[bucketName] = bucket;
-	}
-	elems.forEach(function(x) {
-	    bucket.push({elem: x, tuid: tuid});
-	});
-	if(maxSize) {
-	    assert(bucket.length <= maxSize, bucket.length + ' <= ' + maxSize + ' in ' + bucketName);
+	if(this.async) {
+	    setTimeout(doAppend, 1);
+	} else {
+	    doAppend();
 	}
 	return tuid;
+
+	function doAppend() {
+	    if(!bucketName || bucketName === '') {
+		throw Error("Invalid empty bucket name");
+	    }
+	    var bucket = buckets[bucketName];
+	    if(typeof bucket === 'undefined') {
+		bucket = [];
+		buckets[bucketName] = bucket;
+	    }
+	    elems.forEach(function(x) {
+		bucket.push({elem: x, tuid: tuid});
+	    });
+	    if(maxSize) {
+		assert(bucket.length <= maxSize, bucket.length + ' <= ' + maxSize + ' in ' + bucketName);
+	    }
+	}
     };
     this.retrieve = function*(bucketName, tuid, giveTUID) {
 	tuid = tuid || '';
