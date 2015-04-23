@@ -70,7 +70,8 @@
     DummyBucketStore .retrieve(bucketName[, tuid[, giveTUID]]) should retrieve an empty array for a bucket that has never been appended to:   ․ DummyBucketStore .retrieve(bucketName[, tuid[, giveTUID]]) should retrieve an empty array for a bucket that has never been appended to
     DummyBucketStore .retrieve(bucketName[, tuid[, giveTUID]]) should only return elements that correspond to tuid greater than the given one, if given:   ․ DummyBucketStore .retrieve(bucketName[, tuid[, giveTUID]]) should only return elements that correspond to tuid greater than the given one, if given
     DummyBucketStore .retrieve(bucketName[, tuid[, giveTUID]]) should return an object: {elems, tuid} if giveTUID is true:   ․ DummyBucketStore .retrieve(bucketName[, tuid[, giveTUID]]) should return an object: {elems, tuid} if giveTUID is true
-    DummyBucketStore async mode should work asynchronically if .async is set to true:   ․ DummyBucketStore async mode should work asynchronically if .async is set to true
+    DummyBucketStore async mode should work asynchronically if .async is set to non-zero:   ․ DummyBucketStore async mode should work asynchronically if .async is set to non-zero
+    DummyBucketStore async mode should wait .async number of milliseconds before updating:   ․ DummyBucketStore async mode should wait .async number of milliseconds before updating
     DummyECKVS .newKey(key, value) should store a new key/value pair given that the method is called only once for that key:   ․ DummyECKVS .newKey(key, value) should store a new key/value pair given that the method is called only once for that key
     DummyECKVS .retrieve(key) should return a previously-assigned value of the key, or undefined the value has not yet been regiested:   ․ DummyECKVS .retrieve(key) should return a previously-assigned value of the key, or undefined the value has not yet been regiested
     DummyECKVS .modify(key, value) should change the value so that it eventually becomes the given one:   ․ DummyECKVS .modify(key, value) should change the value so that it eventually becomes the given one
@@ -243,5 +244,5 @@
     counter get should return the counter's value:   ․ counter get should return the counter's value
     counter put{value} should reset the counter to the given value:   ․ counter put{value} should reset the counter to the given value
 
-  243 passing (554ms)
+  244 passing (562ms)
 
