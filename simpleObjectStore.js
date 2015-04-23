@@ -23,11 +23,6 @@ exports.SimpleObjectStorage = function(kvs, prefix) {
 	var v2 = monitor.hash();
 	yield* kvs.store(v2, monitor.json());
 
-	var pHash = vercast.ObjectMonitor.seal(p);
-	var cachedKey = v1 + '>' + pHash;
-	var retVal = {v: {$:addPrefix(v2)}, r: r, eff: eff};
-	yield* kvs.store(cachedKey, JSON.stringify(retVal));
-
 	return addPrefix(v2);
     };
     this.checkCache = function*(ctx, v, p) {
@@ -50,7 +45,12 @@ exports.SimpleObjectStorage = function(kvs, prefix) {
 	    return id;
 	}
     }
-    this.recordTrans = function*() {};
+    this.recordTrans = function*(v1, p, u, v2, r, eff) {
+	var pHash = vercast.ObjectMonitor.seal(p);
+	var cachedKey = v1 + '>' + pHash;
+	var retVal = {v: {$:addPrefix(v2)}, r: r, eff: eff};
+	yield* kvs.store(cachedKey, JSON.stringify(retVal));
+    };
 }
 
 exports.SimpleObjectStore = function(disp, kvs) {
