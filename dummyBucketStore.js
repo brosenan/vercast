@@ -16,6 +16,9 @@ module.exports = function() {
 
     this.append = function*(bucketName, elems) {
 	var tuid = uuid.v1();
+	if(this.delay) {
+	    yield function(_) { setTimeout(_, this.delay); };
+	}
 	if(this.async) {
 	    setTimeout(doAppend, this.async);
 	} else {
