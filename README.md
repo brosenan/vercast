@@ -41,7 +41,7 @@ For reference on the Vercast API please see [the spec](spec.md).
 Pre-requisites:
 
 1. Install Node.js.
-2. We use [mocha](http://visionmedia.github.io/mocha/) for BDD, so you'll need it as well.
+2. We use [mocha](http://mochajs.org/) for BDD, so you'll need it as well.
 
 Then you just clone the repo and run:
 ```
